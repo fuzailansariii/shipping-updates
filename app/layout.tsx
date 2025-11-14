@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lato, Nunito, Roboto } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -30,13 +31,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${lato.variable} ${roboto.variable} ${nunito.variable} antialiased`}
-      >
-        <Navbar />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${lato.variable} ${roboto.variable} ${nunito.variable} antialiased`}
+        >
+          <Navbar />
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
