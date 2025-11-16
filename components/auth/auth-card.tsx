@@ -122,6 +122,7 @@ export default function AuthCard({
                   "Continue with Email"
                 )}
               </Button>
+              <div id="clerk-captcha" />
             </div>
             <div className="relative my-2">
               <Separator />
