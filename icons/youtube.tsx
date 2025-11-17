@@ -1,36 +1,29 @@
-import { cn } from "@/lib/utils";
-
 interface YoutubeProps {
   size?: "sm" | "md" | "lg";
-  className?: string;
 }
 
-const sizeProp = {
-  sm: "w-6 h-6",
-  md: "w-8 h-8",
-  lg: "w-10 h-10",
+const sizeVarient = {
+  sm: "h-6 w-6",
+  md: "h-8 w-8",
+  lg: "h-10 w-10",
 };
 
-export default function Youtube({ size = "md", className }: YoutubeProps) {
+export default function Youtube({ size = "md" }: YoutubeProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn(
-        "lucide lucide-youtube-icon lucide-youtube",
-        sizeProp[size],
-        className
-      )}
+      x="0px"
+      y="0px"
+      width="100"
+      height="100"
+      viewBox="0 0 48 48"
+      className={sizeVarient[size]}
     >
-      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
-      <path d="m10 15 5-3-5-3z" />
+      <path
+        fill="#FF3D00"
+        d="M43.2,33.9c-0.4,2.1-2.1,3.7-4.2,4c-3.3,0.5-8.8,1.1-15,1.1c-6.1,0-11.6-0.6-15-1.1c-2.1-0.3-3.8-1.9-4.2-4C4.4,31.6,4,28.2,4,24c0-4.2,0.4-7.6,0.8-9.9c0.4-2.1,2.1-3.7,4.2-4C12.3,9.6,17.8,9,24,9c6.2,0,11.6,0.6,15,1.1c2.1,0.3,3.8,1.9,4.2,4c0.4,2.3,0.9,5.7,0.9,9.9C44,28.2,43.6,31.6,43.2,33.9z"
+      ></path>
+      <path fill="#FFF" d="M20 31L20 17 32 24z"></path>
     </svg>
   );
 }
