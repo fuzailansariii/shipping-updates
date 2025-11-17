@@ -9,7 +9,7 @@ import { useState } from "react";
 export default function Navbar() {
   const [open, setOpen] = useState<boolean>(false);
   const [hovered, setHovered] = useState<number | null>(null);
-  const [authhovered, setAuthHovered] = useState<number | null>(null);
+  const [authHovered, setAuthHovered] = useState<number | null>(null);
 
   const links = [
     { name: "Home", href: "/" },
@@ -19,7 +19,7 @@ export default function Navbar() {
   ];
   const authMenu = [
     {
-      name: "Register",
+      name: "Sign Up",
       href: "/sign-up",
       style:
         "border-neutral-300 px-4 py-2 border rounded-full hover:bg-neutral-300 transition-colors duration-400",
@@ -57,7 +57,7 @@ export default function Navbar() {
             />
           </Link>
         </motion.div>
-        <div className="hidden md:flex justify-center font-lato text-lg text-neutral-500">
+        <div className="hidden md:flex justify-center font-lato text-base text-neutral-500">
           {links.map((link, index) => (
             <Link
               key={index}
@@ -76,7 +76,7 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-        <motion.div className="text-lg text-neutral-500 gap-2 hidden md:flex">
+        <motion.div className="text-base text-neutral-500 gap-2 hidden md:flex">
           {authMenu.map((link, index) => (
             <Link
               href={link.href}
