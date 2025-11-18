@@ -1,4 +1,8 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import {
+  clerkClient,
+  clerkMiddleware,
+  createRouteMatcher,
+} from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
@@ -9,20 +13,23 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const authData = await auth();
-  const { userId } = authData;
-  const userEmailId = authData.sessionClaims?.email as string | undefined;
+  const { userId, sessionClaims } = await auth();
 
-  //   Get admin email from the env variable
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const role = sessionClaims?.role as string | undefined;
+  const isAdmin = role === "admin";
 
-  //   Check if the user is Admin
-  const isAdmin = userEmailId === adminEmail;
-
-  //   protect admin route
+  if (isAuthRoute(req) && userId) {
+    if (isAdmin) {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    } else {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
   if (isAdminRoute(req)) {
+    //   protect admin route
     if (!userId) {
       const signInUrl = new URL("/sign-in", req.url);
       signInUrl.searchParams.set("redirect_url", req.url);
@@ -32,6 +39,10 @@ export default clerkMiddleware(async (auth, req) => {
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/", req.url));
     }
+  }
+
+  if (isProtectedRoute(req) && isAdmin) {
+    return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   //   protect user routes (dashboard, checkout, etc)

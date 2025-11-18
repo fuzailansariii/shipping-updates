@@ -145,6 +145,7 @@ export default function AuthCard({
                 ? "Loading..."
                 : `${isSignUp ? "Sign up" : "Sign in"} with Google`}
             </Button>
+            <div id="clerk-captcha" />
           </form>
 
           {/* Form footer */}
