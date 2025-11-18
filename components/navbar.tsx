@@ -6,7 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Navbar() {
+interface NavbarProps {
+  userId: string | null;
+  isAdmin: boolean;
+}
+
+export default function Navbar({ userId, isAdmin }: NavbarProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [hovered, setHovered] = useState<number | null>(null);
   const [authHovered, setAuthHovered] = useState<number | null>(null);
@@ -17,20 +22,29 @@ export default function Navbar() {
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
   ];
-  const authMenu = [
-    {
-      name: "Sign Up",
-      href: "/sign-up",
-      style:
-        "border-neutral-300 px-4 py-2 border rounded-full hover:bg-neutral-300 transition-colors duration-400",
-    },
-    {
-      name: "Login",
-      href: "/sign-in",
-      style:
-        "border-neutral-300 px-4 py-2 border rounded-full bg-neutral-500 text-neutral-200 hover:bg-neutral-600 transition-colors duration-400",
-    },
-  ];
+  const authMenu = userId
+    ? [
+        {
+          name: isAdmin ? "Admin Panel" : "Dashboard",
+          href: isAdmin ? "/admin" : "/dashboard",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full bg-neutral-500 text-neutral-200 hover:bg-neutral-600 transition-colors duration-400",
+        },
+      ]
+    : [
+        {
+          name: "Sign Up",
+          href: "/sign-up",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full hover:bg-neutral-300 transition-colors duration-400",
+        },
+        {
+          name: "Login",
+          href: "/sign-in",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full bg-neutral-500 text-neutral-200 hover:bg-neutral-600 transition-colors duration-400",
+        },
+      ];
 
   const mobileLinks = [
     ...links,
