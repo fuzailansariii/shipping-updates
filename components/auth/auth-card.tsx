@@ -7,7 +7,7 @@ import { Separator } from "../ui/separator";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { EmailFormData, emailSchema } from "@/lib/validations/auth";
+import { EmailFormData, emailSchema } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/icons/google";
 
