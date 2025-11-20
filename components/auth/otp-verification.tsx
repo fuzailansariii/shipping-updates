@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { otpSchema, OTPFormData } from "@/lib/validations/auth";
+import { otpSchema, OTPFormData } from "@/lib/validations/zod-schema";
 import logo from "@/public/su-logo.png";
 import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
