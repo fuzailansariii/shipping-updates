@@ -6,15 +6,49 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Navbar() {
+interface NavbarProps {
+  userId: string | null;
+  isAdmin: boolean;
+}
+
+export default function Navbar({ userId, isAdmin }: NavbarProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [authHovered, setAuthHovered] = useState<number | null>(null);
 
   const links = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
+  ];
+  const authMenu = userId
+    ? [
+        {
+          name: isAdmin ? "Admin Panel" : "Dashboard",
+          href: isAdmin ? "/admin" : "/dashboard",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full bg-neutral-500 text-neutral-200 hover:bg-neutral-600 transition-colors duration-400",
+        },
+      ]
+    : [
+        {
+          name: "Sign Up",
+          href: "/sign-up",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full hover:bg-neutral-300 transition-colors duration-400",
+        },
+        {
+          name: "Login",
+          href: "/sign-in",
+          style:
+            "border-neutral-300 px-4 py-2 border rounded-full bg-neutral-500 text-neutral-200 hover:bg-neutral-600 transition-colors duration-400",
+        },
+      ];
+
+  const mobileLinks = [
+    ...links,
+    ...authMenu.map((item) => ({ name: item.name, href: item.href })),
   ];
 
   return (
@@ -37,7 +71,7 @@ export default function Navbar() {
             />
           </Link>
         </motion.div>
-        <div className="hidden md:flex justify-center font-lato text-lg text-neutral-500 mr-7">
+        <div className="hidden md:flex justify-center font-lato text-base text-neutral-500">
           {links.map((link, index) => (
             <Link
               key={index}
@@ -56,6 +90,19 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
+        <motion.div className="text-base text-neutral-500 gap-2 hidden md:flex">
+          {authMenu.map((link, index) => (
+            <Link
+              href={link.href}
+              key={index}
+              className={link.style}
+              onMouseEnter={() => setAuthHovered(index)}
+              onMouseLeave={() => setAuthHovered(null)}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </motion.div>
         <motion.button
           className="md:hidden mr-2 relative w-10 h-10 flex items-center justify-center"
           onClick={() => setOpen(!open)}
@@ -99,7 +146,7 @@ export default function Navbar() {
               className="absolute md:hidden inset-x-0 top-20 bg-neutral-100 rounded-md max-w-[95%] mx-auto border border-neutral-200 shadow-lg"
             >
               <div className="flex flex-col items-start gap-4 text-2xl text-neutral-500 p-4">
-                {links.map((link, index) => (
+                {mobileLinks.map((link, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
