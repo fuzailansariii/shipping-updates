@@ -10,3 +10,5 @@ export const validateFile = (file: File): string | null => {
   }
   return null;
 };
+
+export type UploadKind = "pdf" | "thumbnail";

@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
       publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
     });
   } catch (error) {
-    console.error("Failed to generate upload credentials");
+    // console.error("Failed to authenticate imagekit");
     return NextResponse.json(
-      { error: "Failed to generate upload credentials" },
+      { error: "Failed to authenticate imagekit" },
       { status: 500 }
     );
   }
