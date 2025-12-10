@@ -52,10 +52,10 @@ export default function Footer() {
                 <div className="items-center flex gap-2">
                   <Mail className="h-5 w-5" />
                   <Link
-                    href={"mailto:example@gamil.com"}
+                    href={"mailto:shippingupdates21@gmail.com"}
                     className="font-lato tracking-tight text-neutral-500"
                   >
-                    example@gamil.com
+                    shippingupdates21@gmail.com
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">

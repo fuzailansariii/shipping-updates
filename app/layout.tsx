@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import Footer from "@/components/footer";
 import NavbarWrapper from "@/components/navbar-wrapper";
+import { Providers } from "@/components/Providers";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -33,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <Providers>
       <html lang="en">
         <body
           className={`${lato.variable} ${roboto.variable} ${nunito.variable} antialiased`}
@@ -42,6 +43,6 @@ export default function RootLayout({
           <Footer />
         </body>
       </html>
-    </ClerkProvider>
+    </Providers>
   );
 }
