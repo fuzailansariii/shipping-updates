@@ -16,7 +16,6 @@ CREATE TABLE "pdfs" (
 	"price" real NOT NULL,
 	"file_url" text NOT NULL,
 	"file_size" text NOT NULL,
-	"pages" integer NOT NULL,
 	"topics" text[] NOT NULL,
 	"thumbnail" text,
 	"is_active" boolean DEFAULT true NOT NULL,

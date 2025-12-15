@@ -1,13 +1,22 @@
 "use client";
 
 import { upload } from "@imagekit/next";
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import {
   validateFileSimple,
   isPDFFile,
   isImageFile,
 } from "@/utils/validate-file";
 import axios from "axios";
+import {
+  AlertCircle,
+  Check,
+  FileCheck,
+  FileText,
+  Image,
+  Loader2,
+  UploadIcon,
+} from "lucide-react";
 
 interface FileUploadProps {
   uploadType: "pdf" | "image" | "all";
@@ -18,19 +27,12 @@ interface FileUploadProps {
 const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<any | null>(null);
+  const [progress, setProgress] = useState(0);
+  const inputId = useId();
 
-  /**
-   * Handles the file upload process.
-   *
-   * This function:
-   * - Validates file selection.
-   * - Retrieves upload authentication credentials.
-   * - Initiates the file upload via the ImageKit SDK.
-   * - Updates the upload progress.
-   * - Catches and processes errors accordingly.
-   */
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const processFile = async (file: File) => {
     if (!file) {
       setError("No file selected");
       return;
@@ -56,31 +58,35 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
         validationError = "Only PDF and image files are allowed";
       }
     }
+
     if (validationError) {
       setError(validationError);
       return;
     }
+
     setError(null);
     setUploading(true);
+
     try {
       const { data: authRes } = await axios.get("/api/upload-auth");
 
       const fileData = await upload({
-        // Authentication parameters
         expire: authRes.expire,
         token: authRes.token,
         signature: authRes.signature,
         publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
         file,
         fileName: file.name,
-        // Progress callback to update upload progress state
         onProgress: (event) => {
-          if (event.lengthComputable && onProgress) {
-            const percent = (event.loaded / event.total) * 100;
-            onProgress(Math.round(percent));
-          }
+          if (!event.lengthComputable) return;
+
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setProgress(percent);
+          onProgress?.(percent);
         },
       });
+
+      setUploadedFile(fileData);
       onSuccess(fileData);
     } catch (error: any) {
       console.error("Upload failed:", error);
@@ -91,6 +97,36 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
       );
     } finally {
       setUploading(false);
+      setProgress(0);
+    }
+  };
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      await processFile(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      await processFile(file);
     }
   };
 
@@ -100,20 +136,104 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
     return "application/pdf, image/*";
   };
 
+  const getUploadTypeLabel = () => {
+    if (uploadType === "pdf") return "PDF Document";
+    if (uploadType === "image") return "Thumbnail Image";
+    return "PDF or Image File";
+  };
+
+  const Icon = uploadType === "pdf" ? FileText : Image;
+
   return (
-    <>
-      <input
-        type="file"
-        accept={getAcceptedFiles()}
-        onChange={(e) => {
-          handleUpload(e);
-          e.target.value = "";
-        }}
-        disabled={uploading}
-      />
-      {uploading && <p>Uploading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </>
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        {getUploadTypeLabel()}
+      </label>
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative border-2 border-dashed rounded-xl p-6 transition-all ${
+          isDragOver
+            ? "border-blue-500 bg-blue-500/10"
+            : uploadedFile
+            ? "border-green-500 bg-green-500/5"
+            : error
+            ? "border-red-500 bg-red-500/5"
+            : "border-gray-700 bg-neutral-200 hover:border-gray-600"
+        }`}
+      >
+        <input
+          id={inputId}
+          type="file"
+          accept={getAcceptedFiles()}
+          onChange={handleUpload}
+          disabled={uploading}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+        />
+
+        <div className="flex flex-col items-center justify-center text-center space-y-3 pointer-events-none">
+          {uploading ? (
+            <>
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-blue-400">
+                  Uploading... {progress}%
+                </p>
+              </div>
+              <div className="w-full bg-gray-800 rounded-full h-1.5">
+                <div
+                  className="bg-blue-500 h-1.5 rounded-full transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </>
+          ) : uploadedFile ? (
+            <>
+              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Check className="w-6 h-6 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-green-400">
+                  {uploadedFile.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {(uploadedFile.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
+            </>
+          ) : error ? (
+            <>
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-red-400">{error}</p>
+                <p className="text-xs text-gray-500 mt-1">Click to try again</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center">
+                <Icon className="w-6 h-6 text-gray-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">
+                  Drop your {uploadType} here
+                </p>
+                <p className="text-xs text-gray-600 mt-1">or click to browse</p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* {error && !uploading && (
+        <p className="text-red-400 text-xs mt-2">{error}</p>
+      )} */}
+    </div>
   );
 };
 

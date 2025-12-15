@@ -1,5 +1,5 @@
 {
-  "id": "501dbacd-d67f-4994-9b7e-7914d13cef3d",
+  "id": "aa74cfdc-6bca-4e9b-ab2e-89a1a712ab8a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -98,12 +98,6 @@
         "file_size": {
           "name": "file_size",
           "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pages": {
-          "name": "pages",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
