@@ -1,12 +1,13 @@
 "use client";
+import { PDFUploadForm } from "@/components/pdf-upload-form";
+import Input from "@/components/ui/input-form";
 import Upload from "@/components/upload";
 import React from "react";
 
 export default function Admin() {
   return (
     <>
-      <Upload uploadType="pdf" onSuccess={(res) => console.log(res)} />
-      <Upload uploadType="image" onSuccess={(res) => console.log(res)} />
+      <PDFUploadForm />
     </>
   );
 }

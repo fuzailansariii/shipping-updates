@@ -16,12 +16,17 @@ export const otpSchema = z.object({
 export const pdfSchema = z.object({
   title: z.string().trim().min(1, "File name is requrired"),
   description: z.string().min(1, "Description is required"),
-  price: z.preprocess((v) => Number(v), z.number().positive()),
+  price: z.string().min(1, "Price is required"),
   fileUrl: z.url(),
   fileSize: z.string().min(1),
-  pages: z.number().min(1),
+  // pages: z.number().min(1),
   topics: z.array(z.string().trim()).min(1, "At least one topic required"),
   thumbnail: z.url().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const pdfSchemaProcessed = pdfSchema.extend({
+  price: z.number().positive("Price must be positive"),
   isActive: z.boolean().default(true),
 });
 
@@ -47,6 +52,7 @@ export const messageSchema = z.object({
 
 export type EmailFormData = z.infer<typeof emailSchema>;
 export type OTPFormData = z.infer<typeof otpSchema>;
-export type PDFData = z.infer<typeof pdfSchema>;
+export type PDFFormData = z.infer<typeof pdfSchema>;
+export type PDFData = z.infer<typeof pdfSchemaProcessed>;
 export type PurchaseData = z.infer<typeof purchaseSchema>;
 export type MessageData = z.infer<typeof messageSchema>;

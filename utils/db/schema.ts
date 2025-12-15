@@ -23,7 +23,7 @@ export const pdfs = pgTable("pdfs", {
   price: real("price").notNull(),
   fileUrl: text("file_url").notNull(),
   fileSize: text("file_size").notNull(),
-  pages: integer("pages").notNull(),
+  // pages: integer("pages").notNull(),
   topics: text("topics").array().notNull(),
   thumbnail: text("thumbnail"),
   isActive: boolean("is_active").default(true).notNull(),
