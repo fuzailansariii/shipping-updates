@@ -18,7 +18,7 @@ export const pdfSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
   fileUrl: z.url(),
-  fileSize: z.string().min(1),
+  fileSize: z.number().positive(),
   // pages: z.number().min(1),
   topics: z.array(z.string().trim()).min(1, "At least one topic required"),
   thumbnail: z.url().optional(),

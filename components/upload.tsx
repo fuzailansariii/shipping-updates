@@ -1,63 +1,54 @@
 "use client";
 
 import { upload } from "@imagekit/next";
-import React, { useId, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import {
   validateFileSimple,
   isPDFFile,
   isImageFile,
 } from "@/utils/validate-file";
 import axios from "axios";
-import {
-  AlertCircle,
-  Check,
-  FileCheck,
-  FileText,
-  Image,
-  Loader2,
-  UploadIcon,
-} from "lucide-react";
+import { AlertCircle, Check, FileText, Image, Loader2, X } from "lucide-react";
 
 interface FileUploadProps {
   uploadType: "pdf" | "image" | "all";
   onSuccess: (response: any) => void;
   onProgress?: (progress: number) => void;
+  onRemove?: () => void;
 }
 
-const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
+const Upload = ({
+  onSuccess,
+  onProgress,
+  uploadType,
+  onRemove,
+}: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<any | null>(null);
   const [progress, setProgress] = useState(0);
   const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const processFile = async (file: File) => {
-    if (!file) {
-      setError("No file selected");
-      return;
-    }
-
-    if (!file.type) {
-      setError("File type is undefined");
-      return;
-    }
-
-    let validationError: string | null = null;
+  const validateFile = (file: File): string | null => {
+    if (!file) return "No file selected";
+    if (!file.type) return "File type is undefined";
 
     if (uploadType === "pdf") {
-      validationError = validateFileSimple(file, "pdf");
+      return validateFileSimple(file, "pdf");
     } else if (uploadType === "image") {
-      validationError = validateFileSimple(file, "image");
+      return validateFileSimple(file, "image");
     } else if (uploadType === "all") {
-      if (isPDFFile(file)) {
-        validationError = validateFileSimple(file, "pdf");
-      } else if (isImageFile(file)) {
-        validationError = validateFileSimple(file, "image");
-      } else {
-        validationError = "Only PDF and image files are allowed";
-      }
+      if (isPDFFile(file)) return validateFileSimple(file, "pdf");
+      if (isImageFile(file)) return validateFileSimple(file, "image");
+      return "Only PDF and image files are allowed";
     }
+    return null;
+  };
+
+  const processFile = async (file: File) => {
+    const validationError = validateFile(file);
 
     if (validationError) {
       setError(validationError);
@@ -84,6 +75,10 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
           setProgress(percent);
           onProgress?.(percent);
         },
+        folder: isPDFFile(file)
+          ? "/shipping-updates/pdfs"
+          : "/shipping-updates/thumbnails",
+        tags: [uploadType],
       });
 
       setUploadedFile(fileData);
@@ -130,6 +125,27 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
     }
   };
 
+  const resetUpload = () => {
+    setUploadedFile(null);
+    setError(null);
+    setProgress(0);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    resetUpload();
+    onRemove?.();
+  };
+
   const getAcceptedFiles = () => {
     if (uploadType === "pdf") return "application/pdf";
     if (uploadType === "image") return "image/*";
@@ -164,11 +180,12 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
         }`}
       >
         <input
+          ref={inputRef}
           id={inputId}
           type="file"
           accept={getAcceptedFiles()}
           onChange={handleUpload}
-          disabled={uploading}
+          disabled={uploading || uploadedFile}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
 
@@ -183,14 +200,14 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
                   Uploading... {progress}%
                 </p>
               </div>
-              <div className="w-full bg-gray-800 rounded-full h-1.5">
+              <div className="w-full bg-gray-400 rounded-full h-1.5">
                 <div
                   className="bg-blue-500 h-1.5 rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </>
-          ) : uploadedFile ? (
+          ) : uploadedFile && !error ? (
             <>
               <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
                 <Check className="w-6 h-6 text-green-500" />
@@ -200,9 +217,17 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
                   {uploadedFile.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {(uploadedFile.size / 1024).toFixed(2)} KB
+                  {formatFileSize(uploadedFile.size)}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors pointer-events-auto"
+                aria-label="Remove file"
+              >
+                <X />
+              </button>
             </>
           ) : error ? (
             <>
@@ -229,10 +254,6 @@ const Upload = ({ onSuccess, onProgress, uploadType }: FileUploadProps) => {
           )}
         </div>
       </div>
-
-      {/* {error && !uploading && (
-        <p className="text-red-400 text-xs mt-2">{error}</p>
-      )} */}
     </div>
   );
 };

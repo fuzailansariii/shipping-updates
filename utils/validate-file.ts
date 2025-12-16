@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import {
   ALLOWED_FILE_TYPES,
   FILE_UPLOAD_MESSAGE,
@@ -78,4 +79,17 @@ export const isImageFile = (file: File): boolean => {
 
 export const isPDFFile = (file: File): boolean => {
   return file.type === "application/pdf";
+};
+
+export const UPLOAD_CONFIG = {
+  pdf: {
+    accept: "application/pdf",
+    label: "PDF Document",
+    validate: (file: File) => validateFileSimple(file, "pdf"),
+  },
+  image: {
+    accept: "image/*",
+    label: "Thumbnail Image",
+    validate: (file: File) => validateFileSimple(file, "image"),
+  },
 };
