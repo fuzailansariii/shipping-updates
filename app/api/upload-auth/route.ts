@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
     const { token, expire, signature } = getUploadAuthParams({
-      privateKey: process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY as string, // Never expose this on client side
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY as string, // Never expose this on client side
       publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY as string,
       expire: Math.floor(Date.now() / 1000) + 30,
     });

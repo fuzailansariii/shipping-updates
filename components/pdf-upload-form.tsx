@@ -6,12 +6,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./ui/input-form";
 import { AlignLeft, UploadIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export const PDFUploadForm = () => {
+  const [hasPdfUploaded, setHasPdfUploaded] = React.useState(false);
+  const [hasImageUploaded, setHasImageUploaded] = React.useState(false);
+  const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
+  const RATE_LIMIT_MS = 5000; // 5 seconds
+
   const {
     register,
     handleSubmit,
-    formState: { disabled, errors },
+    formState: { errors, isSubmitting },
     reset,
     setValue,
   } = useForm<PDFFormData>({
@@ -21,22 +27,88 @@ export const PDFUploadForm = () => {
       description: "",
       price: "",
       fileUrl: "",
-      fileSize: "",
+      fileSize: 0,
+      thumbnail: "",
       topics: [],
       isActive: false,
     },
   });
 
-  const onSubmit = (data: PDFFormData) => {
-    const processedData = {
-      ...data,
-      price: Number(data.price),
-      isActive: data.isActive ?? true,
-      fileSize: data.fileSize,
-      fileUrl: data.fileUrl,
-    };
-    console.log("PDF Upload Form Data:", processedData);
+  const handlePdfUpload = (response: any) => {
+    setValue("fileUrl", response.url, {
+      shouldValidate: true,
+    });
+    setValue("fileSize", Number(response.size), {
+      shouldValidate: true,
+    });
+    setHasPdfUploaded(true);
+    toast.success("PDF uploaded successfully!");
   };
+
+  const handleThumbnailUpload = (response: any) => {
+    setValue("thumbnail", response.url, {
+      shouldValidate: true,
+    });
+    setHasImageUploaded(true);
+    toast.success("Thumbnail uploaded successfully!");
+  };
+
+  const handlePdfRemove = () => {
+    setHasPdfUploaded(false);
+    setValue("fileUrl", "");
+    setValue("fileSize", 0);
+    toast.success("PDF removed");
+  };
+
+  const handleImageRemove = () => {
+    setHasImageUploaded(false);
+    setValue("thumbnail", "");
+    toast.success("Thumbnail removed");
+  };
+
+  const onSubmit = async (data: PDFFormData) => {
+    // Rate Limiting
+    const now = Date.now();
+    if (now - lastSubmitTime < RATE_LIMIT_MS) {
+      const remainingTime = Math.ceil(
+        (RATE_LIMIT_MS - (now - (lastSubmitTime || 0))) / 1000
+      );
+      toast.error(
+        `Please wait ${remainingTime} more second(s) before submitting again.`
+      );
+      return;
+    }
+    setLastSubmitTime(now);
+    if (!data.thumbnail || !data.fileUrl) {
+      toast.error("Please upload the PDF document before submitting.");
+      return;
+    }
+
+    try {
+      const processedData = {
+        ...data,
+        price: Number(data.price),
+        isActive: data.isActive ?? false,
+        fileSize: data.fileSize,
+        fileUrl: data.fileUrl,
+      };
+      console.log("PDF Upload Form Data:", processedData);
+      // Here you can send `processedData` to your backend API
+      // Toast notification
+      toast.success("PDF document uploaded successfully!");
+      reset();
+      setHasPdfUploaded(false);
+      setHasImageUploaded(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Upload failed. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
+
+  const isUploadComplete = hasPdfUploaded && hasImageUploaded;
 
   return (
     <div className="min-h-screen">
@@ -49,12 +121,10 @@ export const PDFUploadForm = () => {
             Share your knowledge with the community
           </p>
         </div>
-
         <form
-          onSubmit={handleSubmit(onSubmit, (errors) =>
-            console.error("Validation Errors:", errors)
-          )}
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-8"
+          aria-label="PDF upload form"
         >
           <div className="bg-neutral-100 rounded-2xl p-6 border border-gray-300">
             <h2 className="text-xl font-semibold text-neutral-700 mb-6 flex items-center gap-2">
@@ -62,27 +132,16 @@ export const PDFUploadForm = () => {
               Upload Files
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* File upload components */}
               <Upload
                 uploadType="pdf"
-                onSuccess={(response) => {
-                  setValue("fileUrl", response.fileUrl, {
-                    shouldValidate: true,
-                  });
-                  setValue("fileSize", response.fileSize, {
-                    shouldValidate: true,
-                  });
-                }}
+                onSuccess={handlePdfUpload}
+                onRemove={handlePdfRemove}
               />
               <Upload
                 uploadType="image"
-                onSuccess={(response) => {
-                  setValue("thumbnail", response.fileUrl, {
-                    shouldValidate: true,
-                  });
-                  setValue("fileSize", response.fileSize, {
-                    shouldValidate: true,
-                  });
-                }}
+                onSuccess={handleThumbnailUpload}
+                onRemove={handleImageRemove}
               />
             </div>
           </div>
@@ -140,6 +199,7 @@ export const PDFUploadForm = () => {
                 />
                 <input type="hidden" {...register("fileSize")} />
                 <input type="hidden" {...register("fileUrl")} />
+                <input type="hidden" {...register("thumbnail")} />
               </div>
 
               <div className="flex items-center justify-between p-4 bg-neutral-700 rounded-lg border border-gray-800">
@@ -156,8 +216,9 @@ export const PDFUploadForm = () => {
                     type="checkbox"
                     {...register("isActive")}
                     className="sr-only peer"
+                    aria-label="Publish Document"
                   />
-                  <div className="w-11 h-6 bg-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.top-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
             </div>
@@ -165,9 +226,10 @@ export const PDFUploadForm = () => {
 
           <button
             type="submit"
-            className="w-full py-3 px-6 rounded-lg bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 transition-all font-medium shadow-lg shadow-blue-500/20"
+            disabled={isSubmitting || !isUploadComplete}
+            className="w-full py-3 px-6 rounded-lg bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 transition-all font-medium shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Publish Document
+            {isSubmitting ? "Publishing..." : "Publish Document"}
           </button>
         </form>
       </div>

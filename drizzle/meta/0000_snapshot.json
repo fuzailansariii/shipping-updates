@@ -1,5 +1,5 @@
 {
-  "id": "aa74cfdc-6bca-4e9b-ab2e-89a1a712ab8a",
+  "id": "9ccd272e-8edc-4291-bc54-8769c6619168",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -97,7 +97,7 @@
         },
         "file_size": {
           "name": "file_size",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
