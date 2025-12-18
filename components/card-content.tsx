@@ -21,7 +21,7 @@ export default function CardContent({
             className="text-base items-center gap-2 flex font-roboto text-secondary-dark"
           >
             <Check height={17} width={17} />
-            <p>{title}</p>
+            {title}
           </p>
         ))}
       </div>
