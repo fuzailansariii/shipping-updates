@@ -1,5 +1,4 @@
 import { isAdmin } from "@/lib/auth-helper";
-import { pdfSchema, pdfSchemaProcessed } from "@/lib/validations/zod-schema";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/utils/db";
