@@ -15,14 +15,14 @@ interface MenuListProps {
 
 const aboutMenu = [
   { title: "Products", link: "/products" },
-  { title: "About Us", link: "/about-us" },
+  { title: "About", link: "/about" },
   { title: "Contact", link: "/contact" },
 ];
 
 const helpMenu = [
-  { title: "Privacy", link: "/privacy" },
-  { title: "Term & Conditions", link: "/term-condition" },
-  { title: "Disclaimer", link: "/disclaimer" },
+  { title: "Privacy", link: "/privacy-policy" },
+  { title: "Terms & Conditions", link: "/terms-condition" },
+  { title: "Refund & Cancellation Policy", link: "/refund-policy" },
   { title: "Developer & Teams", link: "/developer-teams" },
 ];
 
