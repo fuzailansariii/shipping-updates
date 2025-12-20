@@ -6,7 +6,7 @@ interface CardProps {
 
 export default function Card({ children, heading }: CardProps) {
   return (
-    <div className="w-full justify-evenly mx-auto rounded-xl mt-20 p-5 border-2 border-neutral-200 shadow-md bg-card-color">
+    <div className="w-full justify-evenly mx-auto rounded-xl mt-20 p-5 border shadow-sm bg-card-color bg-linear-to-r from-neutral-50 to-blue-50">
       {heading && (
         <h2 className="font-bold font-lato text-2xl text-center text-secondary-dark">
           {heading}
