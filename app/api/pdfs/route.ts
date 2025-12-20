@@ -1,5 +1,5 @@
 import { isAdmin } from "@/lib/auth-helper";
-import { pdfSchema } from "@/lib/validations/zod-schema";
+import {  pdfSchemaProcessed } from "@/lib/validations/zod-schema";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/utils/db";
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validateData = pdfSchema.parse(body);
+    const validateData = pdfSchemaProcessed.parse(body);
 
     const pdfId = nanoid();
 
@@ -54,7 +54,6 @@ export async function POST(req: NextRequest) {
         description: validateData.description,
         fileSize: validateData.fileSize,
         fileUrl: validateData.fileUrl,
-        pages: validateData.pages,
         price: validateData.price,
         topics: validateData.topics,
         thumbnail: validateData.thumbnail,
