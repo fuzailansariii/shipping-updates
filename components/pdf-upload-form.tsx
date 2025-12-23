@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./ui/input-form";
 import { AlignLeft, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios";
 
 export const PDFUploadForm = () => {
   const [hasPdfUploaded, setHasPdfUploaded] = React.useState(false);
@@ -94,7 +95,13 @@ export const PDFUploadForm = () => {
       };
       console.log("PDF Upload Form Data:", processedData);
       // Here you can send `processedData` to your backend API
-      // Toast notification
+      const response = await axios.post("/api/pdfs", processedData);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.error);
+      }
+      console.log("PDF Data: ", response);
       toast.success("PDF document uploaded successfully!");
       reset();
       setHasPdfUploaded(false);

@@ -1,9 +1,10 @@
-import { isAdmin } from "@/lib/auth-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/utils/db";
 import { pdfs } from "@/utils/db/schema";
 import { ZodError } from "zod";
+import { pdfSchemaProcessed } from "@/lib/validations/zod-schema";
+import { isAdmin } from "@/lib/auth-helper";
 
 export async function GET() {
   try {
