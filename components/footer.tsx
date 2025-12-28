@@ -15,66 +15,65 @@ interface MenuListProps {
 
 const aboutMenu = [
   { title: "Products", link: "/products" },
-  { title: "About Us", link: "/about-us" },
+  { title: "About", link: "/about" },
   { title: "Contact", link: "/contact" },
 ];
 
 const helpMenu = [
-  { title: "Privacy", link: "/privacy" },
-  { title: "Term & Conditions", link: "/term-condition" },
-  { title: "Disclaimer", link: "/disclaimer" },
+  { title: "Privacy", link: "/privacy-policy" },
+  { title: "Terms & Conditions", link: "/terms-condition" },
+  { title: "Refund & Cancellation Policy", link: "/refund-policy" },
   { title: "Developer & Teams", link: "/developer-teams" },
 ];
 
 export default function Footer() {
   return (
-    <div className="w-full pt-10 mx-auto bg-neutral-300">
-      <Separator className="mb-5" />
-      <div className="max-w-7xl mx-auto flex justify-between">
-        <div className="flex flex-col gap-5 justify-center items-center">
-          <Image src={logo} className="h-24 w-24" alt="Shipping Updates Logo" />
-          <div className="flex gap-5">
+    <div className="w-full pt-10 mx-auto bg-primary-dark border-t border-gray-800">
+      <div className="md:max-w-7xl w-full mx-auto flex flex-col md:flex-row justify-between">
+        <div className="flex md:flex-col gap-5 justify-between md:justify-center items-center px-5 md:px-0">
+          <Image
+            src={logo}
+            className="h-24 w-24 hidden md:block"
+            alt="Shipping Updates Logo"
+          />
+          <span className="block md:hidden font-roboto font-medium text-center text-text-color">
+            FOLLOW US
+          </span>
+          <div className="flex gap-5 items-center">
             <FacebookIcon size="lg" />
             <Youtube size="lg" />
             <WhatsApp size="lg" />
             <Instagram size="lg" />
           </div>
         </div>
-        <div className="">
-          <div className="flex gap-10">
+        <div className="items-center gap-5 mx-5 mt-10">
+          <div className="flex flex-col md:flex-row gap-10">
             <MenuList heading="About" menuItems={aboutMenu} />
             <MenuList heading="Help" menuItems={helpMenu} />
             <div>
-              <h1 className="font-nunito text-neutral-600 text-lg">
+              <h1 className="font-nunito text-text-color text-lg">
                 Contact Info
               </h1>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 font-lato tracking-wide text-text-color/70">
                 <div className="items-center flex gap-2">
                   <Mail className="h-5 w-5" />
-                  <Link
-                    href={"mailto:example@gamil.com"}
-                    className="font-lato tracking-tight text-neutral-500"
-                  >
-                    example@gamil.com
+                  <Link href={"mailto:shippingupdates21@gmail.com"}>
+                    shippingupdates21@gmail.com
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-5 w-5" />
-                  <p className="font-lato tracking-tight text-neutral-500">
-                    {"(+91) 9322300381"}
-                  </p>
+                  <p>{"(+91) 9322300381"}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <Separator className="mt-5" />
-      <div className="text-center flex justify-center items-center py-4 font-nunito font-semibold">
+      <Separator className="mt-5 bg-main" />
+      <div className="text-center text-text-color/50 tracking-wide flex justify-center items-center py-4 font-lato font-semibold">
         <span className="mr-1">&copy;</span>
-        <p className="text-neutral-700">
-          2025 - ShippingUpdates - All Right Resvered
-        </p>
+        <p className="">2025 - ShippingUpdates - All Right Resvered</p>
       </div>
     </div>
   );
@@ -89,10 +88,10 @@ export const MenuList = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <h1 className="text-lg font-semibold font-nunito text-neutral-600">
+      <h1 className="text-lg font-semibold tracking-wide font-nunito text-text-color">
         {heading}
       </h1>
-      <div className="flex flex-col font-lato tracking-tight text-neutral-500 gap-1">
+      <div className="flex flex-col font-lato tracking-wide text-text-color/70 gap-1">
         {menuItems.map((link, index) => (
           <Link key={index} href={link.link}>
             {link.title}
