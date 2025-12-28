@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Lato, Nunito, Roboto } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/navbar";
-import { ClerkProvider } from "@clerk/nextjs";
-import Footer from "@/components/footer";
-import NavbarWrapper from "@/components/navbar-wrapper";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -41,7 +37,6 @@ export default function RootLayout({
           className={`${lato.variable} ${roboto.variable} ${nunito.variable} antialiased`}
         >
           {children}
-          <Footer />
           <Toaster position="top-center" />
         </body>
       </html>

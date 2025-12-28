@@ -5,7 +5,6 @@ import Input from "@/components/ui/input-form";
 import { MessageData, messageSchema } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import React from "react";
 import { useForm } from "react-hook-form";
 
 export default function Contact() {
@@ -145,6 +144,7 @@ export default function Contact() {
                 <Link
                   href="https://www.youtube.com/@ShippingUpdates"
                   className="text-blue-600 hover:underline"
+                  target="_blank"
                 >
                   Shipping Updates Channel
                 </Link>

@@ -1,3 +1,4 @@
+import Footer from "@/components/footer";
 import NavbarWrapper from "@/components/navbar-wrapper";
 import React from "react";
 
@@ -10,6 +11,7 @@ export default function MainLayout({
     <div>
       <NavbarWrapper />
       {children}
+      <Footer />
     </div>
   );
 }
