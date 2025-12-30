@@ -68,7 +68,7 @@ export default function SignUp() {
         }
         await setActive({ session: attemptSignUp.createdSessionId });
         // TODO: toast success message "Sign up successful!"
-        router.push("/dashboard");
+        router.push("/");
       } else if (attemptSignUp.status === "missing_requirements") {
         console.warn("Missing requirements:", attemptSignUp);
         throw new Error("Please complete all required fields.");
@@ -131,7 +131,7 @@ export default function SignUp() {
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/dashboard",
+        redirectUrlComplete: "/",
       });
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };

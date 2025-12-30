@@ -6,7 +6,6 @@ import {
 import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
   "/checkout(.*)",
   "/api/purchase(.*)",
   "/api/download(.*)",
@@ -25,7 +24,7 @@ export default clerkMiddleware(async (auth, req) => {
     if (isAdmin) {
       return NextResponse.redirect(new URL("/admin", req.url));
     } else {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
   if (isAdminRoute(req)) {
@@ -45,7 +44,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
 
-  //   protect user routes (dashboard, checkout, etc)
+  //   protect user routes ( checkout, etc)
   if (isProtectedRoute(req) && !userId) {
     const signInUrl = new URL("/sign-in", req.url);
     signInUrl.searchParams.set("redirect_url", req.url);
