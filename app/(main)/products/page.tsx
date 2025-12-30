@@ -30,7 +30,6 @@ export default function PDFs() {
       try {
         setLoading(true);
         const response = await axios.get("/api/pdfs");
-        console.log("PDFS Fetched: ", response.data);
         setPdfs(response.data.pdfs || []);
         setError(null);
       } catch (error) {

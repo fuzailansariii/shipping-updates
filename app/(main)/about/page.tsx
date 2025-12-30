@@ -87,7 +87,7 @@ export default function AboutPage() {
             </p>
             <div className="max-w-3xl mx-auto space-y-3 text-secondary-dark">
               <p>
-                With over 10 years of active sailing experience, Mudassir brings
+                With over 15 years of active sailing experience, Mudassir brings
                 authentic maritime expertise to every study material. His
                 journey from cadet to officer has given him unique insights into
                 what it takes to succeed in shipping examinations and onboard
