@@ -145,7 +145,7 @@ export default function Home() {
             Founded by{" "}
             <span className="italic font-semibold">Mudassir Hussain</span>,
             Second Officer in the Merchant Navy with{" "}
-            <span className="font-bold font-nunito">10+ years</span> of sailing
+            <span className="font-bold font-nunito">15+ years</span> of sailing
             experience.
           </p>
         </Card>

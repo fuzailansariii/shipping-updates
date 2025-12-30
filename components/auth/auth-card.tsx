@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { EmailFormData, emailSchema } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/icons/google";
+import Container from "../container";
 
 interface AuthCardProps {
   mode: "sign-in" | "sign-up";
@@ -67,8 +68,8 @@ export default function AuthCard({
   };
 
   return (
-    <div className="md:max-w-xl w-full h-screen flex justify-center items-center mx-auto">
-      <div className="border rounded-xl md:px-15 px-5 py-20 max-w-[500px] shadow-xl mt-15 mx-1">
+    <div className="flex justify-center h-screen items-center mx-auto max-w-[500px] px-4">
+      <div className="border rounded-xl md:px-15 px-5 py-20 w-full shadow-xl mx-1 md:mx-0">
         {/* form title and description */}
         <div className="text-center px-3">
           <Image

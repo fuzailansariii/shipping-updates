@@ -16,7 +16,7 @@ export default function SignIn() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
+  const redirectUrl = searchParams.get("redirect_url") || "/";
 
   const handleEmailSubmit = async (emailAddress: string) => {
     if (!isLoaded) {

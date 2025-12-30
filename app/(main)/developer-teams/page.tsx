@@ -10,6 +10,18 @@ export const metadata = {
     "Meet the developer behind Shipping Updates - built from scratch with passion for maritime education.",
 };
 
+const techUsed = [
+  { name: "Next.js", category: "Framework" },
+  { name: "React", category: "Frontend" },
+  { name: "TypeScript", category: "Language" },
+  { name: "Tailwind CSS", category: "Styling" },
+  { name: "Clerk", category: "Authentication" },
+  { name: "Razorpay", category: "Payments" },
+  { name: "PostgreSQL", category: "Database" },
+  { name: "Prisma", category: "ORM" },
+  { name: "Resend", category: "Emails" },
+];
+
 // TODO: Rebuild with scratch and fetch LinkedIn Account to show it.
 
 export default function DeveloperTeamPage() {
@@ -21,7 +33,7 @@ export default function DeveloperTeamPage() {
           <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Developer & Team
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-nunito">
             Built with passion, dedication, and a mission to help aspiring
             maritime professionals succeed.
           </p>
@@ -43,13 +55,13 @@ export default function DeveloperTeamPage() {
 
               {/* Name and Role */}
               <div className="text-center sm:text-left mb-4 sm:mb-0">
-                <h2 className="text-3xl font-bold md:text-card-color text-primary-dark">
+                <h2 className="text-3xl font-bold md:text-card-color text-primary-dark font-nunito">
                   Mohd Fuzail Ansari
                 </h2>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-600 font-nunito">
                   Founder & Solo Developer
                 </p>
-                <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
+                <div className="flex items-center gap-2 mt-2 justify-center font-nunito sm:justify-start">
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                     Full Stack Developer
                   </span>
@@ -61,7 +73,7 @@ export default function DeveloperTeamPage() {
             </div>
 
             {/* Bio */}
-            <div className="prose max-w-none mb-8">
+            <div className="prose max-w-none mb-8 font-lato">
               <p className="text-lg text-gray-700 leading-relaxed">
                 Hi! I'm the solo developer behind{" "}
                 <strong>Shipping Updates</strong>. I built this entire platform
@@ -102,31 +114,34 @@ export default function DeveloperTeamPage() {
 
             {/* Social Links */}
             <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-              <Button
-                variant="outline"
-                size="lg"
-                className="gap-2 items-center"
-              >
-                <FaGithub className="w-5 h-5" />
-                GitHub
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="gap-2 items-center"
-              >
-                <FaLinkedinIn className="w-5 h-5" />
-                LinkedIn
-              </Button>
-              <Link href="/contact">
-                <Button
-                  size="lg"
-                  className="gap-2 bg-blue-600 hover:bg-blue-700"
+              <Button variant="outline" size="lg" asChild>
+                <Link
+                  href="https://github.com/fuzailansariii"
+                  target="_blank"
+                  className="flex items-center gap-2"
                 >
+                  <FaGithub className="w-5 h-5" />
+                  GitHub
+                </Link>
+              </Button>
+
+              <Button variant="outline" size="lg" asChild>
+                <Link
+                  href="https://www.linkedin.com/in/mohdfuzailansari/"
+                  target="_blank"
+                  className="flex items-center gap-2"
+                >
+                  <FaLinkedinIn className="w-5 h-5" />
+                  LinkedIn
+                </Link>
+              </Button>
+
+              <Button size="lg" className="gap-2" variant={"secondary"} asChild>
+                <Link href="mailto:fuzailansarisecret@gmail.com">
                   <Mail className="w-5 h-5" />
                   Get in Touch
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -137,10 +152,10 @@ export default function DeveloperTeamPage() {
             <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
               <Code2 className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-nunito">
               Full Stack Development
             </h3>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed font-roboto">
               I handle everything from frontend design to backend
               infrastructure, database management, payment integration, and
               deployment. Every aspect of Shipping Updates is built and
@@ -152,10 +167,10 @@ export default function DeveloperTeamPage() {
             <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
               <Rocket className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-nunito">
               Product Vision
             </h3>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed font-roboto">
               Beyond coding, I shape the product strategy, user experience, and
               content direction. I'm constantly iterating based on user feedback
               to make this the best platform possible.
@@ -164,7 +179,7 @@ export default function DeveloperTeamPage() {
         </div>
 
         {/* Tech Stack */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-10 mb-12">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-10 mb-12 font-nunito">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-indigo-50 rounded-lg">
               <Zap className="w-6 h-6 text-indigo-600" />
@@ -178,17 +193,7 @@ export default function DeveloperTeamPage() {
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { name: "Next.js", category: "Framework" },
-              { name: "React", category: "Frontend" },
-              { name: "TypeScript", category: "Language" },
-              { name: "Tailwind CSS", category: "Styling" },
-              { name: "Clerk", category: "Authentication" },
-              { name: "Razorpay", category: "Payments" },
-              { name: "PostgreSQL", category: "Database" },
-              { name: "Prisma", category: "ORM" },
-              { name: "Resend", category: "Emails" },
-            ].map((tech, idx) => (
+            {techUsed.map((tech, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
@@ -204,7 +209,7 @@ export default function DeveloperTeamPage() {
         </div>
 
         {/* Mission Statement */}
-        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white text-center">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white text-center font-nunito">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <Heart className="w-8 h-8 text-white" />
@@ -220,7 +225,7 @@ export default function DeveloperTeamPage() {
         </div>
 
         {/* Contact CTA */}
-        <div className="mt-12 text-center">
+        <div className="mt-12 text-center font-nunito">
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
             Let's Connect
           </h3>
@@ -228,12 +233,12 @@ export default function DeveloperTeamPage() {
             Have questions, feedback, or just want to say hi? I'd love to hear
             from you!
           </p>
-          <Link href="/contact">
-            <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button size="lg" className="gap-2 font-bold" variant={"outline"} asChild>
+            <Link href="mailto:fuzailansarisecret@gmail.com">
               <Mail className="w-5 h-5" />
               Contact Me
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </Container>
