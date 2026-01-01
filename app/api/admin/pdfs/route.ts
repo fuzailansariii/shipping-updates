@@ -59,11 +59,11 @@ export async function POST(req: NextRequest) {
       .returning();
 
     return NextResponse.json(
-      { success: true, file: newPdf, message: "PDF saved successfully" },
+      { success: true, file: newPdf, message: "PDF Uploaded Successfully!" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error Saving PDF");
+    console.error("Error Uploading PDF");
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: "Invalid data format", details: error.issues },
