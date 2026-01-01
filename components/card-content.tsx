@@ -20,7 +20,7 @@ export default function CardContent({
             key={idx}
             className="text-base items-center gap-2 flex font-roboto text-secondary-dark"
           >
-            <Check height={17} width={17} />
+            <Check className="h-4 w-4 md:h-5 md:w-5 shrink-0 text-primary-dark" />
             {title}
           </p>
         ))}
