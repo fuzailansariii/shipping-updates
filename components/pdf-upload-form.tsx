@@ -95,14 +95,14 @@ export const PDFUploadForm = () => {
       };
       console.log("PDF Upload Form Data:", processedData);
       // Here you can send `processedData` to your backend API
-      const response = await axios.post("/api/pdfs", processedData);
+      const response = await axios.post("/api/admin/pdfs", processedData);
       if (response.status === 201) {
         toast.success(response.data.message);
       } else {
         toast.error(response.data.error);
       }
       console.log("PDF Data: ", response);
-      toast.success("PDF document uploaded successfully!");
+      // toast.success("PDF document uploaded successfully!");
       reset();
       setHasPdfUploaded(false);
       setHasImageUploaded(false);

@@ -60,18 +60,25 @@ export async function PATCH(
       );
     }
 
-    const validateData = parsed.data;
+    const validatedData = parsed.data;
 
-    if (Object.keys(validateData).length === 0) {
+    if (Object.keys(validatedData).length === 0) {
       return NextResponse.json(
         { error: "No fields provided for update" },
         { status: 400 }
       );
     }
 
+    // only include fields that were provided
+    const updateData = {
+      ...validatedData,
+      updatedAt: new Date(),
+    };
+
+    // Update PDF
     const updatedPdf = await db
       .update(pdfs)
-      .set(validateData)
+      .set(updateData)
       .where(eq(pdfs.id, pdfId))
       .returning();
 

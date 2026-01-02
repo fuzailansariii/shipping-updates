@@ -26,14 +26,14 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   const menuList = [
-    { icon: House, title: "Home", link: "/" },
-    { icon: FileText, title: "PDFs", link: "/products" },
-    { icon: ShoppingCart, title: "Purchases", link: "/purchases" },
-    { icon: MessageCircleMore, title: "Messages", link: "/messages" },
+    { icon: House, title: "Home", link: "/admin" },
+    { icon: FileText, title: "PDFs", link: "/admin/products" },
+    { icon: ShoppingCart, title: "Purchases", link: "/admin/purchases" },
+    { icon: MessageCircleMore, title: "Messages", link: "/admin/messages" },
   ];
 
   const isActiveRoute = (link: string) => {
-    if (link === "/") return pathname === "/";
+    if (link === "/admin") return pathname === "/admin";
     return pathname.startsWith(link);
   };
 
@@ -112,7 +112,7 @@ export default function AdminSidebar() {
           ${isSidebarOpen ? "lg:w-72" : "lg:w-20"}
           
           /* Height */
-          lg:min-h-screen min-h-screen
+          h-screen overflow-y-auto
         `}
       >
         {/* Toggle Button - Desktop Only */}
@@ -135,7 +135,7 @@ export default function AdminSidebar() {
         </div>
 
         <div
-          className={`h-full flex flex-col ${
+          className={`flex flex-col ${
             isSidebarOpen ? "px-3 py-5" : "lg:px-1 lg:py-5 px-3 py-5"
           } rounded-xl`}
         >
