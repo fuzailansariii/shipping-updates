@@ -1,21 +1,19 @@
 import * as z from "zod";
 
 export const emailSchema = z.object({
-  email: z
-    .email("Please enter a valid email address")
-    .min(1, "Email is required"),
+  email: z.email("Please enter a valid email address"),
 });
 
 export const otpSchema = z.object({
   code: z
     .string()
-    .min(1, "Code must be 6 digit")
+    .length(6, "Code must be 6 digits")
     .regex(/^\d+$/, "Code must only contain numbers"),
 });
 
 export const pdfSchema = z.object({
   title: z.string().trim().min(1, "File name is requrired"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().trim().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
   fileUrl: z.url(),
   fileSize: z.number().positive(),
@@ -29,6 +27,18 @@ export const pdfSchemaProcessed = pdfSchema.extend({
   price: z.number().positive("Price must be positive"),
   isActive: z.boolean().default(true),
 });
+
+// Validation schema for update (doesn't include fileUrl and fileSize)
+export const updatePdfSchema = pdfSchemaProcessed
+  .pick({
+    title: true,
+    description: true,
+    price: true,
+    topics: true,
+    thumbnail: true,
+    isActive: true,
+  })
+  .partial();
 
 export const purchaseSchema = z.object({
   pdfId: z.string().min(1),
@@ -65,5 +75,6 @@ export type EmailFormData = z.infer<typeof emailSchema>;
 export type OTPFormData = z.infer<typeof otpSchema>;
 export type PDFFormData = z.infer<typeof pdfSchema>;
 export type PDFData = z.infer<typeof pdfSchemaProcessed>;
+export type UpdatePDFData = z.infer<typeof updatePdfSchema>;
 export type PurchaseData = z.infer<typeof purchaseSchema>;
 export type MessageData = z.infer<typeof messageSchema>;

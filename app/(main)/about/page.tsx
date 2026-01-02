@@ -105,7 +105,7 @@ export default function AboutPage() {
 
         {/* Mission and Values */}
         <Card>
-          <div className="flex flex-col md:flex-row gap-5 justify-evenly">
+          <div className="flex flex-col md:flex-row gap-3 justify-evenly">
             <CardContent heading="Our Mission" title={ourMission} />
             <CardContent heading="Our Values" title={ourValues} />
           </div>

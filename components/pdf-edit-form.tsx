@@ -1,49 +1,79 @@
-"use client";
-import React from "react";
-import Upload from "./upload";
-import { pdfSchema, PDFFormData } from "@/lib/validations/zod-schema";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import {
+  PDFFormData,
+  pdfSchema,
+  UpdatePDFData,
+  updatePdfSchema,
+} from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "./ui/input-form";
-import { AlignLeft, UploadIcon } from "lucide-react";
-import { toast } from "sonner";
 import axios from "axios";
+import { toast } from "sonner";
+import { AlignLeft, Loader2, UploadIcon } from "lucide-react";
+import Input from "./ui/input-form";
+import Upload from "./upload";
+// import { Image } from "@imagekit/next";
 
-export const PDFUploadForm = () => {
-  const [hasPdfUploaded, setHasPdfUploaded] = React.useState(false);
-  const [hasImageUploaded, setHasImageUploaded] = React.useState(false);
-  const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
+interface EditPDFFormProps {
+  pdfId: string;
+  initialData?: PDFFormData & { id: string };
+}
+
+export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
+  const [hasImageUploaded, setHasImageUploaded] = useState(
+    !!initialData?.thumbnail
+  );
+  const [lastSubmitTime, setLastSubmitTime] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const RATE_LIMIT_MS = 5000; // 5 seconds
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     setValue,
-  } = useForm<PDFFormData>({
-    resolver: zodResolver(pdfSchema),
+  } = useForm<UpdatePDFData>({
+    resolver: zodResolver(updatePdfSchema),
     defaultValues: {
       title: "",
       description: "",
-      price: "",
-      fileUrl: "",
-      fileSize: 0,
-      thumbnail: "",
+      price: undefined,
       topics: [],
+      thumbnail: "",
       isActive: false,
     },
   });
 
-  const handlePdfUpload = (response: any) => {
-    setValue("fileUrl", response.url, {
-      shouldValidate: true,
-    });
-    setValue("fileSize", Number(response.size), {
-      shouldValidate: true,
-    });
-    setHasPdfUploaded(true);
-    toast.success("PDF uploaded successfully!");
+  //   fetch PDF data if not provided
+  useEffect(() => {
+    if (!initialData) {
+      fetchPDFData();
+    }
+  }, [pdfId, initialData]);
+
+  // Fetch PDF data function
+  const fetchPDFData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`/api/admin/pdfs/${pdfId}`);
+      const data = response.data.pdf;
+
+      setValue("title", data.title);
+      setValue("description", data.description);
+      setValue("price", data.price);
+      // setValue("fileUrl", data.fileUrl);
+      // setValue("fileSize", data.fileSize);
+      setValue("thumbnail", data.thumbnail);
+      setValue("topics", data.topics);
+      setValue("isActive", data.isActive);
+
+      setHasImageUploaded(!!data.thumbnail);
+    } catch (error) {
+      toast.error("Failed to load PDF data");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleThumbnailUpload = (response: any) => {
@@ -54,25 +84,18 @@ export const PDFUploadForm = () => {
     toast.success("Thumbnail uploaded successfully!");
   };
 
-  const handlePdfRemove = () => {
-    setHasPdfUploaded(false);
-    setValue("fileUrl", "");
-    setValue("fileSize", 0);
-    toast.success("PDF removed");
-  };
-
   const handleImageRemove = () => {
     setHasImageUploaded(false);
     setValue("thumbnail", "");
     toast.success("Thumbnail removed");
   };
 
-  const onSubmit = async (data: PDFFormData) => {
+  const onSubmit = async (data: UpdatePDFData) => {
     // Rate Limiting
     const now = Date.now();
     if (now - lastSubmitTime < RATE_LIMIT_MS) {
       const remainingTime = Math.ceil(
-        (RATE_LIMIT_MS - (now - (lastSubmitTime || 0))) / 1000
+        (RATE_LIMIT_MS - (now - lastSubmitTime)) / 1000
       );
       toast.error(
         `Please wait ${remainingTime} more second(s) before submitting again.`
@@ -80,42 +103,46 @@ export const PDFUploadForm = () => {
       return;
     }
     setLastSubmitTime(now);
-    if (!data.thumbnail || !data.fileUrl) {
-      toast.error("Please upload the PDF document before submitting.");
-      return;
-    }
 
     try {
-      const processedData = {
-        ...data,
-        price: Number(data.price),
-        isActive: data.isActive ?? false,
-        fileSize: data.fileSize,
-        fileUrl: data.fileUrl,
-      };
-      console.log("PDF Upload Form Data:", processedData);
-      // Here you can send `processedData` to your backend API
-      const response = await axios.post("/api/admin/pdfs", processedData);
-      if (response.status === 201) {
-        toast.success(response.data.message);
+      // Transform data for API (convert price to number)
+      // const updateData = {
+      //   title: data.title,
+      //   description: data.description,
+      //   price: Number(data.price), // Convert string to number for API
+      //   thumbnail: data.thumbnail,
+      //   topics: data.topics,
+      //   isActive: data.isActive,
+      // };
+      console.log("Submitting data:", data);
+      const response = await axios.patch(`/api/admin/pdfs/${pdfId}`, data);
+      if (response.data.success) {
+        toast.success(response.data.message || "PDF updated successfully!");
       } else {
-        toast.error(response.data.error);
+        toast.error(response.data.error || "Failed to update PDF.");
       }
-      console.log("PDF Data: ", response);
-      // toast.success("PDF document uploaded successfully!");
-      reset();
-      setHasPdfUploaded(false);
-      setHasImageUploaded(false);
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message || "Upload failed. Please try again.");
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(
+          error.response?.data?.error ||
+            "An error occurred while updating the PDF."
+        );
       } else {
-        toast.error("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred.");
       }
+      console.error("Error updating PDF:", error);
     }
   };
 
-  const isUploadComplete = hasPdfUploaded && hasImageUploaded;
+  // const currentThumbnail = watch("thumbnail");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full items-center justify-center flex">
+        <Loader2 className="w-8 h-8 animate-spin text-black" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -138,21 +165,33 @@ export const PDFUploadForm = () => {
               <UploadIcon className="w-5 h-5 text-blue-500" />
               Upload Files
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Current Thumbnail */}
+            {/* {currentThumbnail && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">Current Thumbnail:</p>
+                <Image
+                  src={currentThumbnail}
+                  alt="Current thumbnail"
+                  className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+                  width={500}
+                  height={500}
+                  loading="eager"
+                />
+              </div>
+            )} */}
+            <div className="max-w-md">
               {/* File upload components */}
-              <Upload
-                uploadType="pdf"
-                onSuccess={handlePdfUpload}
-                onRemove={handlePdfRemove}
-              />
               <Upload
                 uploadType="image"
                 onSuccess={handleThumbnailUpload}
                 onRemove={handleImageRemove}
               />
+              <input type="hidden" {...register("thumbnail")} />
             </div>
           </div>
 
+          {/* Document Details */}
           <div className="bg-neutral-100 rounded-2xl p-6 border border-gray-300">
             <h2 className="text-xl font-semibold text-neutral-700 mb-6 flex items-center gap-2">
               <AlignLeft className="w-5 h-5 text-blue-500" />
@@ -175,7 +214,9 @@ export const PDFUploadForm = () => {
                   label="Price (INR)"
                   type="text"
                   placeholder="0.00"
-                  register={register("price")}
+                  register={register("price", {
+                    valueAsNumber: true,
+                  })}
                   error={errors.price}
                 />
 
@@ -183,7 +224,7 @@ export const PDFUploadForm = () => {
                   name="topics"
                   label="Topics (comma-separated)"
                   type="text"
-                  placeholder="e.g., Programming, Web Development"
+                  placeholder="e.g., GP Rating, Shipping Updates"
                   register={register("topics", {
                     setValueAs: (value) =>
                       typeof value === "string"
@@ -204,11 +245,11 @@ export const PDFUploadForm = () => {
                   register={register("description")}
                   error={errors.description}
                 />
-                <input type="hidden" {...register("fileSize")} />
-                <input type="hidden" {...register("fileUrl")} />
-                <input type="hidden" {...register("thumbnail")} />
+                {/* <input type="hidden" {...register("fileUrl")} />
+                <input type="hidden" {...register("fileSize")} /> */}
               </div>
 
+              {/* Publish Toggle */}
               <div className="flex items-center justify-between p-4 bg-neutral-700 rounded-lg border border-gray-800">
                 <div>
                   <label className="text-sm font-medium text-gray-200">
@@ -233,7 +274,7 @@ export const PDFUploadForm = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting || !isUploadComplete}
+            disabled={isSubmitting}
             className="w-full py-3 px-6 rounded-lg bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 transition-all font-medium shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Publishing..." : "Publish Document"}
@@ -242,4 +283,4 @@ export const PDFUploadForm = () => {
       </div>
     </div>
   );
-};
+}
