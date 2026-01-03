@@ -29,7 +29,7 @@ export default function PDFs() {
     const fetchPdfs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/api/pdfs");
+        const response = await axios.get("/api/products");
         setPdfs(response.data.pdfs || []);
         setError(null);
       } catch (error) {

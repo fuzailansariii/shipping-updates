@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/utils/db";
-import { pdfs } from "@/utils/db/schema";
+import { products } from "@/utils/db/schema";
 import { isAdmin } from "@/lib/auth-helper";
 import { pdfSchemaProcessed } from "@/lib/validations/zod-schema";
 import { nanoid } from "nanoid";
@@ -16,7 +16,7 @@ export async function GET() {
       );
     }
 
-    const pdfData = await db.select().from(pdfs);
+    const pdfData = await db.select().from(products);
 
     return NextResponse.json({ success: true, pdfs: pdfData }, { status: 200 });
   } catch (error) {
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const pdfId = nanoid();
 
     const [newPdf] = await db
-      .insert(pdfs)
+      .insert(products)
       .values({
         id: pdfId,
         title: validateData.title,
