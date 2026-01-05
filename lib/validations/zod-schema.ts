@@ -95,15 +95,48 @@ export const productSchemaProcessed = productSchema.transform((data) => ({
    UPDATE SCHEMA
 ========================= */
 
-// Update Product Schema
-export const updateProductSchema = baseSchema.partial().extend({
-  author: z.string().optional(),
-  publisher: z.string().optional(),
-  isbn: z.string().optional(),
-  edition: z.string().optional(),
+export const baseUpdateFields = baseSchema.omit({ type: true }).partial();
+
+export const updateBookSchema = baseUpdateFields.extend({
+  type: z.literal("book"),
+  author: z.string().trim().optional(),
+  publisher: z.string().trim().optional(),
+  isbn: z.string().trim().optional(),
+  edition: z.string().trim().optional(),
+  stockQuantity: z.number().int().min(1).optional(),
+  // allowing these to be undefined for books
+  fileUrl: z.string().optional(),
+  fileSize: z.number().optional(),
+});
+
+export const updatePdfSchema = baseUpdateFields.extend({
+  type: z.literal("pdf"),
   fileUrl: z.url().optional(),
   fileSize: z.number().positive().optional(),
+  stockQuantity: z.literal(0).optional(),
+  // allowing these to be undefined for PDFs
+  author: z.string().trim().optional(),
+  publisher: z.string().trim().optional(),
+  isbn: z.string().trim().optional(),
+  edition: z.string().trim().optional(),
 });
+
+export const updateProductSchema = z.discriminatedUnion("type", [
+  updateBookSchema,
+  updatePdfSchema,
+]);
+
+// Converting price String --> Number in zod / Already doing it in route(PATCH) code
+// export const updateProductSchemaProcessed = updateProductSchema.transform(
+//   (data) => {
+//     const processed: any = { ...data };
+//     // Only process price if it exist
+//     if (data.price) {
+//       processed.price = parseFloat(data.price);
+//     }
+//     return processed;
+//   }
+// );
 
 /* =========================
    ORDER SCHEMA

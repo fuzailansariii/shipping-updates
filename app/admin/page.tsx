@@ -9,7 +9,7 @@ export default function Admin() {
   return (
     <>
       <PDFUploadForm />
-      {/* <EditPDFForm pdfId="pwLHqVjxYVKxG5VowNal3" /> */}
+      {/* <EditPDFForm productId="HvKNe-zGkB0U2R34YoJPn" /> */}
     </>
   );
 }
