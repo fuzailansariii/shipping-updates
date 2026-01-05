@@ -1,5 +1,9 @@
 import * as z from "zod";
 
+/* =========================
+   COMMON SCHEMA
+========================= */
+
 export const emailSchema = z.object({
   email: z.email("Please enter a valid email address"),
 });
@@ -11,40 +15,106 @@ export const otpSchema = z.object({
     .regex(/^\d+$/, "Code must only contain numbers"),
 });
 
-export const pdfSchema = z.object({
-  title: z.string().trim().min(1, "File name is requrired"),
+/* =========================
+   BASE SCHEMA
+========================= */
+
+export const baseSchema = z.object({
+  type: z.enum(["book", "pdf"], {
+    error: "Product type is required",
+  }),
+  title: z.string().trim().min(1, "Title is required"),
   description: z.string().trim().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
-  fileUrl: z.url(),
-  fileSize: z.number().positive(),
-  // pages: z.number().min(1),
-  topics: z.array(z.string().trim()).min(1, "At least one topic required"),
-  thumbnail: z.url().optional(),
+  topics: z.array(z.string().trim()).min(1, "At least 1 topic required"),
+  thumbnail: z.url(),
+  images: z.array(z.url()).default([]).optional(),
+  language: z.string().min(1),
   isActive: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
 });
 
-export const pdfSchemaProcessed = pdfSchema.extend({
-  price: z.number().positive("Price must be positive"),
-  isActive: z.boolean().default(true),
+/* =========================
+   BOOK SCHEMA
+========================= */
+
+export const bookSchema = baseSchema.extend({
+  type: z.literal("book"),
+
+  // Book-required fields
+  author: z.string().trim().min(1, "Author is required for Books"),
+  stockQuantity: z
+    .number()
+    .int()
+    .min(1, "Stock quantity must be at least 1 for Books"),
+
+  // Book Optional fields
+  publisher: z.string().trim().optional(),
+  isbn: z.string().trim().optional(),
+  edition: z.string().trim().optional(),
+
+  // PDF fields should be optional/nullable for books
+  fileUrl: z.string().optional(),
+  fileSize: z.number().optional(),
 });
 
-// Validation schema for update (doesn't include fileUrl and fileSize)
-export const updatePdfSchema = pdfSchemaProcessed
-  .pick({
-    title: true,
-    description: true,
-    price: true,
-    topics: true,
-    thumbnail: true,
-    isActive: true,
-  })
-  .partial();
+/* =========================
+   PDF SCHEMA
+========================= */
 
-export const purchaseSchema = z.object({
-  pdfId: z.string().min(1),
+export const pdfSchema = baseSchema.extend({
+  type: z.literal("pdf"), // Must be "pdf"
+
+  // PDF-required fields
+  fileUrl: z.url("Valid file URL is required for PDFs"),
+  fileSize: z.number().positive("File size is required for PDFs"),
+
+  // PDFs always have 0 stock (digital = unlimited)
+  stockQuantity: z.literal(0).optional(),
+
+  // Book fields should be optional for PDFs
+  author: z.string().optional(),
+  publisher: z.string().optional(),
+  isbn: z.string().optional(),
+  edition: z.string().optional(),
+});
+
+export const productSchema = z.discriminatedUnion("type", [
+  bookSchema,
+  pdfSchema,
+]);
+
+export const productSchemaProcessed = productSchema.transform((data) => ({
+  ...data,
+  price: parseFloat(data.price),
+  isActive: data.isActive ?? false,
+  isFeatured: data.isFeatured ?? false,
+}));
+
+/* =========================
+   UPDATE SCHEMA
+========================= */
+
+// Update Product Schema
+export const updateProductSchema = baseSchema.partial().extend({
+  author: z.string().optional(),
+  publisher: z.string().optional(),
+  isbn: z.string().optional(),
+  edition: z.string().optional(),
+  fileUrl: z.url().optional(),
+  fileSize: z.number().positive().optional(),
+});
+
+/* =========================
+   ORDER SCHEMA
+========================= */
+
+export const orderSchema = z.object({
+  productId: z.string().min(1),
   clerkUserId: z.string().min(1),
-  buyerEmail: z.email("Buyer email is required"),
+  buyerEmail: z.email("Valid Buyer email is required"),
   buyerName: z.string().min(1, "Buyer name is required"),
+  buyerPhone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits"),
   amount: z.number().positive(),
   razorpayOrderId: z.string().optional(),
   razorpayPaymentId: z.string().optional(),
@@ -52,6 +122,10 @@ export const purchaseSchema = z.object({
     .enum(["pending", "completed", "failed", "refunded"])
     .default("pending"),
 });
+
+/* =========================
+   MESSAGE SCHEMA
+========================= */
 
 export const contactSubjects = [
   "study_materials",
@@ -71,10 +145,17 @@ export const messageSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
 
+/* =========================
+   TYPES
+========================= */
+
+export type BookFormData = z.infer<typeof bookSchema>;
+export type PdfFormData = z.infer<typeof pdfSchema>;
+export type ProductFormData = z.infer<typeof productSchema>;
+export type ProductData = z.infer<typeof productSchemaProcessed>;
+export type UpdateProductData = z.infer<typeof updateProductSchema>;
+export type OrderData = z.infer<typeof orderSchema>;
+
 export type EmailFormData = z.infer<typeof emailSchema>;
 export type OTPFormData = z.infer<typeof otpSchema>;
-export type PDFFormData = z.infer<typeof pdfSchema>;
-export type PDFData = z.infer<typeof pdfSchemaProcessed>;
-export type UpdatePDFData = z.infer<typeof updatePdfSchema>;
-export type PurchaseData = z.infer<typeof purchaseSchema>;
 export type MessageData = z.infer<typeof messageSchema>;

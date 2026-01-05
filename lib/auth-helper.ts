@@ -1,5 +1,6 @@
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { ProductData } from "./validations/zod-schema";
 
 // check if the user is admin and return (true | false)
 export async function isAdmin(): Promise<boolean> {
@@ -59,4 +60,47 @@ export async function isAdminUser() {
     redirect("/");
   }
   return user;
+}
+
+// DB HELPER function
+export function buildProductValues(
+  productId: string,
+  validateData: ProductData
+) {
+  const baseValue = {
+    id: productId,
+    type: validateData.type,
+    title: validateData.title,
+    description: validateData.description,
+    price: validateData.price,
+    topics: validateData.topics,
+    thumbnail: validateData.thumbnail,
+    images: validateData.images ?? [],
+    stockQuantity: validateData.type === "pdf" ? 0 : validateData.stockQuantity,
+    language: validateData.language,
+    isActive: validateData.isActive ?? false,
+    isFeatured: validateData.isFeatured ?? false,
+  };
+
+  if (validateData.type === "book") {
+    return {
+      ...baseValue,
+      author: validateData.author,
+      publisher: validateData.publisher || null,
+      isbn: validateData.isbn || null,
+      edition: validateData.edition || null,
+      fileUrl: null,
+      fileSize: null,
+    };
+  } else {
+    return {
+      ...baseValue,
+      fileUrl: validateData.fileUrl,
+      fileSize: validateData.fileSize,
+      author: null,
+      publisher: null,
+      isbn: null,
+      edition: null,
+    };
+  }
 }

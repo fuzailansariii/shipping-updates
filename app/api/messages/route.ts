@@ -3,6 +3,7 @@ import { messageSchema } from "@/lib/validations/zod-schema";
 import { db } from "@/utils/db";
 import { contactMessages } from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
 
 export async function GET() {
   try {
@@ -38,5 +39,42 @@ export async function GET() {
 // POST Method to create message to the contactMessage Table
 export async function POST(request: NextRequest) {
   try {
-  } catch (error) {}
+    const body = await request.json();
+    const parsed = messageSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid Inputs", issue: parsed.error },
+        { status: 400 }
+      );
+    }
+    const messageId = nanoid();
+
+    const { email, message, name, subject } = parsed.data;
+
+    const [newMessage] = await db
+      .insert(contactMessages)
+      .values({
+        id: messageId,
+        email: email.trim(),
+        message: message.trim(),
+        name: name.trim(),
+        subject,
+      })
+      .returning();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Message created successfully",
+        data: newMessage,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error creating message", error);
+    return NextResponse.json(
+      { error: "Failed to create message" },
+      { status: 500 }
+    );
+  }
 }

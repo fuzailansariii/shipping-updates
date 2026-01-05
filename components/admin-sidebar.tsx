@@ -27,7 +27,7 @@ export default function AdminSidebar() {
 
   const menuList = [
     { icon: House, title: "Home", link: "/admin" },
-    { icon: FileText, title: "PDFs", link: "/admin/products" },
+    { icon: FileText, title: "Products", link: "/admin/products" },
     { icon: ShoppingCart, title: "Purchases", link: "/admin/purchases" },
     { icon: MessageCircleMore, title: "Messages", link: "/admin/messages" },
   ];

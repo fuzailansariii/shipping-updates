@@ -33,7 +33,7 @@ export const orderStatusEnum = pgEnum("order_status", [
 // ----------- PRODUCTS TABLE
 // ============================================
 export const products = pgTable("products", {
-  id: text("_id").primaryKey(),
+  id: text("id").primaryKey(),
   type: productTypeEnum("type").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -41,20 +41,20 @@ export const products = pgTable("products", {
   // pages: integer("pages"),
   topics: text("topics").array().notNull(),
   images: text("images").array().notNull().default([]),
-  thumbnail: text("thumbnail"),
+  thumbnail: text("thumbnail").notNull(),
   // weight: real("weight"),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   isbn: text("isbn"),
   publisher: text("publisher"),
-  author: text("auther"),
+  author: text("author"),
   edition: text("edition"),
-  language: text("english").notNull().default("English"),
+  language: text("language").notNull().default("English"),
 
   // Pdf Specified field(null for books)
   fileUrl: text("file_url"),
   fileSize: integer("file_size"),
   // pages: integer("pages").notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

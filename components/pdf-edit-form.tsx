@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   PDFFormData,
-  pdfSchema,
+  productschema,
   UpdatePDFData,
-  updatePdfSchema,
+  updateproductschema,
 } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -33,7 +33,7 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
     formState: { errors, isSubmitting },
     setValue,
   } = useForm<UpdatePDFData>({
-    resolver: zodResolver(updatePdfSchema),
+    resolver: zodResolver(updateproductschema),
     defaultValues: {
       title: "",
       description: "",
@@ -55,7 +55,7 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
   const fetchPDFData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/admin/pdfs/${pdfId}`);
+      const response = await axios.get(`/api/admin/products/${pdfId}`);
       const data = response.data.pdf;
 
       setValue("title", data.title);
@@ -115,7 +115,7 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
       //   isActive: data.isActive,
       // };
       console.log("Submitting data:", data);
-      const response = await axios.patch(`/api/admin/pdfs/${pdfId}`, data);
+      const response = await axios.patch(`/api/admin/products/${pdfId}`, data);
       if (response.data.success) {
         toast.success(response.data.message || "PDF updated successfully!");
       } else {

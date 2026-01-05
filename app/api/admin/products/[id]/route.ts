@@ -1,7 +1,7 @@
-import { isAdmin } from "@/lib/auth-helper";
-import { updatePdfSchema } from "@/lib/validations/zod-schema";
+import { buildProductValues, isAdmin } from "@/lib/auth-helper";
+import { updateProductSchema } from "@/lib/validations/zod-schema";
 import { db } from "@/utils/db";
-import { pdfs } from "@/utils/db/schema";
+import { products } from "@/utils/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,18 +19,27 @@ export async function GET(
       );
     }
 
-    const { id: pdfId } = await params;
+    const { id: productId } = await params;
 
-    const pdf = await db.select().from(pdfs).where(eq(pdfs.id, pdfId));
+    const product = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, productId));
 
-    if (!pdf.length) {
-      return NextResponse.json({ error: "PDF not found" }, { status: 404 });
+    if (!product.length) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, pdf: pdf[0] }, { status: 200 });
+    return NextResponse.json(
+      { success: true, product: product[0] },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error fetching PDF", error);
-    return NextResponse.json({ error: "Failed to fetch PDF" }, { status: 500 });
+    console.error("Error fetching product", error);
+    return NextResponse.json(
+      { error: "Failed to fetch product" },
+      { status: 500 }
+    );
   }
 }
 
@@ -48,10 +57,10 @@ export async function PATCH(
       );
     }
 
-    const { id: pdfId } = await params;
+    const { id: productId } = await params;
     const body = await request.json();
 
-    const parsed = updatePdfSchema.safeParse(body);
+    const parsed = updateProductSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -72,32 +81,33 @@ export async function PATCH(
     // only include fields that were provided
     const updateData = {
       ...validatedData,
+      price: Number(validatedData.price),
       updatedAt: new Date(),
     };
 
     // Update PDF
-    const updatedPdf = await db
-      .update(pdfs)
+    const updatedProduct = await db
+      .update(products)
       .set(updateData)
-      .where(eq(pdfs.id, pdfId))
+      .where(eq(products.id, productId))
       .returning();
 
-    if (!updatedPdf.length) {
-      return NextResponse.json({ error: "PDF not found" }, { status: 404 });
+    if (!updatedProduct.length) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "PDF Updated successfully",
-        pdf: updatedPdf[0],
+        message: "Product Updated successfully",
+        pdf: updatedProduct[0],
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error Updating PDF", error);
+    console.error("Error Updating Product", error);
     return NextResponse.json(
-      { error: "Failed to update PDF" },
+      { error: "Failed to update product" },
       { status: 500 }
     );
   }
@@ -118,28 +128,28 @@ export async function DELETE(
       );
     }
 
-    const { id: pdfId } = await params;
+    const { id: productId } = await params;
 
-    const deletePDF = await db
-      .delete(pdfs)
-      .where(eq(pdfs.id, pdfId))
+    const deleteProduct = await db
+      .delete(products)
+      .where(eq(products.id, productId))
       .returning();
 
-    if (!deletePDF.length) {
-      return NextResponse.json({ error: "PDF not found" }, { status: 404 });
+    if (!deleteProduct.length) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "PDF deleted successfully",
+        message: "Product deleted successfully",
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error Deleting PDF", error);
+    console.error("Error Deleting Product", error);
     return NextResponse.json(
-      { error: "Failed to delete PDF" },
+      { error: "Failed to delete Product" },
       { status: 500 }
     );
   }
