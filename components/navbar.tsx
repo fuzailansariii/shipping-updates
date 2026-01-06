@@ -1,12 +1,21 @@
 "use client";
 import logo from "@/public/su-logo.png";
 import { SignOutButton } from "@clerk/nextjs";
-import { ChevronDown, LogOut, Menu, Package, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  Menu,
+  Package,
+  ShoppingCart,
+  User,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
+import { useCartStore } from "@/stores/cart-store";
 
 interface NavbarProps {
   userId: string | null;
@@ -19,6 +28,9 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
   // const [authHovered, setAuthHovered] = useState<number | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cart Store
+  const { toggleCart, items } = useCartStore();
 
   const links = [
     { name: "Home", href: "/" },
@@ -128,7 +140,20 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
         </div>
 
         {/* Desktop Auth Menu */}
-        <motion.div className="text-base text-neutral-500 gap-2 hidden md:flex">
+        <motion.div className="text-base gap-2 hidden md:flex items-center">
+          <Button
+            variant="ghost"
+            aria-label="View cart"
+            className="cursor-pointer relative"
+            onClick={toggleCart} // ✅ Changed from setCartSidebarOpen
+          >
+            <ShoppingCart className="size-6" />
+            {items.length > 0 && ( // ✅ Add badge
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {items.length}
+              </span>
+            )}
+          </Button>
           {!userId ? (
             // Show Sign Up / Login buttons if not logged in
             authMenu.map((item, index) => (
@@ -150,7 +175,7 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
               <Button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 variant="secondary"
-                className="flex items-center gap-1 px-3 py-2 rounded-full font-nunito font-semibold hover:bg-neutral-200 transition-colors duration-300"
+                className="flex cursor-pointer items-center gap-1 px-3 py-2 rounded-full font-nunito font-semibold hover:bg-neutral-200 transition-colors duration-300"
               >
                 <User size={18} />
                 <span>Account</span>
@@ -203,39 +228,55 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
         </motion.div>
 
         {/* Mobile Menu Toggle */}
-        <motion.button
-          className="md:hidden mr-2 relative w-10 h-10 flex items-center justify-center"
-          onClick={() => setOpen(!open)}
-          whileTap={{ scale: 0.9 }}
+        <motion.div
+          className="md:hidden flex items-center gap-2 mr-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <X />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="menu"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Menu />
-              </motion.div>
+          <Button
+            variant="ghost"
+            aria-label="View cart"
+            className="cursor-pointer relative"
+            onClick={toggleCart} // ✅ Changed from setCartSidebarOpen
+          >
+            <ShoppingCart className="size-6" />
+            {items.length > 0 && ( // ✅ Add badge
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {items.length}
+              </span>
             )}
-          </AnimatePresence>
-        </motion.button>
+          </Button>
+          <motion.div
+            className="relative w-10 h-10 flex items-center justify-center"
+            onClick={() => setOpen(!open)}
+            whileTap={{ scale: 0.9 }}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {open ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
 
         {/* Mobile Menu Dropdown */}
         <AnimatePresence>

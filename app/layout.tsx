@@ -3,6 +3,7 @@ import { Lato, Nunito, Roboto } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
+import CartSidebar from "@/components/cart-sidebar";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -38,6 +39,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster position="top-center" />
+          <CartSidebar />
         </body>
       </html>
     </Providers>
