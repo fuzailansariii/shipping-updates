@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input-form";
 import { MessageData, messageSchema } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function Contact() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitted },
     reset,
   } = useForm<MessageData>({
     resolver: zodResolver(messageSchema),
@@ -24,9 +26,31 @@ export default function Contact() {
   });
 
   const onSubmit = async (data: MessageData) => {
-    console.log("Message Data", data);
-    // Add your submission logic here
-    reset(); // Reset form after successful submission
+    //TODO: Have to add rate limiting on server side later
+    try {
+      const response = await axios.post("/api/messages", data, {
+        timeout: 10000,
+      });
+      if (response.status === 201) {
+        toast.success("Message sent!", {
+          description:
+            "Thanks for contacting us. We will get back to you soon.",
+          classNames: {
+            description: "!text-gray-700",
+          },
+        });
+      }
+      reset(); // Reset form after successful submission
+    } catch (error) {
+      const err = error as AxiosError<{ error: string }>;
+
+      if (err.response) {
+        toast.error(err.response.data?.error ?? "Something went wrong");
+      } else {
+        toast.error("Network error. Please try again.");
+      }
+      console.error("Error submitting the form:", err);
+    }
   };
 
   return (

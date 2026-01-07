@@ -20,27 +20,27 @@ interface PDF {
   createdAt: string;
 }
 
-export default function PDFs() {
-  const [pdfs, setPdfs] = useState<PDF[]>([]);
+export default function Products() {
+  const [products, setProducts] = useState<PDF[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPdfs = async () => {
+    const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/api/pdfs");
-        setPdfs(response.data.pdfs || []);
+        const response = await axios.get("/api/products");
+        setProducts(response.data.products || []);
         setError(null);
       } catch (error) {
-        console.error("Error fetching PDFs:", error);
-        setError("Failed to load PDFs. Please try again later.");
+        console.error("Error fetching products:", error);
+        setError("Failed to load products. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPdfs();
+    fetchProducts();
   }, []);
 
   // Loading state
@@ -84,7 +84,7 @@ export default function PDFs() {
   }
 
   // Empty state
-  if (pdfs.length === 0) {
+  if (products.length === 0) {
     return (
       <Container>
         <div className="container mx-auto px-4 py-8">
@@ -118,7 +118,7 @@ export default function PDFs() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pdfs.map((pdf) => (
+          {products.map((pdf) => (
             <div
               key={pdf.id}
               className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"

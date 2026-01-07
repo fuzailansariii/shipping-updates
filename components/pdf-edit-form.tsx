@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  PDFFormData,
-  pdfSchema,
-  UpdatePDFData,
-  updatePdfSchema,
+  BookFormData,
+  PdfFormData,
+  UpdateProductData,
+  updateProductSchema,
 } from "@/lib/validations/zod-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -12,14 +12,19 @@ import { toast } from "sonner";
 import { AlignLeft, Loader2, UploadIcon } from "lucide-react";
 import Input from "./ui/input-form";
 import Upload from "./upload";
-// import { Image } from "@imagekit/next";
+
+type ProductType = "book" | "pdf";
 
 interface EditPDFFormProps {
-  pdfId: string;
-  initialData?: PDFFormData & { id: string };
+  productId: string;
+  initialData?: BookFormData | PdfFormData;
 }
 
-export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
+export default function EditPDFForm({
+  productId,
+  initialData,
+}: EditPDFFormProps) {
+  const [type, setType] = useState<ProductType>(initialData?.type || "book");
   const [hasImageUploaded, setHasImageUploaded] = useState(
     !!initialData?.thumbnail
   );
@@ -27,46 +32,62 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
   const [isLoading, setIsLoading] = useState(!initialData);
   const RATE_LIMIT_MS = 5000; // 5 seconds
 
+  const form = useForm<UpdateProductData>({
+    resolver: zodResolver(updateProductSchema),
+    defaultValues: {
+      type: type,
+    },
+  });
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
     setValue,
-  } = useForm<UpdatePDFData>({
-    resolver: zodResolver(updatePdfSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      price: undefined,
-      topics: [],
-      thumbnail: "",
-      isActive: false,
-    },
-  });
+    formState: { errors, isSubmitting },
+  } = form;
 
   //   fetch PDF data if not provided
   useEffect(() => {
     if (!initialData) {
       fetchPDFData();
     }
-  }, [pdfId, initialData]);
+  }, [productId, initialData]);
 
   // Fetch PDF data function
   const fetchPDFData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/admin/pdfs/${pdfId}`);
-      const data = response.data.pdf;
+      const response = await axios.get(`/api/admin/products/${productId}`);
+      const data = response.data.product;
 
-      setValue("title", data.title);
-      setValue("description", data.description);
-      setValue("price", data.price);
-      // setValue("fileUrl", data.fileUrl);
-      // setValue("fileSize", data.fileSize);
-      setValue("thumbnail", data.thumbnail);
-      setValue("topics", data.topics);
-      setValue("isActive", data.isActive);
+      const productType = data.type as ProductType;
+      setType(productType);
 
+      // Reset form with all data at once
+      form.reset({
+        type: productType,
+        title: data.title,
+        description: data.description,
+        price: String(data.price),
+        topics: data.topics,
+        language: data.language,
+        thumbnail: data.thumbnail,
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
+        ...(productType === "book"
+          ? {
+              author: data.author,
+              stockQuantity: data.stockQuantity,
+              publisher: data.publisher,
+              isbn: data.isbn,
+              edition: data.edition,
+            }
+          : {
+              fileUrl: data.fileUrl,
+              fileSize: data.fileSize,
+              stockQuantity: 0,
+            }),
+      });
       setHasImageUploaded(!!data.thumbnail);
     } catch (error) {
       toast.error("Failed to load PDF data");
@@ -90,7 +111,7 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
     toast.success("Thumbnail removed");
   };
 
-  const onSubmit = async (data: UpdatePDFData) => {
+  const onSubmit = async (data: UpdateProductData) => {
     // Rate Limiting
     const now = Date.now();
     if (now - lastSubmitTime < RATE_LIMIT_MS) {
@@ -105,17 +126,11 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
     setLastSubmitTime(now);
 
     try {
-      // Transform data for API (convert price to number)
-      // const updateData = {
-      //   title: data.title,
-      //   description: data.description,
-      //   price: Number(data.price), // Convert string to number for API
-      //   thumbnail: data.thumbnail,
-      //   topics: data.topics,
-      //   isActive: data.isActive,
-      // };
       console.log("Submitting data:", data);
-      const response = await axios.patch(`/api/admin/pdfs/${pdfId}`, data);
+      const response = await axios.patch(
+        `/api/admin/products/${productId}`,
+        data
+      );
       if (response.data.success) {
         toast.success(response.data.message || "PDF updated successfully!");
       } else {
@@ -133,8 +148,6 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
       console.error("Error updating PDF:", error);
     }
   };
-
-  // const currentThumbnail = watch("thumbnail");
 
   if (isLoading) {
     return (
@@ -156,7 +169,10 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
           </p>
         </div>
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            console.log("❌ FORM ERRORS", errors);
+            toast.error("Form validation failed");
+          })}
           className="space-y-8"
           aria-label="PDF upload form"
         >
@@ -166,20 +182,6 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
               Upload Files
             </h2>
 
-            {/* Current Thumbnail */}
-            {/* {currentThumbnail && (
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">Current Thumbnail:</p>
-                <Image
-                  src={currentThumbnail}
-                  alt="Current thumbnail"
-                  className="w-40 h-40 object-cover rounded-lg border border-gray-300"
-                  width={500}
-                  height={500}
-                  loading="eager"
-                />
-              </div>
-            )} */}
             <div className="max-w-md">
               {/* File upload components */}
               <Upload
@@ -214,9 +216,7 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
                   label="Price (INR)"
                   type="text"
                   placeholder="0.00"
-                  register={register("price", {
-                    valueAsNumber: true,
-                  })}
+                  register={register("price")}
                   error={errors.price}
                 />
 
@@ -245,29 +245,110 @@ export default function EditPDFForm({ pdfId, initialData }: EditPDFFormProps) {
                   register={register("description")}
                   error={errors.description}
                 />
-                {/* <input type="hidden" {...register("fileUrl")} />
-                <input type="hidden" {...register("fileSize")} /> */}
-              </div>
 
-              {/* Publish Toggle */}
-              <div className="flex items-center justify-between p-4 bg-neutral-700 rounded-lg border border-gray-800">
-                <div>
-                  <label className="text-sm font-medium text-gray-200">
-                    Publish Document
+                <Input
+                  type="text"
+                  name="language"
+                  placeholder="English"
+                  label="Language"
+                  register={register("language")}
+                  error={errors.language}
+                />
+
+                {/* Render inputs based on type */}
+                {type === "book" && (
+                  <>
+                    <Input
+                      type="text"
+                      name="author"
+                      label="Author"
+                      placeholder="3rd Officer - M. Hussain"
+                      register={register("author")}
+                      error={errors.author}
+                    />
+
+                    <Input
+                      type="text"
+                      name="stockQuantity"
+                      label="Stock Quantity"
+                      placeholder="50"
+                      register={register("stockQuantity", {
+                        valueAsNumber: true,
+                      })}
+                      error={errors.stockQuantity}
+                    />
+
+                    <Input
+                      type="text"
+                      name="publisher"
+                      label="Publisher"
+                      placeholder="M. Hussain"
+                      register={register("publisher")}
+                      error={errors.publisher}
+                    />
+
+                    <Input
+                      type="text"
+                      name="isbn"
+                      label="ISBN"
+                      placeholder="123-45-678-9"
+                      register={register("isbn")}
+                      error={errors.isbn}
+                    />
+
+                    <Input
+                      type="text"
+                      name="edition"
+                      label="Edition"
+                      placeholder="3rd Edition"
+                      register={register("edition")}
+                      error={errors.edition}
+                    />
+                  </>
+                )}
+
+                <input type="hidden" {...register("type")} />
+              </div>
+              {/* isActive, isFeatured Toggle */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center justify-between p-4 bg-neutral-700 rounded-lg border border-gray-800">
+                  <div>
+                    <label className="text-sm font-medium text-gray-200">
+                      Publish Document
+                    </label>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Make this document available for purchase
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      {...register("isActive")}
+                      className="sr-only peer"
+                      aria-label="Publish Document"
+                    />
+                    <div className="w-11 h-6 bg-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
                   </label>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Make this document available for purchase
-                  </p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    {...register("isActive")}
-                    className="sr-only peer"
-                    aria-label="Publish Document"
-                  />
-                  <div className="w-11 h-6 bg-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
+                <div className="flex items-center justify-between p-4 bg-neutral-700 rounded-lg border border-gray-800">
+                  <div>
+                    <label className="text-sm font-medium text-gray-200">
+                      Feature Document
+                    </label>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Highlight this document on the homepage
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      {...register("isFeatured")}
+                      className="sr-only peer"
+                      aria-label="Publish Document"
+                    />
+                    <div className="w-11 h-6 bg-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
+                  </label>
+                </div>
               </div>
             </div>
           </div>

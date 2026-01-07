@@ -77,7 +77,7 @@ const Upload = ({
         },
         folder: isPDFFile(file)
           ? "/shipping-updates/pdfs"
-          : "/shipping-updates/thumbnails",
+          : "/shipping-updates/images",
         tags: [uploadType],
       });
 
