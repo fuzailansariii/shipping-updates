@@ -14,7 +14,7 @@ export default function Home() {
   const { isSignedIn } = useUser();
 
   const weOffer = [
-    "PDF Study Materials",
+    "BOOK and PDF Study Materials",
     "Exam-Oriented Content",
     "Practical Maritime Knowledge",
     "YouTube Learning Support",
@@ -165,7 +165,7 @@ export default function Home() {
         <div className="mt-16 mb-12">
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-center">
             <div className="p-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">10+</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">15+</div>
               <div className="text-secondary-dark">
                 Years of Maritime Experience
               </div>

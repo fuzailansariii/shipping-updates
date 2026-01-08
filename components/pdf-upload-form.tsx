@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import Upload from "./upload";
 import {
-  productSchema,
   ProductFormData,
   BookFormData,
   bookSchema,

@@ -16,9 +16,10 @@ export const useCartStore = create<CartState & CartAction>()(
 
       // Action (function) leave empty for now
       addToCart: (product, quantity) => {
-        let result:
-          | { success: true; message: string }
-          | { success: false; message: string };
+        let result: { success: boolean; message: string } = {
+          success: false,
+          message: "Unknown error",
+        };
 
         set((state) => {
           const existingItem = state.items.find(
@@ -37,22 +38,18 @@ export const useCartStore = create<CartState & CartAction>()(
           //   If book exists, update quantity
           if (existingItem) {
             const newQuantity = existingItem.quantity + quantity;
+            // Check if exceeds max stock
             if (product.maxStock && newQuantity > product.maxStock) {
-              if (
-                product.type === "book" &&
-                product.maxStock &&
-                newQuantity > product.maxStock
-              )
-                result = {
-                  success: false,
-                  message: `Only ${product.maxStock} items available in stock. You already have ${existingItem.quantity} in cart.`,
-                };
+              result = {
+                success: false,
+                message: `Only ${product.maxStock} items available in stock. You already have ${existingItem.quantity} in cart.`,
+              };
               return state;
             }
 
             result = {
               success: true,
-              message: "Cart updated",
+              message: `Updated ${product.title} quantity to ${newQuantity}`,
             };
 
             return {
@@ -93,7 +90,7 @@ export const useCartStore = create<CartState & CartAction>()(
           };
         });
         get().calculateTotal();
-        return result!;
+        return result;
       },
 
       // Remove the item from cart
