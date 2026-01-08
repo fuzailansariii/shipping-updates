@@ -17,8 +17,16 @@ export interface CartState {
   isOpen: boolean;
 }
 
+export interface CartResult {
+  success: boolean;
+  message: string;
+}
+
 export interface CartAction {
-  addToCart: (product: Omit<CartItem, "quantity">, quantity: number) => void;
+  addToCart: (
+    product: Omit<CartItem, "quantity">,
+    quantity: number
+  ) => CartResult;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
