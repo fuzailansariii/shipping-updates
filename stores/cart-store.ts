@@ -16,6 +16,11 @@ export const useCartStore = create<CartState & CartAction>()(
 
       // Action (function) leave empty for now
       addToCart: (product, quantity) => {
+        let result: { success: boolean; message: string } = {
+          success: false,
+          message: "Unknown error",
+        };
+
         set((state) => {
           const existingItem = state.items.find(
             (item) => item.productId === product.productId
@@ -23,24 +28,29 @@ export const useCartStore = create<CartState & CartAction>()(
 
           // If PDF already exists
           if (existingItem && product.type === "pdf") {
-            toast.error("You already have this PDF in your cart");
+            result = {
+              success: false,
+              message: "You already have this PDF in your cart",
+            };
             return state;
           }
 
           //   If book exists, update quantity
           if (existingItem) {
             const newQuantity = existingItem.quantity + quantity;
+            // Check if exceeds max stock
             if (product.maxStock && newQuantity > product.maxStock) {
-              if (
-                product.type === "book" &&
-                product.maxStock &&
-                newQuantity > product.maxStock
-              )
-                toast.error(
-                  `Only ${product.maxStock} items available in stock. You already have ${existingItem.quantity} in cart.`
-                );
+              result = {
+                success: false,
+                message: `Only ${product.maxStock} items available in stock. You already have ${existingItem.quantity} in cart.`,
+              };
               return state;
             }
+
+            result = {
+              success: true,
+              message: `Updated ${product.title} quantity to ${newQuantity}`,
+            };
 
             return {
               items: state.items.map((item) =>
@@ -57,21 +67,30 @@ export const useCartStore = create<CartState & CartAction>()(
             product.maxStock &&
             quantity > product.maxStock
           ) {
-            toast.error(`Only ${product.maxStock} items available in stock`);
+            result = {
+              success: false,
+              message: `Only ${product.maxStock} items available in stock`,
+            };
             return state;
           }
 
-          //   Add new item
+          //   Add New Item
+          result = {
+            success: true,
+            message: `${product.title} added to cart`,
+          };
+
           const newItem: CartItem = {
             ...product,
             quantity: product.type === "pdf" ? 1 : quantity,
           };
-          toast.success(`${product.title} added to cart!`);
+
           return {
             items: [...state.items, newItem],
           };
         });
         get().calculateTotal();
+        return result;
       },
 
       // Remove the item from cart

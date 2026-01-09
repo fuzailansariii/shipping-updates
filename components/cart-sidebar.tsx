@@ -1,16 +1,26 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { useCartStore } from "@/stores/cart-store"; // Fixed import path
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 // TODO: Add navigation to checkout page
 // TODO: Fix UI Later
 
 export default function CartSidebar() {
-  const { isOpen, closeCart, items, subTotal, tax, shipping, total } =
-    useCartStore(); // Added price values
+  const {
+    isOpen,
+    closeCart,
+    items,
+    subTotal,
+    tax,
+    shipping,
+    total,
+    removeFromCart,
+  } = useCartStore(); // Added price values
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -44,7 +54,7 @@ export default function CartSidebar() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-60 flex flex-col"
+            className="fixed inset-y-0 right-0 w-full md:w-lg bg-white shadow-2xl z-60 flex flex-col"
             // Changed z-50 to z-[60]
           >
             {/* Header */}
@@ -75,23 +85,33 @@ export default function CartSidebar() {
                   {items.map((item) => (
                     <div
                       key={item.productId}
-                      className="flex gap-3 p-3 border border-neutral-200 rounded-lg"
+                      className="flex justify-between  p-2 border border-neutral-200 rounded-lg"
                     >
-                      <img
-                        src={item.thumbnail}
-                        alt={item.title}
-                        className="w-20 h-20 object-cover rounded"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm line-clamp-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-neutral-600 text-sm">
-                          ₹{item.price} × {item.quantity}
-                        </p>
-                        <p className="font-semibold text-blue-600">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </p>
+                      <div className="flex gap-3">
+                        <img
+                          src={item.thumbnail}
+                          alt={item.title}
+                          className="w-20 h-20 object-cover rounded"
+                        />
+                        <div className=" max-w-[50%]">
+                          <h3 className="font-semibold text-sm line-clamp-2">
+                            {item.title}
+                          </h3>
+                          <p className="text-neutral-600 text-sm">
+                            ₹{item.price} × {item.quantity}
+                          </p>
+                          <p className="font-semibold text-blue-600">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Button
+                          variant={"destructive"}
+                          onClick={() => removeFromCart(item.productId)}
+                        >
+                          <Trash2 />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -131,22 +151,25 @@ export default function CartSidebar() {
                   </div>
                 </div>
 
-                <button
+                <Button
+                  asChild
                   onClick={() => {
                     // TODO: Navigate to checkout
                     closeCart();
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
                 >
-                  Proceed to Checkout
-                </button>
+                  <Link href={"/checkout"}>Proceed to Checkout</Link>
+                </Button>
 
-                <button
+                <Button
+                  asChild
                   onClick={closeCart}
-                  className="w-full border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-semibold py-2 rounded-lg transition-colors"
+                  variant={"outline"}
+                  className="w-full"
                 >
-                  Continue Shopping
-                </button>
+                  <Link href={"/products"}>Continue Shopping</Link>
+                </Button>
               </div>
             )}
           </motion.div>

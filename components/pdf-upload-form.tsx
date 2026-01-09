@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import Upload from "./upload";
 import {
-  productSchema,
   ProductFormData,
   BookFormData,
   bookSchema,
@@ -207,8 +206,8 @@ export const PDFUploadForm = () => {
             <div className="relative flex w-52 rounded-full bg-gray-200 h-11">
               {/* Sliding Indicator */}
               <div
-                className={`absolute top-1 left-1 h-9 w-[100px] rounded-full bg-white shadow transition-transform duration-300 ${
-                  type === "book" ? "translate-x-[100px]" : ""
+                className={`absolute top-1 left-1 h-9 w-25 rounded-full bg-white shadow transition-transform duration-300 ${
+                  type === "book" ? "translate-x-25" : ""
                 }`}
               />
 
@@ -305,7 +304,7 @@ export const PDFUploadForm = () => {
                   name="topics"
                   label="Topics (comma-separated)"
                   type="text"
-                  placeholder="e.g., Programming, Web Development"
+                  placeholder="e.g., GP Rating, IMU CET"
                   register={register("topics", {
                     setValueAs: (value) =>
                       typeof value === "string"
@@ -322,7 +321,9 @@ export const PDFUploadForm = () => {
                   as="textarea"
                   name="description"
                   label="Description"
-                  placeholder="Provide a detailed description of your PDF content..."
+                  placeholder={`Provide a detailed description of your ${
+                    type === "book" ? "Book" : "PDF"
+                  } content...`}
                   register={register("description")}
                   error={errors.description}
                 />
@@ -342,7 +343,7 @@ export const PDFUploadForm = () => {
                       type="text"
                       name="author"
                       label="Author"
-                      placeholder="3rd Officer - M. Hussain"
+                      placeholder="2nd Officer - M. Hussain"
                       register={register("author")}
                       error={errors.author}
                     />

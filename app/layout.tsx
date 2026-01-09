@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import CartSidebar from "@/components/cart-sidebar";
+import ProfileModal from "@/components/profile-modal";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -37,6 +38,7 @@ export default function RootLayout({
         <body
           className={`${lato.variable} ${roboto.variable} ${nunito.variable} antialiased`}
         >
+          <ProfileModal />
           {children}
           <Toaster position="top-center" />
           <CartSidebar />
