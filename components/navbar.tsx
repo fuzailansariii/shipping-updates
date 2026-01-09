@@ -16,10 +16,18 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { useCartStore } from "@/stores/cart-store";
+import { useProfileStore } from "@/stores/profile-store";
 
 interface NavbarProps {
   userId: string | null;
   isAdmin: boolean;
+}
+
+interface DropdownProp {
+  name: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  href?: string;
+  action?: string;
 }
 
 export default function Navbar({ userId, isAdmin }: NavbarProps) {
@@ -29,9 +37,9 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cart Store
+  // Store
   const { toggleCart, items } = useCartStore();
-
+  const { openProfile } = useProfileStore();
   const links = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -39,9 +47,9 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
     { name: "Contact", href: "/contact" },
   ];
 
-  const dropdownLinks = userId
+  const dropdownLinks: DropdownProp[] = userId
     ? [
-        { name: "Profile", icon: User, href: "/profile" },
+        { name: "Profile", icon: User, action: "profile" },
         {
           name: isAdmin ? "Admin Dashboard" : "My Purchases",
           icon: Package,
@@ -99,7 +107,7 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
 
   return (
     <div className="relative">
-      <nav className="flex justify-between bg-linear-to-r from-blue-50 to-neutral-50 fixed inset-x-0 top-0 md:mt-2 z-50 md:rounded-full mx-auto items-center max-w-5xl border border-neutral-200 p-2">
+      <nav className="flex justify-between bg-linear-to-r from-blue-50 to-neutral-50 fixed inset-x-0 top-0 md:mt-2 z-30 md:rounded-full mx-auto items-center max-w-5xl border border-neutral-200 p-2">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -145,10 +153,10 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
             variant="ghost"
             aria-label="View cart"
             className="cursor-pointer relative"
-            onClick={toggleCart} // ✅ Changed from setCartSidebarOpen
+            onClick={toggleCart}
           >
             <ShoppingCart className="size-6" />
-            {items.length > 0 && ( // ✅ Add badge
+            {items.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                 {items.length}
               </span>
@@ -199,25 +207,39 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
                     {dropdownLinks.map((item, idx) => (
                       <div key={idx}>
                         {item.action === "signout" ? (
+                          // Sign Out Button
                           <SignOutButton redirectUrl="/">
                             <button
                               onClick={() => setDropdownOpen(false)}
                               className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors text-left"
                             >
-                              <item.icon size={18} />
+                              <item.icon className="size-4.5" />
                               <span>{item.name}</span>
                             </button>
                           </SignOutButton>
-                        ) : (
+                        ) : item.action === "profile" ? (
+                          // Profile Button
+                          <button
+                            onClick={() => {
+                              openProfile(); 
+                              setDropdownOpen(false); 
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-neutral-700 hover:bg-neutral-100 transition-colors text-left"
+                          >
+                            <item.icon className="size-4.5" />
+                            <span>{item.name}</span>
+                          </button>
+                        ) : item.href ? (
+                          // Regular Links (My Purchases, Admin Dashboard)
                           <Link
-                            href={item.href!}
+                            href={item.href}
                             onClick={() => setDropdownOpen(false)}
                             className="flex items-center gap-3 px-4 py-2 text-neutral-700 hover:bg-neutral-100 transition-colors"
                           >
-                            <item.icon size={18} />
+                            <item.icon className="size-4.5" />
                             <span>{item.name}</span>
                           </Link>
-                        )}
+                        ) : null}
                       </div>
                     ))}
                   </motion.div>
@@ -238,10 +260,10 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
             variant="ghost"
             aria-label="View cart"
             className="cursor-pointer relative"
-            onClick={toggleCart} // ✅ Changed from setCartSidebarOpen
+            onClick={toggleCart} 
           >
             <ShoppingCart className="size-6" />
-            {items.length > 0 && ( // ✅ Add badge
+            {items.length > 0 && ( 
               <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                 {items.length}
               </span>
@@ -325,7 +347,17 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
                             <p>{item.name}</p>
                           </button>
                         </SignOutButton>
-                      ) : (
+                      ) : item.action === "profile" ? (
+                        <button
+                          className="flex items-center pl-0 gap-3 text-2xl"
+                          onClick={() => {
+                            openProfile();
+                            setOpen(false);
+                          }}
+                        >
+                          <p>{item.name}</p>
+                        </button>
+                      ) : item.href ? (
                         <Link
                           href={item.href!}
                           onClick={() => setOpen(false)}
@@ -334,7 +366,7 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
                           {/* <item.icon size={20} /> */}
                           <p>{item.name}</p>
                         </Link>
-                      )}
+                      ) : null}
                     </motion.div>
                   ))}
               </div>
