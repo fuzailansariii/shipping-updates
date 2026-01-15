@@ -5,11 +5,31 @@ import { useEffect, useState } from "react";
 import { Image } from "@imagekit/next";
 import Container from "@/components/container";
 import { Button } from "@/components/ui/button";
-import { File, AlertCircle, Minus, Plus } from "lucide-react";
+import {
+  File,
+  AlertCircle,
+  Minus,
+  Plus,
+  Edit,
+  ShoppingCart,
+  Trash2,
+  Check,
+  Clock,
+  Shield,
+  Loader2,
+  FileText,
+  BookOpen,
+  Zap,
+  Bell,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/stores/cart-store";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useUserRole } from "@/lib/hooks/useUserRole";
+import { useProductModalStore } from "@/stores/product-store";
+import { formatFileSize } from "@/utils/pdf-helper";
 
 interface Product {
   type: "book" | "pdf";
@@ -30,15 +50,13 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check if Admin
+  const { isAdmin, isLoaded } = useUserRole();
   const router = useRouter();
 
-  // Cart functionality
-  const {
-    items,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-  } = useCartStore();
+  // stores
+  const { items, addToCart, removeFromCart, updateQuantity } = useCartStore();
+  const { openProductModal } = useProductModalStore();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,13 +76,11 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-  };
-
   const handleAddToCart = (product: Product) => {
+    if (isAdmin) {
+      toast.error("Admin Cannot Add Products To Cart");
+      return;
+    }
     const result = addToCart(
       {
         productId: product.id,
@@ -82,6 +98,10 @@ export default function Products() {
   };
 
   const handleBuyNow = (product: Product) => {
+    if (isAdmin) {
+      toast.error("Admins cannot purchase products");
+      return;
+    }
     handleAddToCart(product);
 
     router.push("/checkout");
@@ -92,17 +112,57 @@ export default function Products() {
     return (
       <Container>
         <div className="container mx-auto px-4 py-8">
+          {/* Header Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="h-8 bg-gray-200 rounded-lg w-48 mb-2" />
+            <div className="h-4 bg-gray-200 rounded-lg w-96" />
+          </div>
+
+          {/* Product Cards Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <motion.div
                 key={i}
-                className="border rounded-lg p-4 animate-pulse bg-white"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
               >
-                <div className="bg-gray-300 h-40 rounded mb-4" />
-                <div className="bg-gray-300 h-6 rounded mb-2" />
-                <div className="bg-gray-300 h-4 rounded mb-4" />
-                <div className="bg-gray-300 h-10 rounded" />
-              </div>
+                {/* Image skeleton */}
+                <div className="aspect-6/4 bg-linear-to-br from-gray-100 to-gray-200 animate-pulse" />
+
+                {/* Content skeleton */}
+                <div className="p-5 space-y-3">
+                  {/* Badge skeleton */}
+                  <div className="h-3 bg-gray-200 rounded-full w-20 animate-pulse" />
+
+                  {/* Title skeleton */}
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded-lg w-full animate-pulse" />
+                    <div className="h-4 bg-gray-200 rounded-lg w-3/4 animate-pulse" />
+                  </div>
+
+                  {/* Description skeleton */}
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-100 rounded w-full animate-pulse" />
+                    <div className="h-3 bg-gray-100 rounded w-5/6 animate-pulse" />
+                  </div>
+
+                  {/* Topics skeleton */}
+                  <div className="flex gap-2">
+                    <div className="h-3 bg-gray-100 rounded-md w-16 animate-pulse" />
+                    <div className="h-3 bg-gray-100 rounded-md w-20 animate-pulse" />
+                    <div className="h-3 bg-gray-100 rounded-md w-12 animate-pulse" />
+                  </div>
+
+                  {/* Price & button skeleton */}
+                  <div className="pt-4 space-y-3">
+                    <div className="h-6 bg-gray-200 rounded-lg w-24 animate-pulse" />
+                    <div className="h-7 bg-gray-200 rounded-lg w-full animate-pulse" />
+                    <div className="h-7 bg-gray-200 rounded-lg w-full animate-pulse" />
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -114,23 +174,127 @@ export default function Products() {
   if (error) {
     return (
       <Container>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
-          <p className="text-red-600 font-semibold">{error}</p>
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            {/* Error Icon with animation */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative inline-flex mb-6"
+            >
+              <div className="absolute inset-0 bg-red-100 rounded-full blur-xl opacity-50" />
+              <div className="relative bg-linear-to-br from-red-50 to-red-100 p-6 rounded-full">
+                <AlertCircle
+                  className="text-red-500"
+                  size={64}
+                  strokeWidth={1.5}
+                />
+              </div>
+            </motion.div>
+
+            {/* Error Message */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Oops! Something went wrong
+            </h2>
+            <p className="text-gray-600 mb-6 leading-relaxed">{error}</p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/")}
+              >
+                Go Home
+              </Button>
+            </div>
+
+            {/* Help text */}
+            <p className="text-sm text-gray-500 mt-6">
+              If the problem persists, please{" "}
+              <a href="/contact" className="text-blue-600 hover:underline">
+                contact support
+              </a>
+            </p>
+          </div>
         </div>
       </Container>
     );
   }
 
-  /* ---------------- EMPTY ---------------- */
+  /* ---------------- EMPTY STATE ---------------- */
   if (products.length === 0) {
     return (
       <Container>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <File className="mx-auto text-gray-400 mb-4" size={64} />
-          <p className="text-gray-600 font-semibold">
-            No study materials available.
-          </p>
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            {/* Empty Icon with animation */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative inline-flex mb-6"
+            >
+              <div className="absolute inset-0 bg-blue-100 rounded-full blur-2xl opacity-30" />
+              <div className="relative bg-linear-to-br from-blue-50 to-indigo-50 p-8 rounded-full">
+                <BookOpen
+                  className="text-blue-500"
+                  size={72}
+                  strokeWidth={1.5}
+                />
+              </div>
+            </motion.div>
+
+            {/* Empty Message */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              No Study Materials Yet
+            </h2>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              We're working hard to bring you the best shipping exam preparation
+              materials. Check back soon for updates!
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+              <Button
+                onClick={() => window.location.reload()}
+                variant="default"
+                className="inline-flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/")}
+              >
+                Go Home
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                Want to be notified when we add new materials?
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => (window.location.href = "/contact")}
+                className="inline-flex items-center gap-2"
+              >
+                <Bell className="w-4 h-4" />
+                Get Notified
+              </Button>
+            </div>
+          </div>
         </div>
       </Container>
     );
@@ -139,102 +303,205 @@ export default function Products() {
   /* ---------------- MAIN ---------------- */
   return (
     <Container>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Study Materials</h1>
+      <div className="container mx-auto px-4 py-2">
+        <h1 className="text-2xl md:text-3xl font-bold mb-8">Study Materials</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {products.map((product) => {
-            // Get the cart item
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {products.map((product, idx) => {
             const cartItem = items.find(
               (item) => item.productId === product.id
             );
+
             return (
-              <div
+              <motion.div
                 key={product.id}
-                className="border flex flex-col rounded-lg overflow-hidden bg-white hover:shadow-lg transition-shadow"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -10 }}
+                transition={{ duration: 0.1 }}
+                className="group relative flex flex-col bg-white rounded-2xl border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
-                {/* -------- TOP SECTION -------- */}
-                <div>
-                  <div className="relative bg-gray-100 h-36">
-                    {product.thumbnail ? (
+                {/* -------- IMAGE SECTION -------- */}
+                <div
+                  onClick={() => openProductModal(product)}
+                  className="relative aspect-6/4 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden"
+                >
+                  {product.thumbnail ? (
+                    <>
                       <Image
                         urlEndpoint={product.thumbnail}
                         src={product.thumbnail}
                         alt={product.title}
                         fill
-                        className="object-contain"
+                        priority
+                        className="object-cover h-full w-full group-hover:scale-105 transition-transform duration-200"
                       />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        <File size={48} />
-                      </div>
-                    )}
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <File
+                        size={56}
+                        className="text-gray-300"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+                  )}
 
+                  {/* Type Badge */}
+                  <div className="absolute top-3 left-3">
                     <span
-                      className={`absolute top-2 left-2 px-3 py-1 rounded-full text-white text-xs font-semibold ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm ${
                         product.type === "book"
-                          ? "bg-purple-500"
-                          : "bg-blue-500"
+                          ? "bg-purple-500/90 text-white"
+                          : "bg-blue-500/90 text-white"
                       }`}
                     >
-                      {product.type === "book" ? "Book" : "PDF"}
+                      {product.type === "book" ? (
+                        <>
+                          <BookOpen size={14} />
+                          Book
+                        </>
+                      ) : (
+                        <>
+                          <FileText size={14} />
+                          PDF
+                        </>
+                      )}
                     </span>
                   </div>
 
-                  <div className="p-4 gap-2">
-                    <h3 className="font-bold text-base mb-2 line-clamp-2">
+                  {/* Stock/Active Status Badge */}
+                  {!product.isActive ? (
+                    <div className="absolute top-3 right-3">
+                      <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-500/90 text-white backdrop-blur-sm">
+                        Coming Soon
+                      </span>
+                    </div>
+                  ) : (
+                    product.type === "book" &&
+                    product.stockQuantity !== undefined &&
+                    product.stockQuantity <= 5 && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-orange-500/90 text-white backdrop-blur-sm">
+                          Only {product.stockQuantity} left
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+
+                {/* -------- CONTENT SECTION -------- */}
+                <div className="flex flex-col flex-1 p-5">
+                  {/* Title */}
+                  <h2 className="font-bold text-lg mb-1 font-lato text-gray-900 line-clamp-2">
+                    <span
+                      onClick={() => openProductModal(product)}
+                      className="inline cursor-pointer hover:text-blue-600 transition-colors"
+                    >
                       {product.title}
-                    </h3>
+                    </span>
+                  </h2>
 
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm font-roboto mb-1 line-clamp-2 leading-relaxed">
+                    {product.description}
+                  </p>
 
-                    {product.topics?.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {product.topics.slice(0, 3).map((topic, idx) => (
-                          <span
-                            key={idx}
-                            className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                          >
-                            {topic}
-                          </span>
-                        ))}
-                        {product.topics.length > 3 && (
-                          <span className="text-xs text-gray-500 py-1">
-                            +{product.topics.length - 3} more
-                          </span>
+                  {/* Topics */}
+                  {product.topics?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3 font-nunito">
+                      {product.topics.slice(0, 3).map((topic, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                      {product.topics.length > 3 && (
+                        <span className="inline-flex items-center px-2.5 py-1 text-xs text-gray-500 font-medium">
+                          +{product.topics.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Spacer to push actions to bottom */}
+                  <div className="flex-1" />
+
+                  {/* -------- PRICE & FILE SIZE -------- */}
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+                    <div>
+                      <div className="text-2xl font-bold text-green-700">
+                        ₹{product.price.toFixed(2)}
+                      </div>
+                      {product.type === "book" &&
+                        product.stockQuantity !== undefined && (
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {product.stockQuantity > 0
+                              ? "In Stock"
+                              : "Out of Stock"}
+                          </div>
                         )}
+                    </div>
+
+                    {product.fileSize && (
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500">File Size</div>
+                        <div className="text-sm font-medium text-gray-700">
+                          {formatFileSize(product.fileSize)}
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* -------- BOTTOM SECTION (FIXED) -------- */}
-                <div className="p-4 pt-0 mt-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-green-600">
-                      ₹{product.price.toFixed(2)}
-                    </span>
-
-                    {product.fileSize && (
-                      <span className="text-sm text-gray-500">
-                        {formatFileSize(product.fileSize)}
-                      </span>
-                    )}
-                  </div>
-
-                  {product.isActive ? (
-                    <div className="flex flex-col gap-2">
+                  {/* -------- ACTIONS -------- */}
+                  {!isLoaded ? (
+                    <Button disabled className="w-full">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </Button>
+                  ) : isAdmin ? (
+                    // ========== ADMIN VIEW ==========
+                    <div className="space-y-2">
+                      <div className="flex justify-center items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                        <Shield className="w-4 h-4 text-amber-600 shrink-0" />
+                        <p className="text-xs text-amber-800 font-medium font-roboto">
+                          Admin accounts cannot purchase
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full group/btn"
+                        onClick={() =>
+                          (window.location.href = `/admin/products/${product.id}/edit`)
+                        }
+                      >
+                        <Edit className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform" />
+                        Edit Product
+                      </Button>
+                    </div>
+                  ) : !product.isActive ? (
+                    // ========== INACTIVE PRODUCT ==========
+                    <Button disabled className="w-full" variant="secondary">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Coming Soon
+                    </Button>
+                  ) : (
+                    // ========== USER VIEW ==========
+                    <div className="space-y-2">
+                      {/* Cart Controls */}
                       {cartItem && product.type === "book" ? (
-                        // Quantity controls for books already in cart
+                        // Book quantity controls
                         <motion.div
-                          className="flex items-center justify-center gap-3"
-                          initial={{ x: 100 }}
-                          animate={{ x: 0 }}
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="flex items-center justify-between p-2 rounded-lg border-2 border-blue-200 bg-blue-50"
                         >
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={() =>
                               updateQuantity(
@@ -242,63 +509,75 @@ export default function Products() {
                                 cartItem.quantity - 1
                               )
                             }
+                            className="h-9 w-9 p-0 hover:bg-blue-100"
                           >
-                            <Minus />
+                            <Minus className="w-4 h-4" />
                           </Button>
 
-                          <span className="font-medium min-w-7.5 text-center">
-                            {cartItem.quantity}
-                          </span>
+                          <div className="text-center px-3">
+                            <div className="text-sm font-bold text-gray-900">
+                              {cartItem.quantity}
+                            </div>
+                            <div className="text-xs text-gray-500">in cart</div>
+                          </div>
 
                           <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => handleAddToCart(product)}
+                            className="h-9 w-9 p-0 hover:bg-blue-100"
                           >
-                            <Plus />
+                            <Plus className="w-4 h-4" />
                           </Button>
                         </motion.div>
                       ) : cartItem && product.type === "pdf" ? (
-                        // PDF already in cart - show message
+                        // PDF in cart
                         <motion.div
-                          initial={{ x: 100 }}
-                          animate={{ x: 0 }}
-                          className="flex items-center gap-2 w-full justify-evenly"
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="flex items-center gap-2"
                         >
-                          <Button variant="secondary" disabled className="">
+                          <Button
+                            variant="secondary"
+                            disabled
+                            className="flex-1"
+                          >
+                            <Check className="w-4 h-4 mr-2" />
                             In Cart
                           </Button>
                           <Button
-                            variant={"outline"}
+                            variant="outline"
+                            size="icon"
                             onClick={() => removeFromCart(product.id)}
+                            className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                           >
-                            <Minus />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </motion.div>
                       ) : (
-                        // Not in cart - show add button
+                        // Add to cart
                         <Button
-                          onClick={() => handleAddToCart(product)}
                           variant="outline"
-                          className="w-full"
+                          className="w-full group/btn"
+                          onClick={() => handleAddToCart(product)}
                         >
+                          <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
                           Add to Cart
                         </Button>
                       )}
 
+                      {/* Buy Now Button */}
                       <Button
-                        className="w-full"
+                        className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-sm"
                         onClick={() => handleBuyNow(product)}
                       >
+                        <Zap className="w-4 h-4 mr-2" />
                         Buy Now
                       </Button>
                     </div>
-                  ) : (
-                    <Button disabled className="w-full">
-                      Coming Soon
-                    </Button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

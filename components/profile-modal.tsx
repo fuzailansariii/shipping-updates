@@ -87,7 +87,10 @@ export default function ProfileModal() {
 
               {/* Actions */}
               <div className="mt-5 flex items-center gap-3">
-                <Button variant={"default"} className="rounded-full w-1/3 bg-black text-white hover:bg-black/90">
+                <Button
+                  variant={"default"}
+                  className="rounded-full w-1/3 bg-black text-white hover:bg-black/90"
+                >
                   My Orders
                 </Button>
 
