@@ -16,7 +16,6 @@ import {
   Check,
   Clock,
   Shield,
-  Loader2,
   FileText,
   BookOpen,
   Zap,
@@ -30,20 +29,7 @@ import { useRouter } from "next/navigation";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { useProductModalStore } from "@/stores/product-store";
 import { formatFileSize } from "@/utils/pdf-helper";
-
-interface Product {
-  type: "book" | "pdf";
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  fileSize?: number;
-  topics: string[];
-  thumbnail: string | null;
-  stockQuantity?: number;
-  isActive: boolean;
-  createdAt: string;
-}
+import { Product } from "@/utils/db/schema";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -51,7 +37,7 @@ export default function Products() {
   const [error, setError] = useState<string | null>(null);
 
   // Check if Admin
-  const { isAdmin, isLoaded } = useUserRole();
+  const { isAdmin } = useUserRole();
   const router = useRouter();
 
   // stores
@@ -458,12 +444,7 @@ export default function Products() {
                   </div>
 
                   {/* -------- ACTIONS -------- */}
-                  {!isLoaded ? (
-                    <Button disabled className="w-full">
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Loading...
-                    </Button>
-                  ) : isAdmin ? (
+                  {isAdmin ? (
                     // ========== ADMIN VIEW ==========
                     <div className="space-y-2">
                       <div className="flex justify-center items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">

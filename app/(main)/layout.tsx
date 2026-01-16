@@ -1,6 +1,5 @@
 import Footer from "@/components/footer";
 import NavbarWrapper from "@/components/navbar-wrapper";
-// import ProductModal from "@/components/product-modal";
 import React from "react";
 
 export default function MainLayout({
@@ -13,7 +12,6 @@ export default function MainLayout({
       <NavbarWrapper />
       {children}
       <Footer />
-      {/* <ProductModal /> */}
     </div>
   );
 }

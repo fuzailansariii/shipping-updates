@@ -126,7 +126,6 @@ export default function EditPDFForm({
     setLastSubmitTime(now);
 
     try {
-      console.log("Submitting data:", data);
       const response = await axios.patch(
         `/api/admin/products/${productId}`,
         data
@@ -170,7 +169,6 @@ export default function EditPDFForm({
         </div>
         <form
           onSubmit={handleSubmit(onSubmit, (errors) => {
-            console.log("❌ FORM ERRORS", errors);
             toast.error("Form validation failed");
           })}
           className="space-y-8"

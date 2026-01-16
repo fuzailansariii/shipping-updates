@@ -1,22 +1,5 @@
+import { Product } from "@/utils/db/schema";
 import { create } from "zustand";
-
-interface Product {
-  type: "book" | "pdf";
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  fileSize?: number;
-  topics: string[];
-  thumbnail: string | null;
-  stockQuantity?: number;
-  isbn?: string;
-  publisher?: string;
-  author?: string;
-  edition?: string;
-  language?: string;
-  isActive: boolean;
-}
 
 interface ProductModalStore {
   isProductModalOpen: boolean;
