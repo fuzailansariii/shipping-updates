@@ -56,12 +56,9 @@ export default function SignUp() {
     }
     try {
       const cleanCode = code.trim();
-      // console.log("Attempting verification with code:", cleanCode);
-      // console.log("Current signUp status:", signUp.status);
       const attemptSignUp = await signUp.attemptEmailAddressVerification({
         code: cleanCode,
       });
-      // console.log("Verification attempt result:", attemptSignUp.status);
       if (attemptSignUp.status === "complete") {
         if (!setActive) {
           throw new Error("Unable to set active session");

@@ -1,6 +1,9 @@
 // Format bytes to human-readable file size
-export const formatFileSize = (bytes: number): string => {
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+export const formatFileSize = (size: number): string => {
+  if (size >= 1024) {
+    return `${(size / 1024).toFixed(2)} MB`;
+  }
+  return `${size.toFixed(2)} KB`;
 };
 
 // Parse comma-separated topics string into array

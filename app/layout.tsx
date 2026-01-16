@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import CartSidebar from "@/components/cart-sidebar";
 import ProfileModal from "@/components/profile-modal";
+import ProductModal from "@/components/product-modal";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -42,6 +43,7 @@ export default function RootLayout({
           {children}
           <Toaster position="top-center" />
           <CartSidebar />
+          <ProductModal />
         </body>
       </html>
     </Providers>

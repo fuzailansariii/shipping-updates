@@ -23,6 +23,7 @@ export async function GET() {
         stockQuantity: products.stockQuantity,
         language: products.language,
         isFeatured: products.isFeatured,
+        edition: products.edition,
       })
       .from(products)
       .where(eq(products.isActive, true)); // Only show active Products

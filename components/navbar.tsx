@@ -149,19 +149,21 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
 
         {/* Desktop Auth Menu */}
         <motion.div className="text-base gap-2 hidden md:flex items-center">
-          <Button
-            variant="ghost"
-            aria-label="View cart"
-            className="cursor-pointer relative"
-            onClick={toggleCart}
-          >
-            <ShoppingCart className="size-6" />
-            {items.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {items.length}
-              </span>
-            )}
-          </Button>
+          {!isAdmin ? (
+            <Button
+              variant="ghost"
+              aria-label="View cart"
+              className="cursor-pointer relative"
+              onClick={toggleCart}
+            >
+              <ShoppingCart className="size-6" />
+              {items.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {items.length}
+                </span>
+              )}
+            </Button>
+          ) : null}
           {!userId ? (
             // Show Sign Up / Login buttons if not logged in
             authMenu.map((item, index) => (
@@ -221,8 +223,8 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
                           // Profile Button
                           <button
                             onClick={() => {
-                              openProfile(); 
-                              setDropdownOpen(false); 
+                              openProfile();
+                              setDropdownOpen(false);
                             }}
                             className="w-full flex items-center gap-3 px-4 py-2 text-neutral-700 hover:bg-neutral-100 transition-colors text-left"
                           >
@@ -256,19 +258,21 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Button
-            variant="ghost"
-            aria-label="View cart"
-            className="cursor-pointer relative"
-            onClick={toggleCart} 
-          >
-            <ShoppingCart className="size-6" />
-            {items.length > 0 && ( 
-              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {items.length}
-              </span>
-            )}
-          </Button>
+          {!isAdmin ? (
+            <Button
+              variant="ghost"
+              aria-label="View cart"
+              className="cursor-pointer relative"
+              onClick={toggleCart}
+            >
+              <ShoppingCart className="size-6" />
+              {items.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {items.length}
+                </span>
+              )}
+            </Button>
+          ) : null}
           <motion.div
             className="relative w-10 h-10 flex items-center justify-center"
             onClick={() => setOpen(!open)}
