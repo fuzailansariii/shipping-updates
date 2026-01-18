@@ -126,35 +126,94 @@ export const updateProductSchema = z.discriminatedUnion("type", [
   updatePdfSchema,
 ]);
 
-// Converting price String --> Number in zod / Already doing it in route(PATCH) code
-// export const updateProductSchemaProcessed = updateProductSchema.transform(
-//   (data) => {
-//     const processed: any = { ...data };
-//     // Only process price if it exist
-//     if (data.price) {
-//       processed.price = parseFloat(data.price);
-//     }
-//     return processed;
-//   }
-// );
-
 /* =========================
-   ORDER SCHEMA
+   ORDER-ITEM SCHEMA
 ========================= */
 
-export const orderSchema = z.object({
+export const orderItemSchema = z.object({
   productId: z.string().min(1),
-  clerkUserId: z.string().min(1),
-  buyerEmail: z.email("Valid Buyer email is required"),
-  buyerName: z.string().min(1, "Buyer name is required"),
-  buyerPhone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits"),
-  amount: z.number().positive(),
+  productType: z.enum(["book", "pdf"]),
+  productTitle: z.string().min(1),
+  quantity: z.number().int().positive(),
+  unitPrice: z.number().positive(),
+  totalPrice: z.number().positive(),
+});
+
+export type OrderItemInput = z.infer<typeof orderItemSchema>;
+
+/* =========================
+   ADDRESS SCHEMA
+========================= */
+
+export const addressSchema = z.object({
+  id: z.string().optional(),
+  clerkUserId: z.string().min(1, "UserID is required"),
+  fullName: z.string().min(1, "FullName is requried"),
+  phone: z
+    .string()
+    .regex(/^\d{10}$/, "Phone must be exactly 10 digits")
+    .transform((val) => val.trim()),
+  addressLine1: z.string().min(5, "Address is requires").max(200),
+  addressLine2: z.string().max(200).optional(),
+  city: z.string().min(2, "City is required").max(100),
+  state: z.string().min(2, "State is required").max(100),
+  pincode: z
+    .string()
+    .regex(/^\d{6}/, "Pin-Code must be exactly 6 digits")
+    .transform((val) => val.trim()),
+  landmark: z.string().max(200).optional(),
+  isDefault: z.boolean().default(false),
+});
+
+export type AddressInput = z.infer<typeof addressSchema>;
+
+/* =========================
+   Checkout SCHEMA
+========================= */
+export const checkoutSchema = z.object({
+  clerkUserId: z.string().min(1, "UserID is required"),
+  buyerEmail: z.string().min(1, "Buyer email is required"),
+  buyerName: z.string().min(1, "Buyer Name is required"),
+  buyerPhone: z
+    .string()
+    .regex(/^\d{10}$/, "Phone must be exactly 10 digits")
+    .transform((val) => val.trim()),
+  shippingAddress: z.string().min(10, "Shipping Address is required"),
+  billingAddress: z.string().optional(), // Defaults to shipping if not provided
+  items: z
+    .array(orderItemSchema)
+    .min(1, "At least one item is required in the order"),
+  subTotal: z.number().positive("Sub Total must be Positive"),
+  shippingCharges: z.number().min(0).default(0),
+  tax: z.number().min(0).default(0),
+  discount: z.number().min(0).default(0),
+  totalAmount: z.number().positive("Total amount must be positive"),
+  paymentMethod: z.enum(["razorpay", "cod"]).default("razorpay"),
+  // Payment updates optional for now
   razorpayOrderId: z.string().optional(),
   razorpayPaymentId: z.string().optional(),
   paymentStatus: z
     .enum(["pending", "completed", "failed", "refunded"])
     .default("pending"),
+  notes: z.string().max(500).optional(),
 });
+
+export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+/* =========================
+   PAYMENT VERIFICATION SCHEMA
+========================= */
+
+export const paymentVerificationSchema = z.object({
+  orderId: z.string().min(1),
+  razorpayOrderId: z.string().min(1),
+  razorpayPaymentId: z.string().min(1),
+  razorpaySignature: z.string().min(1),
+});
+
+export type PaymentVerificationInput = z.infer<
+  typeof paymentVerificationSchema
+>;
 
 /* =========================
    MESSAGE SCHEMA
@@ -187,8 +246,6 @@ export type PdfFormData = z.infer<typeof pdfSchema>;
 export type ProductFormData = z.infer<typeof productSchema>;
 export type ProductData = z.infer<typeof productSchemaProcessed>;
 export type UpdateProductData = z.infer<typeof updateProductSchema>;
-export type OrderData = z.infer<typeof orderSchema>;
-
 export type EmailFormData = z.infer<typeof emailSchema>;
 export type OTPFormData = z.infer<typeof otpSchema>;
 export type MessageData = z.infer<typeof messageSchema>;

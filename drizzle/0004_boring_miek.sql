@@ -3,6 +3,22 @@ CREATE TYPE "public"."order_status" AS ENUM('pending', 'confirmed', 'packed', 's
 CREATE TYPE "public"."payment_method" AS ENUM('online', 'cod');--> statement-breakpoint
 CREATE TYPE "public"."payment_status" AS ENUM('pending', 'completed', 'failed', 'refunded');--> statement-breakpoint
 CREATE TYPE "public"."product_type" AS ENUM('book', 'pdf');--> statement-breakpoint
+CREATE TABLE "addresses" (
+	"id" text PRIMARY KEY NOT NULL,
+	"clerk_user_id" text NOT NULL,
+	"fullname" text NOT NULL,
+	"phone" text NOT NULL,
+	"address_line_1" text NOT NULL,
+	"address_line_2" text,
+	"city" text NOT NULL,
+	"state" text NOT NULL,
+	"pincode" text NOT NULL,
+	"landmark" text,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "contact_messages" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -69,28 +85,28 @@ CREATE TABLE "orders" (
 );
 --> statement-breakpoint
 CREATE TABLE "products" (
-	"_id" text PRIMARY KEY NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"type" "product_type" NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
 	"price" real NOT NULL,
 	"topics" text[] NOT NULL,
 	"images" text[] DEFAULT '{}' NOT NULL,
-	"thumbnail" text,
+	"thumbnail" text NOT NULL,
 	"stock_quantity" integer DEFAULT 0 NOT NULL,
 	"isbn" text,
 	"publisher" text,
-	"auther" text,
+	"author" text,
 	"edition" text,
-	"english" text DEFAULT 'English' NOT NULL,
+	"language" text DEFAULT 'English' NOT NULL,
 	"file_url" text,
 	"file_size" integer,
-	"is_active" boolean DEFAULT true NOT NULL,
+	"is_active" boolean DEFAULT false NOT NULL,
 	"is_featured" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "inventory_logs" ADD CONSTRAINT "inventory_logs_product_id_products__id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "inventory_logs" ADD CONSTRAINT "inventory_logs_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products__id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("_id") ON DELETE restrict ON UPDATE no action;
+ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE restrict ON UPDATE no action;
