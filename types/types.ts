@@ -27,36 +27,16 @@ export interface Product {
 // Address
 export interface Address {
   id: string;
+  clerkUserId: string;
   fullName: string;
   phone: string;
   addressLine1: string;
-  addressLine2?: string;
+  addressLine2: string | null;
   city: string;
   state: string;
   pincode: string;
-  landmark?: string;
-  isDefault?: boolean;
-}
-
-// Checkout
-export interface CheckoutStore {
-  step: 1 | 2 | 3 | 4;
-
-  // address
-  savedAddresses: Address[];
-  shippingAddress: Address | null;
-
-  //   order
-  orderId: string | null;
-
-  //   ui state
-  loading: boolean;
-  error: string | null;
-
-  //   actions
-  setStep: (step: 1 | 2 | 3 | 4) => void;
-  setShippingAddress: (address: Address) => void;
-  setSavedAddresses: (addresses: Address[]) => void;
-  createOrder: (orderData: unknown) => Promise<void>;
-  reset: () => void;
+  landmark: string | null;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

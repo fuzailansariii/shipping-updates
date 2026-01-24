@@ -39,11 +39,11 @@ export function calculateOrderTotals(items: CartItem[]) {
   const totalAmount = subTotal + shippingCharges + tax;
 
   return {
-    subTotal: parseFloat(subTotal.toFixed()),
-    shippingCharge: parseFloat(shippingCharges.toFixed()),
-    tax: parseFloat(tax.toFixed()),
+    subTotal: parseFloat(subTotal.toFixed(2)),
+    shippingCharge: parseFloat(shippingCharges.toFixed(2)),
+    tax: parseFloat(tax.toFixed(2)),
     discount: 0,
-    totalAmount: parseFloat(totalAmount.toFixed()),
+    totalAmount: parseFloat(totalAmount.toFixed(2)),
   };
 }
 
@@ -67,7 +67,7 @@ interface Address {
   addressLine2?: string;
   city: string;
   state: string;
-  pinCode: string;
+  pincode: string;
   landmark?: string;
 }
 export function formatAddressForStorage(address: Address) {
@@ -78,7 +78,7 @@ export function formatAddressForStorage(address: Address) {
     address.addressLine2,
     address.city,
     address.state,
-    address.pinCode,
+    address.pincode,
     address.landmark,
   ].filter(Boolean); // Remove empty values
   return parts.join(", ");
