@@ -21,7 +21,7 @@ export function calculateOrderTotals(items: CartItem[]) {
   //   Calulation of subtotal
   const subTotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   //   Shipping charge
@@ -87,7 +87,7 @@ export function formatAddressForStorage(address: Address) {
 // Validate Stock availability
 export async function validateStockAvailability(
   items: CartItem[],
-  db: DB
+  db: DB,
 ): Promise<{ isValid: boolean; errors: string[] }> {
   const errors: string[] = [];
 
@@ -119,3 +119,12 @@ export async function validateStockAvailability(
     errors,
   };
 }
+
+export const formatPrice = (amount: number) => {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};

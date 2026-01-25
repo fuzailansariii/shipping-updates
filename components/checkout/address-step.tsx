@@ -6,12 +6,14 @@ import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import { useAddresses } from "@/lib/hooks/use-addresses";
 import { AddressInput, addressSchema } from "@/lib/validations/zod-schema";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "../ui/input-form";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 
 export default function AddressStep() {
+  const [checked, setChecked] = useState(false);
   const { user } = useUser();
   const { items } = useCartStore();
   const {
@@ -35,6 +37,7 @@ export default function AddressStep() {
   const {
     handleSubmit,
     register,
+    control,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<AddressInput>({
@@ -111,89 +114,93 @@ export default function AddressStep() {
         </div>
 
         {/* Address Cards Container */}
-        <div className="w-full ring-1 ring-indigo-500/80 bg-primary-dark/10 p-4 rounded-lg">
-          {/* Loading State */}
-          {isLoading && !hasAddress && (
-            <div className="text-center py-8 text-gray-500">
-              Loading addresses...
-            </div>
-          )}
+        {!showAddForm && (
+          <div className="w-full max-w-xl border border-gray-200 bg-white rounded-xl p-5 shadow-sm">
+            {/* Loading State */}
+            {isLoading && (
+              <div className="text-center py-8 text-gray-500">
+                Loading addresses...
+              </div>
+            )}
 
-          {/* No Addresses - Show Button */}
-          {!isLoading && !hasAddress && !showAddForm && (
-            <div className="text-center py-6">
-              <p className="text-gray-600 mb-4">No saved addresses yet</p>
-              <Button onClick={() => setShowAddForm(true)}>
-                + Add Your First Address
-              </Button>
-            </div>
-          )}
+            {/* No Addresses - Show Button */}
+            {!isLoading && !hasAddress && !showAddForm && (
+              <div className="text-center py-6">
+                <p className="text-gray-500 mb-4 text-sm">
+                  No saved addresses yet
+                </p>
+                <Button onClick={() => setShowAddForm(true)}>
+                  + Add Your First Address
+                </Button>
+              </div>
+            )}
 
-          {/* Saved Addresses List */}
-          {!isLoading && hasAddress && !showAddForm && (
-            <div className="space-y-3">
-              {addresses.map((address) => (
-                <div
-                  key={address.id}
-                  onClick={() => handleSelectAddress(address)}
-                  className={`border rounded-lg p-4 cursor-pointer transition ${
-                    selectedAddress?.id === address.id
-                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600"
-                      : "border-gray-300 hover:border-blue-400"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900">
-                          {address?.fullName}
-                        </h3>
-                        {address.isDefault && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                            Default
-                          </span>
+            {/* Saved Addresses List */}
+            {!isLoading && hasAddress && !showAddForm && (
+              <div className="space-y-3">
+                {addresses.map((address) => (
+                  <div
+                    key={address.id}
+                    onClick={() => handleSelectAddress(address)}
+                    className={`border rounded-lg p-4 cursor-pointer transition ${
+                      selectedAddress?.id === address.id
+                        ? "border-blue-600 bg-blue-50 shadow-sm"
+                        : "border-gray-300 hover:border-blue-400"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-gray-900">
+                            {address?.fullName}
+                          </h3>
+                          {address.isDefault && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-1">
+                          {address.phone}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          {address.addressLine1}
+                          {address.addressLine2 && `, ${address.addressLine2}`}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          {address.landmark && `${address.landmark}, `}
+                          {address.city}, {address.state} - {address.pincode}
+                        </p>
+                      </div>
+                      <div>
+                        {selectedAddress?.id === address.id && (
+                          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-4 h-4 text-white"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mb-1">
-                        {address.phone}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {address.addressLine1}
-                        {address.addressLine2 && `, ${address.addressLine2}`}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {address.landmark && `${address.landmark}, `}
-                        {address.city}, {address.state} - {address.pincode}
-                      </p>
-                    </div>
-                    <div>
-                      {selectedAddress?.id === address?.id && (
-                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Add Address Form */}
       {showAddForm && (
-        <div className="w-full max-w-3xl ring-1 ring-indigo-500/80 bg-primary-dark/10 p-6 rounded-lg">
+        <div className="w-full max-w-xl border border-gray-200 bg-white rounded-xl px-3 py-5 md:p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
               {hasAddress ? "Add New Address" : "Add Your First Address"}
@@ -296,11 +303,16 @@ export default function AddressStep() {
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                {...register("isDefault")}
-                type="checkbox"
-                id="isDefault"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              <Controller
+                name="isDefault"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isDefault"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
               />
               <label htmlFor="isDefault" className="text-sm text-gray-700">
                 Set as default address
@@ -320,19 +332,20 @@ export default function AddressStep() {
 
       {/* Billing Address Section */}
       {selectedAddress && (
-        <div className="w-full max-w-xl ring-1 ring-indigo-500/80 bg-primary-dark/10 p-4 rounded-lg">
+        <div
+          className="w-full max-w-xl border border-gray-200 bg-white p-4 rounded-xl shadow-sm
+"
+        >
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             Billing Address
           </h2>
 
           {/* Same as shipping checkbox */}
           <div className="flex items-center gap-2 mb-4">
-            <input
-              type="checkbox"
+            <Checkbox
               id="sameAddress"
               checked={useSameAddressForBilling}
-              onChange={toggleSameAddressForBilling}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              onCheckedChange={toggleSameAddressForBilling}
             />
             <label htmlFor="sameAddress" className="text-sm text-gray-700">
               Same as Shipping Address
@@ -349,7 +362,7 @@ export default function AddressStep() {
                   className={`border rounded-lg p-4 cursor-pointer transition ${
                     billingAddress?.id === address?.id
                       ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600"
-                      : "border-gray-300 hover:border-blue-400"
+                      : "border border-gray-200 hover:border-blue-500 hover:bg-blue-50/40"
                   }`}
                 >
                   <div className="flex items-start justify-between">
