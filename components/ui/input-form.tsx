@@ -33,7 +33,7 @@ export function Input(props: InputProps) {
   const { label, name, error, register, className, as = "input" } = props;
 
   const renderInput = () => {
-    const baseClassName = `w-full px-2 pb-1.5 font-semibold text-base font-nunito tracking-tight rounded focus:outline-none bg-transparent ${
+    const baseClassName = `w-full px-2 py-1 rounded-xl font-medium text-base font-lato tracking-tight rounded focus:outline-none bg-transparent ${
       error ? "border-red-500" : ""
     } ${className || ""}`;
 
@@ -73,7 +73,7 @@ export function Input(props: InputProps) {
   };
 
   return (
-    <div className="space-y-1 flex flex-col w-full max-w-3xl border-gray-300 border rounded-3xl p-2 bg-white">
+    <div className="flex flex-col w-full max-w-3xl border-gray-300 border rounded-xl p-1 bg-white">
       {label && (
         <label
           htmlFor={name}

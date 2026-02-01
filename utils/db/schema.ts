@@ -18,7 +18,7 @@ export const paymentStatusEnum = pgEnum("payment_status", [
 
 export const productTypeEnum = pgEnum("product_type", ["book", "pdf"]);
 
-export const paymentMethodEnum = pgEnum("payment_method", ["online", "cod"]);
+export const paymentMethodEnum = pgEnum("payment_method", ["razorpay", "cod"]);
 
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
@@ -28,6 +28,29 @@ export const orderStatusEnum = pgEnum("order_status", [
   "delivered",
   "failed",
 ]);
+
+// ============================================
+// ----------- ADDRESSES TABLE
+// ============================================
+
+export const addresses = pgTable("addresses", {
+  id: text("id").primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull(),
+  fullName: text("fullname").notNull(),
+  phone: text("phone").notNull(),
+  addressLine1: text("address_line_1").notNull(),
+  addressLine2: text("address_line_2"),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  pincode: text("pincode").notNull(),
+  landmark: text("landmark"),
+  isDefault: boolean("is_default").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
 
 // ============================================
 // ----------- PRODUCTS TABLE
@@ -211,9 +234,21 @@ export const inventoryRelations = relations(inventoryLogs, ({ one }) => ({
   }),
 }));
 
+// one address can have multiple orders
+export const addressesRelations = relations(addresses, ({ many }) => ({
+  orders: many(orders),
+}));
+// one order can have multiple order items
+export const orderRelations = relations(orders, ({ many }) => ({
+  items: many(orderItems),
+}));
+
 // ============================================
 // ----------- TYPES FOR TYPESCRIPT
 // ============================================
+
+export type Address = typeof addresses.$inferSelect;
+export type NewAddress = typeof addresses.$inferInsert;
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 

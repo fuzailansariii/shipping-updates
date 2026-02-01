@@ -127,7 +127,7 @@ export default function Contact() {
               error={errors.message}
               as="textarea"
               name="message-textarea"
-              className="w-full min-h-[150px] md:min-h-[200px]"
+              className="w-full min-h-37.5 md:min-h-50"
             />
           </div>
 

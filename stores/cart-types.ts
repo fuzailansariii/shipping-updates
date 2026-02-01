@@ -25,7 +25,7 @@ export interface CartResult {
 export interface CartAction {
   addToCart: (
     product: Omit<CartItem, "quantity">,
-    quantity: number
+    quantity: number,
   ) => CartResult;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;

@@ -3,24 +3,17 @@
   "dialect": "postgresql",
   "entries": [
     {
-      "idx": 0,
+      "idx": 3,
       "version": "7",
-      "when": 1767434805181,
-      "tag": "0000_lyrical_sunspot",
+      "when": 1768667798041,
+      "tag": "0003_illegal_gunslinger",
       "breakpoints": true
     },
     {
-      "idx": 1,
+      "idx": 4,
       "version": "7",
-      "when": 1767539806894,
-      "tag": "0001_sour_paibok",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1767542195382,
-      "tag": "0002_bouncy_hellion",
+      "when": 1768668428206,
+      "tag": "0004_boring_miek",
       "breakpoints": true
     }
   ]
