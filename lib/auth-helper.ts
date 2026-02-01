@@ -35,7 +35,6 @@ export async function getCurrentUser() {
 }
 
 // get userId (clerk userId)
-
 export async function currentUserId() {
   const { userId } = await auth();
   return userId;
@@ -65,7 +64,7 @@ export async function isAdminUser() {
 // DB HELPER function
 export function buildProductValues(
   productId: string,
-  validateData: ProductData
+  validateData: ProductData,
 ) {
   const baseValue = {
     id: productId,
