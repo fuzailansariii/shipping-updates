@@ -1,69 +1,133 @@
-import { checkoutSchema } from "@/lib/validations/zod-schema";
+import { calculatePricing } from "@/lib/pricing";
+import { checkoutSchema } from "@/lib/validations/order.schema";
 import { db } from "@/utils/db";
 import { generateOrderId } from "@/utils/db/order-id";
-import { orderItems, orders, products } from "@/utils/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { inventoryLogs, orderItems, orders, products } from "@/utils/db/schema";
+import { eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
+import { requireAuth } from "@/lib/auth-helper";
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await requireAuth();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
     const body = await req.json();
     const parsedData = checkoutSchema.safeParse(body);
+
     if (!parsedData.success) {
       return NextResponse.json(
-        { error: z.treeifyError(parsedData.error) },
-        { status: 400 }
+        { success: false, error: parsedData.error.flatten() },
+        { status: 400 },
       );
     }
 
     const {
-      clerkUserId,
       buyerEmail,
       buyerName,
       buyerPhone,
-      discount,
       items,
-      paymentMethod,
-      paymentStatus,
       shippingAddress,
-      shippingCharges,
-      subTotal,
-      tax,
-      totalAmount,
       billingAddress,
       notes,
-      //   razorpayOrderId,
-      //   razorpayPaymentId,
     } = parsedData.data;
+
+    if (!items || items.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Cart is empty" },
+        { status: 400 },
+      );
+    }
 
     const orderId = nanoid();
     const orderNumber = generateOrderId();
     const now = new Date();
 
-    // Start a transaction (if using Drizzle's transaction API)
-    // This ensures both order and orderItems are created together
     try {
-      await db.transaction(async (tx) => {
-        // insert Orders
+      const result = await db.transaction(async (tx) => {
+        const productIds = items.map((item) => item.productId);
+
+        const dbProducts = await tx
+          .select()
+          .from(products)
+          .where(inArray(products.id, productIds));
+
+        if (dbProducts.length !== productIds.length) {
+          throw new Error("Some products not found");
+        }
+
+        const productMap = new Map(
+          dbProducts.map((product) => [product.id, product]),
+        );
+
+        // Build safe order items
+        const safeOrderItems = items.map((item) => {
+          const product = productMap.get(item.productId);
+
+          if (!product) {
+            throw new Error("Product not found");
+          }
+
+          if (
+            product.type === "book" &&
+            product.stockQuantity < item.quantity
+          ) {
+            throw new Error(`Not enough stock for ${product.title}`);
+          }
+          if (!product.isActive) {
+            throw new Error(`${product.title} is not available`);
+          }
+
+          const unitPrice = product.price;
+          const totalPrice = unitPrice * item.quantity;
+
+          return {
+            id: nanoid(),
+            orderId,
+            productId: product.id,
+            productType: product.type,
+            productTitle: product.title,
+            quantity: item.quantity,
+            unitPrice,
+            totalPrice,
+            downloadCount: 0,
+            maxDownloads: product.type === "pdf" ? 3 : 0,
+            createdAt: now,
+          };
+        });
+
+        //  calculatePricing (same as preview endpoint)
+        const pricingInput = safeOrderItems.map((item) => ({
+          price: item.unitPrice,
+          quantity: item.quantity,
+          type: item.productType,
+        }));
+
+        const pricing = calculatePricing(pricingInput);
+
+        // Insert order with calculated pricing
         await tx.insert(orders).values({
           id: orderId,
-          clerkUserId,
+          clerkUserId: user.id,
           orderNumber,
           buyerEmail,
           buyerName,
           buyerPhone,
-          subTotal,
-          tax,
-          shippingCharges,
-          totalAmount,
+          subTotal: pricing.subTotal,
+          tax: pricing.tax,
+          shippingCharges: pricing.shippingCharges,
+          totalAmount: pricing.totalAmount,
           shippingAddress,
           billingAddress: billingAddress || shippingAddress,
-          paymentMethod: paymentMethod || "online",
-          discount,
-          paymentStatus: paymentStatus || "pending",
-          orderStatus: "pending", // Initial status
+          paymentMethod: "razorpay",
+          paymentStatus: "pending",
+          orderStatus: "pending",
           awbNumber: null,
           courierPartner: null,
           shippedAt: null,
@@ -75,60 +139,80 @@ export async function POST(req: NextRequest) {
           updatedAt: now,
         });
 
-        // Prepare OrderItemsData
-        const orderItemsData = items.map((item) => ({
-          id: nanoid(),
-          orderId,
-          productId: item.productId,
-          productType: item.productType,
-          productTitle: item.productTitle,
-          quantity: item.quantity,
-          totalPrice: item.totalPrice,
-          unitPrice: item.unitPrice,
-          downloadCount: 0,
-          maxDownloads: item.productType === "pdf" ? 3 : 0,
-          createdAt: now,
-        }));
+        // insert order items
+        await tx.insert(orderItems).values(safeOrderItems);
 
-        // Insert OrderItems
-        await tx.insert(orderItems).values(orderItemsData);
-        //   Reduce stock quantity for physical books.
-        for (const item of items) {
+        // Stock deduction
+        for (const item of safeOrderItems) {
           if (item.productType === "book") {
-            await tx
+            // current stock before update
+            const [currentProduct] = await tx
+              .select({ stockQuantity: products.stockQuantity })
+              .from(products)
+              .where(eq(products.id, item.productId));
+
+            const previousStock = currentProduct.stockQuantity;
+            const newStock = previousStock - item.quantity;
+            const updated = await tx
               .update(products)
               .set({
                 stockQuantity: sql`${products.stockQuantity} - ${item.quantity}`,
               })
-              .where(eq(products.id, item.productId));
+              .where(
+                sql`${products.id} = ${item.productId}
+                    AND ${products.stockQuantity} >= ${item.quantity}`,
+              )
+              .returning();
+
+            if (updated.length === 0) {
+              throw new Error("Stock update failed");
+            }
+
+            // log inventory change
+            await tx.insert(inventoryLogs).values({
+              id: nanoid(),
+              productId: item.productId,
+              action: "sale",
+              quantity: -item.quantity,
+              previousStock: previousStock,
+              newStock: newStock,
+              reason: `Order ${orderNumber}`,
+              createdBy: user.id,
+              createdAt: now,
+            });
           }
         }
+
+        return {
+          orderId,
+          orderNumber,
+          totalAmount: pricing.totalAmount,
+        };
       });
 
-      // Return success + order id
       return NextResponse.json(
         {
           success: true,
           message: "Order created successfully",
-          data: { orderId, orderNumber, totalAmount },
+          data: result,
         },
-        { status: 201 }
+        { status: 201 },
       );
-    } catch (error) {
-      console.error("Database transaction error:", error);
+    } catch (error: any) {
+      console.error("Transaction error:", error);
       return NextResponse.json(
         {
           success: false,
-          error: "Failed to create order in database",
+          error: error.message || "Order creation failed",
         },
-        { status: 500 }
+        { status: 400 },
       );
     }
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(
-      { error: "Internal server error during checkout" },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

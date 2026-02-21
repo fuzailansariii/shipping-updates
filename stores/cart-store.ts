@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { CartAction, CartItem, CartState } from "./cart-types";
 import { toast } from "sonner";
+import { calculatePricing } from "@/lib/pricing";
 
 export const useCartStore = create<CartState & CartAction>()(
   persist(
@@ -23,7 +24,7 @@ export const useCartStore = create<CartState & CartAction>()(
 
         set((state) => {
           const existingItem = state.items.find(
-            (item) => item.productId === product.productId
+            (item) => item.productId === product.productId,
           );
 
           // If PDF already exists
@@ -56,7 +57,7 @@ export const useCartStore = create<CartState & CartAction>()(
               items: state.items.map((item) =>
                 item.productId === product.productId
                   ? { ...item, quantity: newQuantity }
-                  : item
+                  : item,
               ),
             };
           }
@@ -140,27 +141,14 @@ export const useCartStore = create<CartState & CartAction>()(
 
       calculateTotal: () => {
         set((state) => {
-          // Sub total of a product
-          const subTotal = state.items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
+          const { shippingCharges, subTotal, tax, totalAmount } =
+            calculatePricing(state.items);
 
-          //   Tax calculation
-          const tax = subTotal * 0.18;
-
-          // Shipping (₹50 flat, free above ₹500)
-          const shipping = subTotal >= 500 ? 0 : 50;
-
-          //   Total
-          const total = subTotal + tax + shipping;
-
-          //   Return
           return {
             subTotal,
             tax,
-            shipping,
-            total,
+            shipping: shippingCharges,
+            total: totalAmount,
           };
         });
       },
@@ -171,6 +159,7 @@ export const useCartStore = create<CartState & CartAction>()(
     }),
     {
       name: "cart-storage", // localStorage key name
-    }
-  )
+      storage: createJSONStorage(() => sessionStorage),
+    },
+  ),
 );

@@ -1,6 +1,6 @@
 CREATE TYPE "public"."inventory_action" AS ENUM('stock_in', 'stock_out', 'sale', 'adjustment');--> statement-breakpoint
 CREATE TYPE "public"."order_status" AS ENUM('pending', 'confirmed', 'packed', 'shipped', 'delivered', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."payment_method" AS ENUM('online', 'cod');--> statement-breakpoint
+CREATE TYPE "public"."payment_method" AS ENUM('razorpay', 'cod');--> statement-breakpoint
 CREATE TYPE "public"."payment_status" AS ENUM('pending', 'completed', 'failed', 'refunded');--> statement-breakpoint
 CREATE TYPE "public"."product_type" AS ENUM('book', 'pdf');--> statement-breakpoint
 CREATE TABLE "addresses" (
@@ -48,8 +48,8 @@ CREATE TABLE "order_items" (
 	"product_type" "product_type" NOT NULL,
 	"product_title" text NOT NULL,
 	"quantity" integer NOT NULL,
-	"unit_price" real NOT NULL,
-	"total_price" real NOT NULL,
+	"unit_price" integer NOT NULL,
+	"total_price" integer NOT NULL,
 	"download_count" integer DEFAULT 0 NOT NULL,
 	"max_downloads" integer DEFAULT 3 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
@@ -64,11 +64,11 @@ CREATE TABLE "orders" (
 	"buyer_phone" text NOT NULL,
 	"shipping_address" text NOT NULL,
 	"billing_address" text,
-	"subtotal" real NOT NULL,
-	"shipping_charges" real DEFAULT 0 NOT NULL,
-	"tax" real DEFAULT 0 NOT NULL,
-	"discount" real DEFAULT 0 NOT NULL,
-	"total_amount" real NOT NULL,
+	"subtotal" integer NOT NULL,
+	"shipping_charges" integer DEFAULT 0 NOT NULL,
+	"tax" integer DEFAULT 0 NOT NULL,
+	"discount" integer DEFAULT 0 NOT NULL,
+	"total_amount" integer NOT NULL,
 	"payment_method" "payment_method" NOT NULL,
 	"razorpay_order_id" text,
 	"razorpay_payment_id" text,
@@ -89,7 +89,7 @@ CREATE TABLE "products" (
 	"type" "product_type" NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
-	"price" real NOT NULL,
+	"price" integer NOT NULL,
 	"topics" text[] NOT NULL,
 	"images" text[] DEFAULT '{}' NOT NULL,
 	"thumbnail" text NOT NULL,

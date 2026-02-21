@@ -7,10 +7,9 @@ import { Separator } from "../ui/separator";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { EmailFormData, emailSchema } from "@/lib/validations/zod-schema";
+import { EmailFormData, emailSchema } from "@/lib/validations/product.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/icons/google";
-import Container from "../container";
 
 interface AuthCardProps {
   mode: "sign-in" | "sign-up";
@@ -68,7 +67,7 @@ export default function AuthCard({
   };
 
   return (
-    <div className="flex justify-center h-screen items-center mx-auto max-w-[500px] px-4">
+    <div className="flex justify-center h-screen items-center mx-auto max-w-125 px-4">
       <div className="border rounded-xl md:px-15 px-5 py-20 w-full shadow-xl mx-1 md:mx-0">
         {/* form title and description */}
         <div className="text-center px-3">

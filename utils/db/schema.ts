@@ -60,7 +60,7 @@ export const products = pgTable("products", {
   type: productTypeEnum("type").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  price: real("price").notNull(),
+  price: integer("price").notNull(),
   // pages: integer("pages"),
   topics: text("topics").array().notNull(),
   images: text("images").array().notNull().default([]),
@@ -102,11 +102,11 @@ export const orders = pgTable("orders", {
   billingAddress: text("billing_address"),
 
   // Order financials
-  subTotal: real("subtotal").notNull(),
-  shippingCharges: real("shipping_charges").notNull().default(0),
-  tax: real("tax").notNull().default(0),
-  discount: real("discount").notNull().default(0),
-  totalAmount: real("total_amount").notNull(),
+  subTotal: integer("subtotal").notNull(),
+  shippingCharges: integer("shipping_charges").notNull().default(0),
+  tax: integer("tax").notNull().default(0),
+  discount: integer("discount").notNull().default(0),
+  totalAmount: integer("total_amount").notNull(),
 
   // Payment Information
   paymentMethod: paymentMethodEnum("payment_method").notNull(),
@@ -151,8 +151,8 @@ export const orderItems = pgTable("order_items", {
 
   // Order item details
   quantity: integer("quantity").notNull(), // Number of units
-  unitPrice: real("unit_price").notNull(), // Price per unit at purchase time
-  totalPrice: real("total_price").notNull(), // quantity × unitPrice
+  unitPrice: integer("unit_price").notNull(), // Price per unit at purchase time
+  totalPrice: integer("total_price").notNull(), // quantity × unitPrice
 
   // PDF-specific tracking
   downloadCount: integer("download_count").notNull().default(0), // For PDFs only

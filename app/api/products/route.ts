@@ -30,13 +30,13 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, products: productData },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching Products", error);
     return NextResponse.json(
       { error: "Failed to fetch Products" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

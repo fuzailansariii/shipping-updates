@@ -4,8 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import CartSidebar from "@/components/cart-sidebar";
-import ProfileModal from "@/components/profile-modal";
-import ProductModal from "@/components/product-modal";
+import ProfileModal from "@/components/product/profile-modal";
+import ProductModal from "@/components/product/product-modal";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],

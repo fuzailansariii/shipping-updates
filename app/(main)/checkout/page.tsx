@@ -1,5 +1,5 @@
 "use client";
-import React, { ComponentType } from "react";
+import React, { ComponentType, useEffect } from "react";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import {
   CHECKOUT_STEPS,
@@ -11,6 +11,8 @@ import ReviewStep from "@/components/checkout/review-step";
 import PaymentStep from "@/components/checkout/payment-step";
 import SuccessStep from "@/components/checkout/success-step";
 import Container from "@/components/container";
+import { useCartStore } from "@/stores/cart-store";
+import { useRouter } from "next/navigation";
 
 // Map steps to component
 const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
@@ -21,8 +23,24 @@ const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
 };
 
 export default function Checkout() {
-  const { currentStep } = useCheckoutStore();
+  const { currentStep, resetCheckout } = useCheckoutStore();
 
+  // navigate to the products page if cart is empty and current step is not success
+  const { items } = useCartStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (items.length === 0 && currentStep !== "success") {
+      router.replace("/products");
+      return;
+    }
+
+    if (items.length > 0 && currentStep === "success") {
+      resetCheckout();
+    }
+  }, [items, currentStep, router]);
+
+  // get current step index and total steps for progress bar
   const currentStepIndex = CHECKOUT_STEPS.indexOf(currentStep);
   const totalSteps = CHECKOUT_STEPS.length - 1; // Exclude success
 

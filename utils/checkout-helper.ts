@@ -1,5 +1,5 @@
 import { CartItem } from "@/stores/cart-types";
-import { OrderItemInput } from "@/lib/validations/zod-schema";
+import { OrderItemInput } from "@/lib/validations/order.schema";
 import { DB } from "./db";
 import { products } from "./db/schema";
 import { eq } from "drizzle-orm";
@@ -119,12 +119,11 @@ export async function validateStockAvailability(
     errors,
   };
 }
-
 export const formatPrice = (amount: number) => {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount / 100);
 };

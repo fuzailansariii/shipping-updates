@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
 import { buildProductValues, isAdmin } from "@/lib/auth-helper";
-import { productSchemaProcessed } from "@/lib/validations/zod-schema";
 import { nanoid } from "nanoid";
 import { ZodError } from "zod";
+import { backendSchema } from "@/lib/validations/product.schema";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, admin access is required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -20,13 +20,13 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, products: productData },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching PDFs", error);
     return NextResponse.json(
       { error: "Failed to fetch PDFs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -37,12 +37,12 @@ export async function POST(req: NextRequest) {
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, admin access is required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const body = await req.json();
-    const validateData = productSchemaProcessed.safeParse(body);
+    const validateData = backendSchema.safeParse(body);
 
     if (!validateData.success) {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
           error: "Invalid data format",
           details: validateData.error.message ?? "Invalid Inputs",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
           validateData.data.type === "book" ? "Book" : "PDF"
         } uploaded successfully!`,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error uploading product", error);
@@ -81,13 +81,13 @@ export async function POST(req: NextRequest) {
           error: "Invalid data format",
           details: error.message ?? "Invalid Inputs",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { error: "Failed to save Product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

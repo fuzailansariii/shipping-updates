@@ -16,7 +16,7 @@ import {
   Edit,
   Shield,
 } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { formatFileSize } from "@/utils/pdf-helper";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import Link from "next/link";
