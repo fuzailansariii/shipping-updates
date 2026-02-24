@@ -90,11 +90,11 @@ export interface CheckoutActions {
   goToPreviousStep: () => void;
 
   createOrder: (
-    userId: string,
+    clerkUserId: string,
     userEmail: string,
     userName: string,
     userPhone: string,
-    cartItems: CartItem[]
+    cartItems: CartItem[],
   ) => Promise<OrderCreationResult>;
   resetCheckout: () => void;
   clearError: () => void;

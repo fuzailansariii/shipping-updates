@@ -1,6 +1,6 @@
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { ProductData } from "./validations/zod-schema";
+import { BackendProductData } from "./validations/product.schema";
 
 // check if the user is admin and return (true | false)
 export async function isAdmin(): Promise<boolean> {
@@ -64,7 +64,7 @@ export async function isAdminUser() {
 // DB HELPER function
 export function buildProductValues(
   productId: string,
-  validateData: ProductData,
+  validateData: BackendProductData,
 ) {
   const baseValue = {
     id: productId,

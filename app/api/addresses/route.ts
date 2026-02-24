@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addressApiSchema } from "@/lib/validations/zod-schema";
+import { addressApiSchema } from "@/lib/validations/address.schema";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/utils/db";
 import { addresses } from "@/utils/db/schema";

@@ -1,21 +1,22 @@
 import { buildProductValues, isAdmin } from "@/lib/auth-helper";
-import { updateProductSchema } from "@/lib/validations/zod-schema";
+import { backendUpdateProductSchema } from "@/lib/validations/product.schema";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import z from "zod";
 
 // GET - Fetch single PDF (admin only - includes fileUrl)
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, admin access is required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -32,13 +33,13 @@ export async function GET(
 
     return NextResponse.json(
       { success: true, product: product[0] },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching product", error);
     return NextResponse.json(
       { error: "Failed to fetch product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -46,26 +47,29 @@ export async function GET(
 // PATCH - Update PDF (admin only)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, Admin access is required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const { id: productId } = await params;
     const body = await request.json();
 
-    const parsed = updateProductSchema.safeParse(body);
+    const parsed = backendUpdateProductSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: parsed.error.message },
-        { status: 400 }
+        {
+          error: "Validation failed",
+          details: z.treeifyError(parsed.error),
+        },
+        { status: 400 },
       );
     }
 
@@ -74,7 +78,7 @@ export async function PATCH(
     if (Object.keys(validatedData).length === 0) {
       return NextResponse.json(
         { error: "No fields provided for update" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -102,13 +106,13 @@ export async function PATCH(
         message: "Product Updated successfully",
         pdf: updatedProduct[0],
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error Updating Product", error);
     return NextResponse.json(
       { error: "Failed to update product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -117,14 +121,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, Admin access is required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -144,13 +148,13 @@ export async function DELETE(
         success: true,
         message: "Product deleted successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error Deleting Product", error);
     return NextResponse.json(
       { error: "Failed to delete Product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

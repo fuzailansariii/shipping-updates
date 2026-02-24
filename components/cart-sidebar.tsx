@@ -1,14 +1,12 @@
 "use client";
 
-import { Minus, Plus, Trash2, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { useCartStore } from "@/stores/cart-store"; // Fixed import path
 import { Button } from "./ui/button";
 import Link from "next/link";
-
-// TODO: Add navigation to checkout page
-// TODO: Fix UI Later
+import { formatPrice } from "@/utils/checkout-helper";
 
 export default function CartSidebar() {
   const {
@@ -98,10 +96,10 @@ export default function CartSidebar() {
                             {item.title}
                           </h3>
                           <p className="text-neutral-600 text-sm">
-                            ₹{item.price} × {item.quantity}
+                            {formatPrice(item.price)} × {item.quantity}
                           </p>
                           <p className="font-semibold text-blue-600">
-                            ₹{(item.price * item.quantity).toFixed(2)}
+                            {formatPrice(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -126,27 +124,27 @@ export default function CartSidebar() {
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Subtotal:</span>
                     <span className="font-semibold">
-                      ₹{subTotal.toFixed(2)}
+                      {formatPrice(subTotal)}
                       {/* Simplified */}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Tax (18%):</span>
                     <span className="font-semibold">
-                      ₹{tax.toFixed(2)}
+                      {formatPrice(tax)}
                       {/* Simplified */}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Shipping:</span>
                     <span className="font-semibold">
-                      {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+                      {shipping === 0 ? "FREE" : `${formatPrice(shipping)}`}
                       {/* Simplified */}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Total:</span>
-                    <span>₹{total.toFixed(2)}</span>
+                    <span>{formatPrice(total)}</span>
                     {/* Simplified */}
                   </div>
                 </div>
@@ -158,6 +156,7 @@ export default function CartSidebar() {
                     closeCart();
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                  disabled={items.length === 0}
                 >
                   <Link href={"/checkout"}>Proceed to Checkout</Link>
                 </Button>

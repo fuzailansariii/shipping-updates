@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import { useAddresses } from "@/lib/hooks/use-addresses";
-import { AddressInput, addressSchema } from "@/lib/validations/zod-schema";
+import { AddressInput, addressSchema } from "@/lib/validations/address.schema";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "../ui/input-form";
@@ -13,7 +13,6 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 
 export default function AddressStep() {
-  const [checked, setChecked] = useState(false);
   const { user } = useUser();
   const { items } = useCartStore();
   const {

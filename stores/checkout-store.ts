@@ -6,6 +6,7 @@ import {
 } from "./checkout-types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { calculatePricing } from "@/lib/pricing";
 
 const initialState: CheckoutState = {
   selectedAddress: null,
@@ -50,40 +51,19 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
       },
 
       //   Order summary
-      calculateOrderSummary: (cartItem) => {
+      calculateOrderSummary: (cartItems) => {
         set({ isCalculating: true });
 
-        // Check if there is physical books
-        const hasPhysicalBooks = cartItem.some((item) => item.type === "book");
-
-        // sub total of items in cart
-        const subTotal = cartItem.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        );
-
-        // tax amount on the books only
-        const taxableAmount = cartItem
-          .filter((item) => item.type === "book")
-          .reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const tax = taxableAmount * 0.18;
-
-        // shipping charge on books only if the total item cost < Rs.500
-        let shippingCharges = 0;
-        if (hasPhysicalBooks) {
-          shippingCharges = subTotal >= 500 ? 0 : 50;
-        }
-
-        // total amount
-        const totalAmount = subTotal + tax + shippingCharges;
+        const { shippingCharges, subTotal, tax, totalAmount } =
+          calculatePricing(cartItems);
 
         set({
           orderSummary: {
-            subTotal: parseFloat(subTotal.toFixed(2)),
-            tax: parseFloat(tax.toFixed(2)),
-            shippingCharges: parseFloat(shippingCharges.toFixed(2)),
+            subTotal,
+            tax,
+            shippingCharges,
             discount: 0,
-            totalAmount: parseFloat(totalAmount.toFixed(2)),
+            totalAmount,
           },
           isCalculating: false,
         });
@@ -138,6 +118,14 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
         set({ isProcessingOrder: true, orderError: null });
         const state = get();
         try {
+          if (!cartItems || cartItems.length === 0) {
+            throw new Error("Cart is empty");
+          }
+
+          if (state.orderSummary.totalAmount === 0) {
+            throw new Error("Order summary not calculated");
+          }
+
           const hasBooks = cartItems.some((item) => item.type === "book");
           if (hasBooks && !state.selectedAddress) {
             throw new Error("Please select a shipping address");
@@ -175,9 +163,10 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             : formatAddress(state.billingAddress);
 
           const response = await axios.post("/api/checkout", {
+            clerkUserId: userId,
             buyerEmail: userEmail,
             buyerName: userName,
-            buyerPhone: userPhone,
+            buyerPhone: userPhone || state.selectedAddress?.phone || "",
             shippingAddress,
             billingAddress,
             subTotal: state.orderSummary.subTotal,
@@ -194,13 +183,10 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             throw new Error(response.data.error || "Failed to create order");
           }
 
-          console.log("Placing order status: ", response.data);
-
           set({
             isProcessingOrder: false,
             createdOrderId: response.data.data.orderId,
             createdOrderNumber: response.data.data.orderNumber,
-            currentStep: "success",
           });
           return {
             success: true,
@@ -239,6 +225,15 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
     {
       name: "checkout-storage",
       storage: createJSONStorage(() => sessionStorage),
+
+      partialize: (state) => ({
+        selectedAddress: state.selectedAddress,
+        billingAddress: state.billingAddress,
+        useSameAddressForBilling: state.useSameAddressForBilling,
+        orderSummary: state.orderSummary,
+        createdOrderId: state.createdOrderId,
+        createdOrderNumber: state.createdOrderNumber,
+      }),
     },
   ),
 );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useProfileStore } from "@/stores/profile-store";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useEffect } from "react";
 import { Mail, Bell, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

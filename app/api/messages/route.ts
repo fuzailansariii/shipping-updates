@@ -1,5 +1,5 @@
 import { isAdmin } from "@/lib/auth-helper";
-import { messageSchema } from "@/lib/validations/zod-schema";
+import { messageSchema } from "@/lib/validations/message.schema";
 import { db } from "@/utils/db";
 import { contactMessages } from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";
@@ -11,7 +11,7 @@ export async function GET() {
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized, Admin access required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -25,13 +25,13 @@ export async function GET() {
         message: "Message fetched successfully",
         data: messages,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching messages", error);
     return NextResponse.json(
       { error: "Failed to fetch messages" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid Inputs", issue: parsed.error },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const messageId = nanoid();
@@ -68,13 +68,13 @@ export async function POST(request: NextRequest) {
         message: "Message created successfully",
         data: newMessage,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating message", error);
     return NextResponse.json(
       { error: "Failed to create message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

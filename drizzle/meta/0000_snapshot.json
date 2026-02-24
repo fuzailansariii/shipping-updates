@@ -1,5 +1,5 @@
 {
-  "id": "0b473d7f-4908-40e6-ace1-9b619b008ccb",
+  "id": "f0d9c6fe-a19f-43bc-9d16-39ada1d9a819",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -281,13 +281,13 @@
         },
         "unit_price": {
           "name": "unit_price",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
         "total_price": {
           "name": "total_price",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -402,34 +402,34 @@
         },
         "subtotal": {
           "name": "subtotal",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
         "shipping_charges": {
           "name": "shipping_charges",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
         },
         "tax": {
           "name": "tax",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
         },
         "discount": {
           "name": "discount",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
         },
         "total_amount": {
           "name": "total_amount",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -560,7 +560,7 @@
         },
         "price": {
           "name": "price",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -698,7 +698,7 @@
       "name": "payment_method",
       "schema": "public",
       "values": [
-        "online",
+        "razorpay",
         "cod"
       ]
     },

@@ -2,7 +2,7 @@
 import Container from "@/components/container";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input-form";
-import { MessageData, messageSchema } from "@/lib/validations/zod-schema";
+import { MessageData, messageSchema } from "@/lib/validations/message.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import Link from "next/link";

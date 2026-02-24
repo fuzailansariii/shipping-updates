@@ -4,23 +4,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Image } from "@imagekit/next";
 import Container from "@/components/container";
-import { Button } from "@/components/ui/button";
 import {
   File,
-  AlertCircle,
-  Minus,
-  Plus,
-  Edit,
-  ShoppingCart,
-  Trash2,
-  Check,
-  Clock,
-  Shield,
-  FileText,
   BookOpen,
-  Zap,
-  Bell,
+  FileText,
+  AlertCircle,
   RefreshCw,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/stores/cart-store";
@@ -30,17 +20,18 @@ import { useUserRole } from "@/lib/hooks/useUserRole";
 import { useProductModalStore } from "@/stores/product-store";
 import { formatFileSize } from "@/utils/pdf-helper";
 import { Product } from "@/utils/db/schema";
+import { ProductStockBadge } from "@/components/product/product-stock-badge";
+import { ProductActions } from "@/components/product/product-actions";
+import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/utils/checkout-helper";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if Admin
   const { isAdmin } = useUserRole();
   const router = useRouter();
-
-  // stores
   const { items, addToCart, removeFromCart, updateQuantity } = useCartStore();
   const { openProductModal } = useProductModalStore();
 
@@ -67,6 +58,23 @@ export default function Products() {
       toast.error("Admin Cannot Add Products To Cart");
       return;
     }
+
+    // Check stock for books
+    if (product.type === "book") {
+      if (!product.stockQuantity || product.stockQuantity <= 0) {
+        toast.error("This product is out of stock");
+        return;
+      }
+
+      const cartItem = items.find((item) => item.productId === product.id);
+      const currentQtyInCart = cartItem?.quantity || 0;
+
+      if (currentQtyInCart >= product.stockQuantity) {
+        toast.error(`Only ${product.stockQuantity} items available`);
+        return;
+      }
+    }
+
     const result = addToCart(
       {
         productId: product.id,
@@ -76,8 +84,9 @@ export default function Products() {
         type: product.type,
         maxStock: product.stockQuantity,
       },
-      1
+      1,
     );
+
     result.success
       ? toast.success(result.message)
       : toast.error(result.message);
@@ -88,12 +97,61 @@ export default function Products() {
       toast.error("Admins cannot purchase products");
       return;
     }
-    handleAddToCart(product);
 
+    // check stock for books
+    if (
+      product.type === "book" &&
+      (!product.stockQuantity || product.stockQuantity <= 0)
+    ) {
+      toast.error("This product is out of stock");
+      return;
+    }
+
+    const cartItem = items.find((item) => item.productId === product.id);
+    if (!cartItem) {
+      const result = addToCart(
+        {
+          productId: product.id,
+          title: product.title,
+          price: product.price,
+          thumbnail: product.thumbnail || "",
+          type: product.type,
+          maxStock: product.stockQuantity,
+        },
+        1,
+      );
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+    }
     router.push("/checkout");
   };
 
-  /* ---------------- LOADING ---------------- */
+  //  Helper function to compute product state
+  const getProductState = (product: Product) => {
+    const cartItem = items.find((item) => item.productId === product.id);
+    const isOutOfStock =
+      product.type === "book" &&
+      (!product.stockQuantity || product.stockQuantity <= 0);
+    const isLowStock =
+      product.type === "book" &&
+      product.stockQuantity > 0 &&
+      product.stockQuantity <= 5;
+    const canAddMore =
+      product.type === "book"
+        ? (cartItem?.quantity || 0) < (product.stockQuantity || 0)
+        : !cartItem;
+
+    return {
+      cartItem,
+      isOutOfStock,
+      isLowStock,
+      canAddMore,
+    };
+  };
+
+  // Loading, error, empty states.
   if (loading) {
     return (
       <Container>
@@ -156,7 +214,6 @@ export default function Products() {
     );
   }
 
-  /* ---------------- ERROR ---------------- */
   if (error) {
     return (
       <Container>
@@ -215,7 +272,6 @@ export default function Products() {
     );
   }
 
-  /* ---------------- EMPTY STATE ---------------- */
   if (products.length === 0) {
     return (
       <Container>
@@ -286,7 +342,6 @@ export default function Products() {
     );
   }
 
-  /* ---------------- MAIN ---------------- */
   return (
     <Container>
       <div className="container mx-auto px-4 py-2">
@@ -294,9 +349,7 @@ export default function Products() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product, idx) => {
-            const cartItem = items.find(
-              (item) => item.productId === product.id
-            );
+            const state = getProductState(product);
 
             return (
               <motion.div
@@ -307,10 +360,10 @@ export default function Products() {
                 transition={{ duration: 0.1 }}
                 className="group relative flex flex-col bg-white rounded-2xl border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
-                {/* -------- IMAGE SECTION -------- */}
+                {/* IMAGE SECTION */}
                 <div
                   onClick={() => openProductModal(product)}
-                  className="relative aspect-6/4 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden"
+                  className="relative aspect-6/4 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden cursor-pointer"
                 >
                   {product.thumbnail ? (
                     <>
@@ -322,7 +375,6 @@ export default function Products() {
                         priority
                         className="object-cover h-full w-full group-hover:scale-105 transition-transform duration-200"
                       />
-                      {/* Gradient overlay */}
                       <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </>
                   ) : (
@@ -358,29 +410,17 @@ export default function Products() {
                     </span>
                   </div>
 
-                  {/* Stock/Active Status Badge */}
-                  {!product.isActive ? (
-                    <div className="absolute top-3 right-3">
-                      <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-500/90 text-white backdrop-blur-sm">
-                        Coming Soon
-                      </span>
-                    </div>
-                  ) : (
-                    product.type === "book" &&
-                    product.stockQuantity !== undefined &&
-                    product.stockQuantity <= 5 && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-orange-500/90 text-white backdrop-blur-sm">
-                          Only {product.stockQuantity} left
-                        </span>
-                      </div>
-                    )
-                  )}
+                  {/*  Stock Badge - using component */}
+                  <ProductStockBadge
+                    isActive={product.isActive}
+                    isOutOfStock={state.isOutOfStock}
+                    isLowStock={state.isLowStock}
+                    stockQuantity={product.stockQuantity}
+                  />
                 </div>
 
-                {/* -------- CONTENT SECTION -------- */}
+                {/* CONTENT SECTION */}
                 <div className="flex flex-col flex-1 p-5">
-                  {/* Title */}
                   <h2 className="font-bold text-lg mb-1 font-lato text-gray-900 line-clamp-2">
                     <span
                       onClick={() => openProductModal(product)}
@@ -390,12 +430,10 @@ export default function Products() {
                     </span>
                   </h2>
 
-                  {/* Description */}
                   <p className="text-gray-600 text-sm font-roboto mb-1 line-clamp-2 leading-relaxed">
                     {product.description}
                   </p>
 
-                  {/* Topics */}
                   {product.topics?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3 font-nunito">
                       {product.topics.slice(0, 3).map((topic, idx) => (
@@ -414,23 +452,19 @@ export default function Products() {
                     </div>
                   )}
 
-                  {/* Spacer to push actions to bottom */}
                   <div className="flex-1" />
 
-                  {/* -------- PRICE & FILE SIZE -------- */}
+                  {/* PRICE & FILE SIZE */}
                   <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
                     <div>
                       <div className="text-2xl font-bold text-green-700">
-                        ₹{product.price.toFixed(2)}
+                        {formatPrice(product.price)}
                       </div>
-                      {product.type === "book" &&
-                        product.stockQuantity !== undefined && (
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            {product.stockQuantity > 0
-                              ? "In Stock"
-                              : "Out of Stock"}
-                          </div>
-                        )}
+                      {product.type === "book" && (
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {state.isOutOfStock ? "Out of Stock" : "In Stock"}
+                        </div>
+                      )}
                     </div>
 
                     {product.fileSize && (
@@ -443,120 +477,18 @@ export default function Products() {
                     )}
                   </div>
 
-                  {/* -------- ACTIONS -------- */}
-                  {isAdmin ? (
-                    // ========== ADMIN VIEW ==========
-                    <div className="space-y-2">
-                      <div className="flex justify-center items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                        <Shield className="w-4 h-4 text-amber-600 shrink-0" />
-                        <p className="text-xs text-amber-800 font-medium font-roboto">
-                          Admin accounts cannot purchase
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="w-full group/btn"
-                        onClick={() =>
-                          (window.location.href = `/admin/products/${product.id}/edit`)
-                        }
-                      >
-                        <Edit className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform" />
-                        Edit Product
-                      </Button>
-                    </div>
-                  ) : !product.isActive ? (
-                    // ========== INACTIVE PRODUCT ==========
-                    <Button disabled className="w-full" variant="secondary">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Coming Soon
-                    </Button>
-                  ) : (
-                    // ========== USER VIEW ==========
-                    <div className="space-y-2">
-                      {/* Cart Controls */}
-                      {cartItem && product.type === "book" ? (
-                        // Book quantity controls
-                        <motion.div
-                          initial={{ scale: 0.95, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="flex items-center justify-between p-2 rounded-lg border-2 border-blue-200 bg-blue-50"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              updateQuantity(
-                                cartItem.productId,
-                                cartItem.quantity - 1
-                              )
-                            }
-                            className="h-9 w-9 p-0 hover:bg-blue-100"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-
-                          <div className="text-center px-3">
-                            <div className="text-sm font-bold text-gray-900">
-                              {cartItem.quantity}
-                            </div>
-                            <div className="text-xs text-gray-500">in cart</div>
-                          </div>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleAddToCart(product)}
-                            className="h-9 w-9 p-0 hover:bg-blue-100"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </motion.div>
-                      ) : cartItem && product.type === "pdf" ? (
-                        // PDF in cart
-                        <motion.div
-                          initial={{ scale: 0.95, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="flex items-center gap-2"
-                        >
-                          <Button
-                            variant="secondary"
-                            disabled
-                            className="flex-1"
-                          >
-                            <Check className="w-4 h-4 mr-2" />
-                            In Cart
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => removeFromCart(product.id)}
-                            className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </motion.div>
-                      ) : (
-                        // Add to cart
-                        <Button
-                          variant="outline"
-                          className="w-full group/btn"
-                          onClick={() => handleAddToCart(product)}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-                          Add to Cart
-                        </Button>
-                      )}
-
-                      {/* Buy Now Button */}
-                      <Button
-                        className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-sm"
-                        onClick={() => handleBuyNow(product)}
-                      >
-                        <Zap className="w-4 h-4 mr-2" />
-                        Buy Now
-                      </Button>
-                    </div>
-                  )}
+                  {/*  ACTIONS - using component */}
+                  <ProductActions
+                    product={product}
+                    cartItem={state.cartItem}
+                    isOutOfStock={state.isOutOfStock}
+                    isAdmin={isAdmin}
+                    canAddMore={state.canAddMore}
+                    onAddToCart={handleAddToCart}
+                    onBuyNow={handleBuyNow}
+                    onUpdateQuantity={updateQuantity}
+                    onRemoveFromCart={removeFromCart}
+                  />
                 </div>
               </motion.div>
             );

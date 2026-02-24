@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { otpSchema, OTPFormData } from "@/lib/validations/zod-schema";
+import { otpSchema, OTPFormData } from "@/lib/validations/product.schema";
 import logo from "@/public/su-logo.png";
 import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -107,7 +107,7 @@ export default function OTPVerification({
 
   return (
     <div className="md:max-w-xl w-full h-screen flex justify-center items-center mx-auto">
-      <div className="border rounded-xl md:px-15 px-5 py-15 max-w-[500px] shadow-xl mt-15 mx-1">
+      <div className="border rounded-xl md:px-15 px-5 py-15 max-w-125 shadow-xl mt-15 mx-1">
         {/* Header */}
         <div className="text-center px-3">
           <Image

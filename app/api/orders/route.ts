@@ -1,4 +1,4 @@
-import { isAuthenticated, currentUserId } from "@/lib/auth-helper";
+import { currentUserId } from "@/lib/auth-helper";
 import { db } from "@/utils/db";
 import { orders } from "@/utils/db/schema";
 import { desc, eq } from "drizzle-orm";

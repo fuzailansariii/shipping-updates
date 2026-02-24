@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { AddressInput } from "../validations/zod-schema";
+import { AddressInput } from "../validations/address.schema";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
