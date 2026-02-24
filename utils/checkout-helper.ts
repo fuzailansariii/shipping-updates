@@ -27,7 +27,7 @@ export function calculateOrderTotals(items: CartItem[]) {
   //   Shipping charge
   let shippingCharges = 0;
   if (hasBooks) {
-    shippingCharges = subTotal >= 500 ? 0 : 50;
+    shippingCharges = subTotal >= 50000 ? 0 : 5000;
   }
 
   // TAX: 18% GST only on books

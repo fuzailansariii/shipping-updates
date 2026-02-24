@@ -5,8 +5,8 @@ import { ProductUploadForm } from "@/components/product/product-upload-form";
 export default function Admin() {
   return (
     <>
-      {/* <ProductUploadForm /> */}
-      <EditPDFForm productId="xM3Q3Mbxd3n_cw17fdq-v" />
+      <ProductUploadForm />
+      {/* <EditPDFForm productId="xM3Q3Mbxd3n_cw17fdq-v" /> */}
     </>
   );
 }

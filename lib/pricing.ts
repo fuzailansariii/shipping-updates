@@ -27,7 +27,7 @@ export function calculatePricing(items: PricingItem[]): PricingResult {
   const tax = Math.round((taxableAmount * 18) / 100);
 
   // ₹500 shipping = 50000 paise threshold
-  const shippingCharges = hasBooks && subTotal < 50000 ? 500 : 0;
+  const shippingCharges = hasBooks && subTotal < 50000 ? 5000 : 0;
 
   const totalAmount = subTotal + tax + shippingCharges;
 

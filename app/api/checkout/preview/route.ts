@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     const pricing = calculatePricing(pricingInput);
 
-    // ✅ Return only pricing, not items
+    // Return only pricing, not items
     return NextResponse.json({
       success: true,
       data: pricing, // Just { subTotal, tax, shippingCharges, totalAmount }

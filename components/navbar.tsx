@@ -51,9 +51,9 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
     ? [
         { name: "Profile", icon: User, action: "profile" },
         {
-          name: isAdmin ? "Admin Dashboard" : "My Purchases",
+          name: isAdmin ? "Admin Dashboard" : "Orders & History",
           icon: Package,
-          href: isAdmin ? "/admin" : "/purchases",
+          href: isAdmin ? "/admin" : "/orders-history",
         },
         { name: "Logout", icon: LogOut, action: "signout" },
       ]

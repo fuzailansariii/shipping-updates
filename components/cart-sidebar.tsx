@@ -8,9 +8,6 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { formatPrice } from "@/utils/checkout-helper";
 
-// TODO: Add navigation to checkout page
-// TODO: Fix UI Later
-
 export default function CartSidebar() {
   const {
     isOpen,

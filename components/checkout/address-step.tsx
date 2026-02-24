@@ -13,7 +13,6 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 
 export default function AddressStep() {
-  const [checked, setChecked] = useState(false);
   const { user } = useUser();
   const { items } = useCartStore();
   const {
