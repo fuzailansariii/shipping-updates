@@ -15,3 +15,11 @@ export const parseTopics = (topicString: string): string[] => {
     .map((topic) => topic.trim())
     .filter((topic) => topic.length > 0);
 };
+
+export const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};

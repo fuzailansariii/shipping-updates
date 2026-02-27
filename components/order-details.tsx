@@ -1,11 +1,9 @@
 "use client";
-import {
-  OrderItems,
-  useOrderDetailsStore,
-} from "@/stores/orders-history-store";
+import { useOrderDetailsStore } from "@/stores/orders-history-store";
 import { formatPrice } from "@/utils/checkout-helper";
+import { formatDate } from "@/utils/pdf-helper";
 import { AnimatePresence, motion } from "framer-motion";
-import { Package, X } from "lucide-react";
+import { BookOpenText, FileText, Package, X } from "lucide-react";
 import React, { useEffect } from "react";
 
 const getStatusConfig = (status: string) => {
@@ -62,13 +60,6 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-const formatDate = (date: string) =>
-  new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
 export default function OrderDetails() {
   const isOpen = useOrderDetailsStore((s) => s.isOpen);
   const selectedOrder = useOrderDetailsStore((s) => s.selectedOrder);
@@ -99,11 +90,9 @@ export default function OrderDetails() {
     ? getStatusConfig(selectedOrder.orderStatus)
     : null;
 
-  if (!selectedOrder) return null;
-
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && selectedOrder && (
         <motion.div
           className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center"
           initial={{ opacity: 0 }}
@@ -176,7 +165,11 @@ export default function OrderDetails() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
-                              <Package className="w-4 h-4 text-gray-400" />
+                              {item.productType === "pdf" ? (
+                                <FileText className="w-4 h-4 text-gray-400" />
+                              ) : (
+                                <BookOpenText className="w-4 h-4 text-gray-400" />
+                              )}
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-800 line-clamp-1">
