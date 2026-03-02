@@ -16,7 +16,9 @@ export default async function AdminLayout({
         <AdminSidebar />
         <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8 overflow-y-auto max-h-screen">
           <div className="max-w-7xl mx-auto">
-            <SidebarHeader />
+            <div className="md:hidden block">
+              <SidebarHeader />
+            </div>
             {children}
           </div>
         </main>

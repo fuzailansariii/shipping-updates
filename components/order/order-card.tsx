@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { formatPrice } from "@/utils/checkout-helper";
 import { Button } from "../ui/button";
 import { useOrderDetailsStore } from "@/stores/orders-history-store";
+import { formatDate } from "@/utils/pdf-helper";
 
 type OrderItem = {
   id: string;
@@ -12,6 +13,8 @@ type OrderItem = {
   quantity: number;
   price: number;
   productType: "pdf" | "book";
+  downloadCount: number;
+  maxDownloads: number;
 };
 
 type Order = {
@@ -44,7 +47,7 @@ export default function OrderCard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { openOrderDetails } = useOrderDetailsStore();
+  const { openOrderDetails, openDownloadModal } = useOrderDetailsStore();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -53,7 +56,6 @@ export default function OrderCard() {
           withCredentials: true,
         });
         const ordersArray = response.data?.data?.orders ?? [];
-        console.log("Order Array: ", ordersArray);
         setOrders(ordersArray);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -65,14 +67,6 @@ export default function OrderCard() {
 
     fetchOrders();
   }, []);
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
 
   const getStatusConfig = (status: string) => {
     switch (status?.toLowerCase().trim()) {
@@ -157,13 +151,26 @@ export default function OrderCard() {
                   </div>
 
                   {/* Action */}
-                  <Button
-                    onClick={() => openOrderDetails(order)}
-                    variant={"ghost"}
-                    className="px-2 py-1.5 text-xs flex text-blue-600 underline mt-1 cursor-pointer hover:text-blue-800"
-                  >
-                    View details
-                  </Button>
+                  <div className="flex justify-between items-center">
+                    <Button
+                      onClick={() => openOrderDetails(order)}
+                      variant={"ghost"}
+                      className="px-2 py-1.5 text-xs flex text-blue-600 underline mt-1 cursor-pointer hover:text-blue-800"
+                    >
+                      View details
+                    </Button>
+                    {order.items.some((item) => item.productType === "pdf") && (
+                      <div className="ml-2">
+                        <Button
+                          onClick={() => openDownloadModal(order)}
+                          variant={"ghost"}
+                          className="px-2 py-1.5 text-xs flex text-blue-600 underline mt-1 cursor-pointer hover:text-blue-800"
+                        >
+                          Download PDF's
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

@@ -1,12 +1,30 @@
-"use client";
-import EditPDFForm from "@/components/product/product-edit-form";
-import { ProductUploadForm } from "@/components/product/product-upload-form";
+import Overview from "@/components/admin/overview";
+import {
+  getOverviewStats,
+  getRecentOrders,
+  getRecentMessages,
+  getTopSellingProducts,
+  getLowStockProducts,
+} from "@/lib/admin/overview-querys";
 
-export default function Admin() {
+export const revalidate = 60;
+
+export default async function OverviewPage() {
+  const [stats, orders, messages, topProducts, lowStock] = await Promise.all([
+    getOverviewStats(),
+    getRecentOrders(),
+    getRecentMessages(),
+    getTopSellingProducts(),
+    getLowStockProducts(),
+  ]);
+
   return (
-    <>
-      <ProductUploadForm />
-      {/* <EditPDFForm productId="xM3Q3Mbxd3n_cw17fdq-v" /> */}
-    </>
+    <Overview
+      stats={stats}
+      orders={orders}
+      messages={messages}
+      topProducts={topProducts}
+      lowStock={lowStock}
+    />
   );
 }
