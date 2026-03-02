@@ -2,13 +2,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { formatPrice } from "@/utils/checkout-helper";
 
 interface AdminMenuCardProps {
   title: string;
   count: number;
+  isCurrency?: boolean;
 }
 
-export default function AdminMenuCard({ title, count }: AdminMenuCardProps) {
+export default function AdminMenuCard({
+  title,
+  count,
+  isCurrency,
+}: AdminMenuCardProps) {
   const [displayCount, setDisplayCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const frameRef = useRef<number | null>(null);
@@ -68,7 +74,7 @@ export default function AdminMenuCard({ title, count }: AdminMenuCardProps) {
         transition={{ duration: 0.4 }}
         className="text-2xl font-bold text-secondary-dark/70 tracking-tight leading-none tabular-nums z-10"
       >
-        {displayCount.toLocaleString()}
+        {isCurrency ? formatPrice(displayCount) : displayCount.toString()}
       </motion.p>
 
       {/* Title */}

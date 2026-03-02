@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "./ui/button";
@@ -39,63 +39,40 @@ export default function AdminSidebar() {
     return pathname.startsWith(link);
   };
 
+  // Close mobile menu on route change
   useEffect(() => {
     closeMobileMenu();
   }, [pathname, closeMobileMenu]);
 
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && isMobileMenuOpen) closeMobileMenu();
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isMobileMenuOpen, closeMobileMenu]);
-
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay — only renders when menu is open */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { delay: 0.15 } }}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-              onClick={closeMobileMenu}
-            />
-
-            {/* Sidebar */}
-          </>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { delay: 0.15 } }}
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            onClick={closeMobileMenu}
+          />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Sidebar
+          - Mobile: fixed, slides in/out via Framer Motion
+          - Desktop: static, always visible, CSS overrides any transform
+      */}
       <motion.aside
         initial={false}
-        animate={{
-          x: isDesktop ? 0 : isMobileMenuOpen ? 0 : "-100%",
-        }}
-        transition={{
-          duration: 0.3,
-          ease: "easeInOut",
-        }}
+        animate={{ x: isMobileMenuOpen ? 0 : "-100%" }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
         className="
-    bg-white border-r border-black/6
-    h-screen overflow-y-auto overflow-x-hidden
-    md:relative fixed inset-y-0 left-0 z-50
-    w-64
-  "
+          bg-white border-r border-black/6
+          h-screen overflow-y-auto overflow-x-hidden
+          fixed inset-y-0 left-0 z-50 w-64
+          md:static md:transform-none!
+        "
       >
         <div className="flex flex-col h-full px-4 md:py-6 py-3">
           {/* Mobile close button */}
@@ -151,7 +128,6 @@ export default function AdminSidebar() {
                     }
                   `}
                 >
-                  {/* Active left accent pill */}
                   {isActive && (
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-[55%] bg-secondary-dark rounded-r-full" />
                   )}

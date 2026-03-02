@@ -1,14 +1,30 @@
-"use client";
-import AdminMenuCard from "@/components/admin/admin-menu-card";
 import Overview from "@/components/admin/overview";
-import EditPDFForm from "@/components/product/product-edit-form";
-import { ProductUploadForm } from "@/components/product/product-upload-form";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  getOverviewStats,
+  getRecentOrders,
+  getRecentMessages,
+  getTopSellingProducts,
+  getLowStockProducts,
+} from "@/lib/admin/overview-querys";
 
-export default function Admin() {
+export const revalidate = 60;
+
+export default async function OverviewPage() {
+  const [stats, orders, messages, topProducts, lowStock] = await Promise.all([
+    getOverviewStats(),
+    getRecentOrders(),
+    getRecentMessages(),
+    getTopSellingProducts(),
+    getLowStockProducts(),
+  ]);
+
   return (
-    <>
-      <Overview />
-    </>
+    <Overview
+      stats={stats}
+      orders={orders}
+      messages={messages}
+      topProducts={topProducts}
+      lowStock={lowStock}
+    />
   );
 }
