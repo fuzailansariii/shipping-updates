@@ -17,12 +17,9 @@ const getStockColor = (stock: number) => {
 export default function LowStockItem({ stock, title }: LowStockItemProps) {
   return (
     <div className="flex items-center justify-between px-4 py-3 hover:bg-white/2 transition-colors">
-      {/* Title Wrapper MUST allow shrinking */}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-secondary-dark/70 truncate">{title}</p>
-      </div>
+      <p className="text-sm text-secondary-dark/70 line-clamp-1">{title}</p>
 
-      <div className="flex items-center gap-1.5 ml-3 shrink-0">
+      <div className="flex items-center">
         {stock === 0 ? (
           <span className="text-xs font-bold text-red-500">Out of stock</span>
         ) : (

@@ -7,7 +7,6 @@ import LowStockList from "./stocks/low-stock-list";
 import RecentOrderTable from "./orders/recent-order-table";
 import { Status } from "./shared/status-badge";
 import TopSellingProducts from "./products/top-selling-table";
-import { formatPrice } from "@/utils/checkout-helper";
 
 type Props = {
   stats: {
@@ -27,6 +26,7 @@ type Props = {
   messages: {
     id: string;
     customer: string;
+    subject: string;
     message: string;
     time: string;
   }[];
@@ -81,15 +81,15 @@ export default function Overview({
         </div>
 
         {/* Recent Order Table + Messages */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <RecentOrderTable orders={orders} />
-          <MessagesList messages={messages} />
-        </div>
 
-        {/* ROW 2 — Top Selling Products + Low Stock */}
+        <RecentOrderTable orders={orders} />
+        <TopSellingProducts products={topProducts} />
+
+        {/* Top Selling Products + Low Stock */}
         <div className="flex flex-col md:flex-row gap-4">
           {/* Top Selling Products + Low Stock */}
-          <TopSellingProducts products={topProducts} />
+          <MessagesList messages={messages} />
+
           <LowStockList products={lowStock} />
         </div>
       </motion.div>

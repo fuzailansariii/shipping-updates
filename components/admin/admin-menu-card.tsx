@@ -58,7 +58,7 @@ export default function AdminMenuCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
-      transition={{ duration: 0.4, ease: "linear" }}
+      transition={{ duration: 0.05, ease: "linear" }}
       className="group relative bg-primary-dark/20 border border-white/[0.07] rounded-2xl px-5 py-4 w-full flex flex-col gap-1.5 overflow-hidden hover:border-indigo-500/30 transition-all duration-300 cursor-default"
     >
       {/* Subtle glow on hover */}
