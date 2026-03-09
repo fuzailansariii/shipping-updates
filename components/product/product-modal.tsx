@@ -20,6 +20,7 @@ import { Button } from "../ui/button";
 import { formatFileSize } from "@/utils/pdf-helper";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import Link from "next/link";
+import { formatPrice } from "@/utils/checkout-helper";
 
 export default function ProductModal() {
   const { isProductModalOpen, closeProductModal, selectedProduct } =
@@ -114,7 +115,7 @@ export default function ProductModal() {
                   </p>
 
                   <div className="text-xl font-bold text-green-700">
-                    ₹{selectedProduct.price.toFixed(2)}
+                    {formatPrice(selectedProduct.price)}
                   </div>
 
                   {/* TOPICS */}

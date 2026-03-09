@@ -135,11 +135,12 @@ export async function DELETE(
     const { id: productId } = await params;
 
     const deleteProduct = await db
-      .delete(products)
+      .update(products)
+      .set({ deletedAt: new Date() })
       .where(eq(products.id, productId))
       .returning();
 
-    if (!deleteProduct.length) {
+    if (!deleteProduct) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 

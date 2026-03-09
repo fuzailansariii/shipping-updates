@@ -8,6 +8,20 @@
       "when": 1771439088912,
       "tag": "0000_unusual_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773075500250,
+      "tag": "0001_open_loa",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773078608800,
+      "tag": "0002_majestic_tana_nile",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -26,7 +26,7 @@ export async function GET() {
         edition: products.edition,
       })
       .from(products)
-      .where(eq(products.isActive, true)); // Only show active Products
+      .where(and(eq(products.isActive, true), isNull(products.deletedAt))); // Only show active and non deleted Products
 
     return NextResponse.json(
       { success: true, products: productData },
