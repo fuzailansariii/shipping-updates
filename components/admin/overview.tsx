@@ -7,6 +7,12 @@ import LowStockList from "./stocks/low-stock-list";
 import RecentOrderTable from "./orders/recent-order-table";
 import { Status } from "./shared/status-badge";
 import TopSellingProducts from "./products/top-selling-table";
+import {
+  DashboardOrder,
+  Message,
+  DashboardProduct,
+  LowStockProduct,
+} from "@/types";
 
 type Props = {
   stats: {
@@ -15,33 +21,10 @@ type Props = {
     pendingOrders: number;
     totalCustomers: number;
   };
-  orders: {
-    id: string;
-    orderNumber: string;
-    customer: string;
-    product: string;
-    amount: number;
-    status: Status;
-  }[];
-  messages: {
-    id: string;
-    customer: string;
-    subject: string;
-    message: string;
-    time: string;
-  }[];
-  topProducts: {
-    id: string;
-    title: string;
-    type: "book" | "pdf";
-    sold: number;
-    revenue: number;
-  }[];
-  lowStock: {
-    id: string;
-    title: string;
-    stock: number;
-  }[];
+  orders: DashboardOrder[];
+  messages: Message[];
+  topProducts: DashboardProduct[];
+  lowStock: LowStockProduct[];
 };
 
 export default function Overview({

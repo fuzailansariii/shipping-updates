@@ -24,7 +24,7 @@ export default function LowStockItem({ stock, title }: LowStockItemProps) {
           <span className="text-xs font-bold text-red-500">Out of stock</span>
         ) : (
           <>
-            <span className={`text-sm font-bold ${getStockColor(stock)}`}>
+            <span className={`text-sm font-bold ${getStockColor(stock)} mr-2`}>
               {stock}
             </span>
             <span className="text-xs text-secondary-dark/40">left</span>

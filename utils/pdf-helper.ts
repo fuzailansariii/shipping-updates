@@ -16,7 +16,7 @@ export const parseTopics = (topicString: string): string[] => {
     .filter((topic) => topic.length > 0);
 };
 
-export const formatDate = (date: string) => {
+export const formatDate = (date: string | Date) => {
   return new Date(date).toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",

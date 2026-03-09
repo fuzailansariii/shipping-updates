@@ -7,10 +7,7 @@ import { productTypeEnum } from "./product.schema";
 export const orderItemSchema = z.object({
   productId: z.string().min(1),
   productType: productTypeEnum,
-  // productTitle: z.string().min(1),
   quantity: z.number().int().positive(),
-  // unitPrice: z.number().positive(),
-  // totalPrice: z.number().positive(),
 });
 
 export type OrderItemInput = z.infer<typeof orderItemSchema>;
@@ -31,11 +28,6 @@ export const checkoutSchema = z.object({
   items: z
     .array(orderItemSchema)
     .min(1, "At least one item is required in the order"),
-  // subTotal: z.number().positive("Sub Total must be Positive"),
-  // shippingCharges: z.number().min(0).default(0),
-  // tax: z.number().min(0).default(0),
-  // discount: z.number().min(0).default(0),
-  // totalAmount: z.number().positive("Total amount must be positive"),
   paymentMethod: z.enum(["razorpay", "cod"]).default("razorpay"),
   // Payment updates optional for now
   razorpayOrderId: z.string().optional(),

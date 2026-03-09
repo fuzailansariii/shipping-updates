@@ -6,6 +6,7 @@ import { useSignIn } from "@clerk/nextjs";
 import { ClerkAPIError } from "@clerk/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Step = "email" | "verification";
 
@@ -27,7 +28,7 @@ export default function SignIn() {
       const signInAttempt = await signIn.create({ identifier: emailAddress });
 
       const emailFactor = signInAttempt.supportedFirstFactors?.find(
-        (factor) => factor.strategy === "email_code"
+        (factor) => factor.strategy === "email_code",
       );
 
       if (!emailFactor?.emailAddressId) {
@@ -41,14 +42,14 @@ export default function SignIn() {
 
       setEmail(emailAddress);
       setCurrentStep("verification");
-      // TODO: toast success message "Verification code sent to your email!"
+      toast.success("Verification code sent to your email!");
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
       const errorMessage =
         clerkError.errors?.[0]?.message ||
         clerkError.errors?.[0]?.longMessage ||
         "Failed to send verification code";
-      // toast.error(errorMessage);
+      toast.error("Failed to send verification code");
       console.error("Email submission error:", errorMessage);
       throw new Error(errorMessage);
     }
@@ -69,9 +70,9 @@ export default function SignIn() {
         }
         await setActive({ session: completeSignIn.createdSessionId });
         router.push(redirectUrl);
-        // TODO: toast success message "Signed in successfully!"
+        toast.success("Signed in successfully!");
       } else {
-        // TODO: toast error message("Sign-in not complete. Please try again.")
+        toast.error("Sign-in not complete. Please try again.");
         throw new Error("Sign-in not complete");
       }
     } catch (error) {
@@ -80,7 +81,7 @@ export default function SignIn() {
         clerkError.errors?.[0]?.longMessage ||
         clerkError.errors?.[0]?.message ||
         "Failed to verify code";
-      console.error("Verification error:", errorMessage);
+      toast.error("Failed to verify code");
       throw new Error(errorMessage);
     }
   };
@@ -93,7 +94,7 @@ export default function SignIn() {
 
     try {
       const emailFactor = signIn.supportedFirstFactors?.find(
-        (factor) => factor.strategy === "email_code"
+        (factor) => factor.strategy === "email_code",
       );
 
       if (!emailFactor?.emailAddressId) {
@@ -105,14 +106,14 @@ export default function SignIn() {
         emailAddressId: emailFactor.emailAddressId,
       });
 
-      // toast.success("New verification code sent!");
+      toast.success("New verification code sent!");
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
       const errorMessage =
         clerkError.errors?.[0]?.message ||
         clerkError.errors?.[0]?.longMessage ||
         "Failed to resend code";
-      console.error("Resend code error:", errorMessage);
+      toast.error("Failed to resend code");
       // toast.error("Failed to resend code. Please try again.");
       throw new Error(errorMessage);
     }
@@ -136,7 +137,7 @@ export default function SignIn() {
         clerkError.errors?.[0].longMessage ||
         "Google sign-in failed";
       console.error("Google sign-in error:", errorMessage);
-      // toast.error('Google sign in failed. Please try again.');
+      toast.error("Google sign in failed. Please try again.");
       throw new Error(errorMessage);
     }
   };

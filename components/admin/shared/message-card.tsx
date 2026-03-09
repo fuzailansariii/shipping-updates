@@ -1,12 +1,7 @@
+import { Message } from "@/types";
 import React from "react";
 
-interface MessageCardProps {
-  customer: string;
-  subject: string;
-  message: string;
-  time: string;
-  unread?: boolean;
-}
+type MessageCardProps = Message;
 
 export default function MessageCard({
   customer,
