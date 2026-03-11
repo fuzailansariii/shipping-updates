@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
 import { buildProductValues, isAdmin } from "@/lib/auth-helper";
+import { isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { ZodError } from "zod";
 import { backendSchema } from "@/lib/validations/product.schema";
@@ -16,7 +17,10 @@ export async function GET() {
       );
     }
 
-    const productData = await db.select().from(products);
+    const productData = await db
+      .select()
+      .from(products)
+      .where(isNull(products.deletedAt));
 
     return NextResponse.json(
       { success: true, products: productData },

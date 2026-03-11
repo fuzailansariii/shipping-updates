@@ -5,6 +5,7 @@ import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ClerkAPIError } from "@clerk/types";
+import { toast } from "sonner";
 
 type Step = "email" | "verification";
 
@@ -31,7 +32,7 @@ export default function SignUp() {
       // move to verification step
       setEmail(emailAddress);
       setCurrentStep("verification");
-      // TODO: toast success message "Verification code sent to your email!"
+      toast.success("Verification code sent to your email!");
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
       const errorMessage =
@@ -39,12 +40,8 @@ export default function SignUp() {
         clerkError.errors?.[0]?.message ||
         "Failed to send verification code";
 
-      console.error("Email submission error:", errorMessage);
-
-      // TODO: Add toast error message
-      // toast.error(errorMessage);
-
-      throw new Error(errorMessage);
+      // console.error("Email submission error:", errorMessage);
+      toast.error("Failed to send verification code");
     }
   };
 
@@ -64,16 +61,14 @@ export default function SignUp() {
           throw new Error("Unable to set active session");
         }
         await setActive({ session: attemptSignUp.createdSessionId });
-        // TODO: toast success message "Sign up successful!"
+        toast.success("Sign up successful!");
         router.push("/");
       } else if (attemptSignUp.status === "missing_requirements") {
-        console.warn("Missing requirements:", attemptSignUp);
+        toast.error("Please complete all required fields.");
         throw new Error("Please complete all required fields.");
       } else {
-        // Handle incomplete verification
-        console.warn("Verification incomplete:", attemptSignUp.status);
+        toast.error("Verification incomplete. Please try again.");
         throw new Error("Verification incomplete. Please try again.");
-        // toast.error("Verification incomplete. Please try again.");
       }
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
@@ -82,11 +77,7 @@ export default function SignUp() {
         clerkError.errors?.[0]?.longMessage ||
         "Invalid verification code";
 
-      console.error("Verification error:", errorMessage);
-
-      // TODO: Add toast error message
-      // toast.error(errorMessage);
-
+      toast.error("Failed to verify code");
       throw new Error(errorMessage);
     }
   };
@@ -101,7 +92,7 @@ export default function SignUp() {
       await signUp.prepareEmailAddressVerification({
         strategy: "email_code",
       });
-      // TODO: toast success message "Verification code resent to your email!"
+      toast.success("Verification code resent to your email!");
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
       const errorMessage =
@@ -109,10 +100,7 @@ export default function SignUp() {
         clerkError.errors?.[0]?.longMessage ||
         "Failed to resend verification code";
 
-      console.error("Resend error:", errorMessage);
-
-      // TODO: Add toast error message
-      // toast.error(errorMessage);
+      toast.error("Failed to resend code");
 
       throw new Error(errorMessage);
     }
@@ -137,9 +125,7 @@ export default function SignUp() {
         clerkError.errors?.[0]?.longMessage ||
         "Google sign-up failed";
 
-      console.error("Google sign-up error:", errorMessage);
-
-      // toast.error(errorMessage);
+      toast.error("Google sign-up failed. Please try again.");
 
       throw new Error(errorMessage);
     }

@@ -8,7 +8,13 @@ export async function isAdmin(): Promise<boolean> {
   if (!user) return false;
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  const userEmail = user.emailAddresses[0]?.emailAddress;
+  if (!adminEmail) {
+    console.error("ADMIN_EMAIL env variable is not set");
+    return false;
+  }
+
+  // use primaryEmailAddress
+  const userEmail = user.primaryEmailAddress?.emailAddress;
   return userEmail === adminEmail;
 }
 

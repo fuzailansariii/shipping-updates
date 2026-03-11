@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -155,13 +156,13 @@ export default function EditProduct({ productId }: EditProductProps) {
 
   if (isLoading)
     return (
-      <div className="min-h-screen w-full flex items-center justify-center">
+      <div className="h-screen w-full flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-black" />
       </div>
     );
 
   return (
-    <div className="min-h-screen">
+    <div className="h-screen">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-700 mb-2">

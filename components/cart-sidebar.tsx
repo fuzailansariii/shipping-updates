@@ -7,6 +7,7 @@ import { useCartStore } from "@/stores/cart-store"; // Fixed import path
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { formatPrice } from "@/utils/checkout-helper";
+import { useRouter } from "next/navigation";
 
 export default function CartSidebar() {
   const {
@@ -19,7 +20,7 @@ export default function CartSidebar() {
     total,
     removeFromCart,
   } = useCartStore(); // Added price values
-
+  const router = useRouter();
   // Prevent body scroll when cart is open
   useEffect(() => {
     if (isOpen) {
@@ -152,7 +153,7 @@ export default function CartSidebar() {
                 <Button
                   asChild
                   onClick={() => {
-                    // TODO: Navigate to checkout
+                    router.push("/checkout");
                     closeCart();
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"

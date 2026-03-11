@@ -1,19 +1,12 @@
-// components/admin/messages/messages-list.tsx
 import React from "react";
 import { motion } from "framer-motion";
 import SectionHeader from "../shared/section-header";
 import MessageCard from "../shared/message-card";
+import { Message } from "@/types";
 
-interface Message {
-  id: string;
-  customer: string;
-  message: string;
-  time: string;
-}
-
-interface MessagesListProps {
+type MessagesListProps = {
   messages: Message[];
-}
+};
 
 export default function MessagesList({ messages }: MessagesListProps) {
   return (
@@ -32,7 +25,9 @@ export default function MessagesList({ messages }: MessagesListProps) {
             transition={{ delay: i * 0.05 }}
           >
             <MessageCard
+              id={msg.id}
               customer={msg.customer}
+              subject={msg.subject}
               message={msg.message}
               time={msg.time}
             />

@@ -16,9 +16,7 @@ export async function GET() {
     }
 
     const messages = await db.select().from(contactMessages);
-    if (messages.length === 0) {
-      return NextResponse.json({ error: "No Messages found" }, { status: 404 });
-    }
+
     return NextResponse.json(
       {
         success: true,

@@ -6,7 +6,9 @@ export type Status =
   | "packed"
   | "shipped"
   | "delivered"
-  | "failed";
+  | "failed"
+  | "completed"
+  | "refunded";
 
 interface StatusBadgeProps {
   status: Status;
@@ -19,12 +21,14 @@ const statusStyles: Record<Status, string> = {
   shipped: "bg-purple-500/10 text-purple-500 border border-purple-500/20",
   delivered: "bg-green-500/10 text-green-500 border border-green-500/20",
   failed: "bg-red-500/10 text-red-500 border border-red-500/20",
+  completed: "bg-green-500/10 text-green-500 border border-green-500/20",
+  refunded: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
-      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit ${statusStyles[status]}`}
+      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit ${statusStyles[status]} truncate`}
     >
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>

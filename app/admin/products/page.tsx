@@ -1,21 +1,24 @@
-export default function ProductsPage() {
-  return (
-    <>
-      {/* <AdminHeader title="Products" subtitle="Manage your product inventory" /> */}
+import { isAdmin } from "@/lib/auth-helper";
+import { db } from "@/utils/db";
+import { Product, products } from "@/utils/db/schema";
+import { isNull } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import React from "react";
+import ProductsPage from "./product-page";
 
-      <div className="bg-white rounded-lg shadow-sm my-10 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800">Product List</h2>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-            Add Product
-          </button>
-        </div>
+export default async function AdminProducts() {
+  const admin = await isAdmin();
+  if (!admin) redirect("/sign-in");
 
-        {/* Your products content here */}
-        <p className="text-gray-600">
-          Product management interface coming soon...
-        </p>
-      </div>
-    </>
-  );
+  let initialProducts: Product[] = [];
+
+  try {
+    initialProducts = await db
+      .select()
+      .from(products)
+      .where(isNull(products.deletedAt));
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+  }
+  return <ProductsPage initialProducts={initialProducts} />;
 }

@@ -1,7 +1,7 @@
 import { calculatePricing } from "@/lib/pricing";
 import { checkoutSchema } from "@/lib/validations/order.schema";
 import { db } from "@/utils/db";
-import { generateOrderId } from "@/utils/db/order-id";
+import { generateOrderNumber } from "@/utils/db/order-id";
 import { inventoryLogs, orderItems, orders, products } from "@/utils/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const orderId = nanoid();
-    const orderNumber = generateOrderId();
+    const orderNumber = generateOrderNumber();
     const now = new Date();
 
     try {

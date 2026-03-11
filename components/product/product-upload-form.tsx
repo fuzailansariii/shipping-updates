@@ -1,3 +1,4 @@
+"use client";
 import { ProductType } from "@/lib/validations/product.schema";
 import BookUploadForm from "./book-form";
 import PdfUploadForm from "./pdf-form";
