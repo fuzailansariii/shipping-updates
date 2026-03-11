@@ -1,119 +1,192 @@
-import { desc } from "drizzle-orm";
-import { db } from "@/utils/db";
-import { contactMessages } from "@/utils/db/schema";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import axios from "axios";
 import { formatDate } from "@/utils/pdf-helper";
-import { isAdmin } from "@/lib/auth-helper";
+import { cn } from "@/lib/utils";
+import {
+  useAdminMessageModal,
+  Message,
+} from "@/stores/admin-message-modal-store";
+import AdminMessageModal from "@/components/admin/messages/admin-message-modal";
+import DataTable from "@/components/admin/shared/data-table";
 
-export default async function MessagesPage() {
-  const admin = await isAdmin();
+export default function MessagesPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!admin) {
-    return null;
-  }
+  const { userId, isLoaded } = useAuth();
+  const router = useRouter();
+  const { openMessageModal } = useAdminMessageModal();
 
-  const messages = await db
-    .select({
-      id: contactMessages.id,
-      name: contactMessages.name,
-      email: contactMessages.email,
-      subject: contactMessages.subject,
-      message: contactMessages.message,
-      createdAt: contactMessages.createdAt,
-    })
-    .from(contactMessages)
-    .orderBy(desc(contactMessages.createdAt))
-    .limit(50);
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!userId) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await axios.get("/api/admin/messages", {
+          signal: controller.signal,
+        });
+        setMessages(res.data?.data ?? []);
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 403) {
+            setError("You are not authorized to view this page.");
+          } else {
+            setError("Failed to load messages. Please try again.");
+          }
+        } else {
+          setError("Something went wrong while loading messages.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+    return () => controller.abort();
+  }, [userId, isLoaded]);
+
+  const handleMarkedRead = (id: string) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
+    );
+  };
+
+  const unreadCount = messages.filter((m) => !m.isRead).length;
 
   return (
-    <div className="py-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <>
+      <div className="py-8 space-y-6">
+        {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-secondary-dark">Messages</h1>
+          <h1 className="text-2xl font-bold text-secondary-dark flex items-center gap-2">
+            Messages
+            {unreadCount > 0 && (
+              <span className="text-sm font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                {unreadCount} unread
+              </span>
+            )}
+          </h1>
           <p className="mt-1 text-sm text-secondary-dark/60">
             Recent contact form submissions from your customers.
           </p>
         </div>
-      </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Desktop header */}
-        <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-          <div className="col-span-3">Customer</div>
-          <div className="col-span-3">Email</div>
-          <div className="col-span-2">Subject</div>
-          <div className="col-span-2">Received</div>
-          <div className="col-span-2 text-right">Preview</div>
-        </div>
-
-        {messages.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">
-            No messages received yet.
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100 text-sm">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className="px-4 py-3 hover:bg-gray-50/80 transition-colors"
+        <DataTable
+          columns={[
+            { label: "Customer" },
+            { label: "Email" },
+            { label: "Subject" },
+            { label: "Received" },
+            { label: "Status" },
+          ]}
+          data={messages}
+          loading={loading}
+          error={error}
+          gridClassName="grid-cols-5"
+          onRowClick={(msg) => openMessageModal(msg)}
+          renderRow={(msg) => (
+            <>
+              {/* Customer name — bold if unread */}
+              <span
+                className={cn(
+                  "text-sm line-clamp-1 flex items-center gap-2 mx-auto",
+                  !msg.isRead ? "font-bold text-gray-900" : "text-gray-700",
+                )}
               >
-                {/* Mobile layout */}
-                <div className="flex flex-col gap-1 md:hidden">
-                  <div className="flex justify-between gap-3">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 line-clamp-1">
-                        {msg.name}
-                      </p>
-                      <p className="text-xs text-gray-400 line-clamp-1">
-                        {msg.email || "-"}
-                      </p>
-                    </div>
-                    <p className="text-[11px] text-gray-500 shrink-0">
-                      {msg.createdAt ? formatDate(msg.createdAt) : "-"}
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-600 line-clamp-2">
-                    <span className="font-medium text-gray-700">
-                      {msg.subject || "No subject"}:
-                    </span>{" "}
-                    {msg.message}
-                  </p>
-                  <p className="text-[11px] text-gray-400 line-clamp-1">
-                    ID: {msg.id}
-                  </p>
-                </div>
+                {!msg.isRead && (
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 inline-block" />
+                )}
+                {msg.name}
+              </span>
 
-                {/* Desktop layout */}
-                <div className="hidden md:grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-3">
-                    <p className="font-semibold text-gray-900 line-clamp-1">
-                      {msg.name}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
-                      ID: {msg.id}
-                    </p>
-                  </div>
-                  <div className="col-span-3">
-                    <p className="text-gray-700 line-clamp-1">
-                      {msg.email || "-"}
-                    </p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-gray-700 line-clamp-1">
-                      {msg.subject || "-"}
-                    </p>
-                  </div>
-                  <div className="col-span-2 text-gray-700 text-xs">
-                    {msg.createdAt ? formatDate(msg.createdAt) : "-"}
-                  </div>
-                  <div className="col-span-2 text-right text-xs text-gray-600 line-clamp-2">
-                    {msg.message}
-                  </div>
+              {/* Email */}
+              <span className="text-sm text-gray-600 line-clamp-1">
+                {msg.email}
+              </span>
+
+              {/* Subject */}
+              <span className="text-sm text-gray-600 line-clamp-1">
+                {msg.subject ?? "—"}
+              </span>
+
+              {/* Received */}
+              <span className="text-xs text-gray-500">
+                {msg.createdAt ? formatDate(msg.createdAt) : "—"}
+              </span>
+
+              {/* Status badge */}
+              <span
+                className={cn(
+                  "text-[11px] font-medium px-2 py-0.5 mx-auto rounded-full w-fit",
+                  msg.isRead
+                    ? "bg-gray-100 text-gray-500"
+                    : "bg-blue-50 text-blue-600",
+                )}
+              >
+                {msg.isRead ? "Read" : "Unread"}
+              </span>
+            </>
+          )}
+          renderMobileCard={(msg) => (
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                {!msg.isRead && (
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />
+                )}
+                <div className="space-y-0.5 min-w-0">
+                  <p
+                    className={cn(
+                      "text-sm line-clamp-1",
+                      !msg.isRead
+                        ? "font-bold text-gray-900"
+                        : "font-semibold text-gray-700",
+                    )}
+                  >
+                    {msg.name}
+                  </p>
+                  <p className="text-xs text-gray-500 line-clamp-1">
+                    {msg.email}
+                  </p>
+                  <p className="text-xs text-gray-400 line-clamp-1">
+                    {msg.subject ?? "No subject"}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-[11px] text-gray-400">
+                  {msg.createdAt ? formatDate(msg.createdAt) : "—"}
+                </span>
+                <span
+                  className={cn(
+                    "text-[11px] font-medium px-2 py-0.5 rounded-full",
+                    msg.isRead
+                      ? "bg-gray-100 text-gray-500"
+                      : "bg-blue-50 text-blue-600",
+                  )}
+                >
+                  {msg.isRead ? "Read" : "Unread"}
+                </span>
+              </div>
+            </div>
+          )}
+        />
       </div>
-    </div>
+
+      <AdminMessageModal onMarkedRead={handleMarkedRead} />
+    </>
   );
 }
