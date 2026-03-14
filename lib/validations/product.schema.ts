@@ -134,7 +134,7 @@ export const backendBaseSchema = z.object({
 export const backendBookSchema = backendBaseSchema
   .extend({
     type: z.literal("book"),
-    author: z.string().optional(),
+    author: z.string().min(1, "Author is required"),
     stockQuantity: z.number().int().min(1, "Stock must be at least 1"),
     publisher: z.string().optional(),
     isbn: z.string().optional(),

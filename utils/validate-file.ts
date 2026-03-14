@@ -1,4 +1,3 @@
-import { FileText } from "lucide-react";
 import {
   ALLOWED_FILE_TYPES,
   FILE_UPLOAD_MESSAGE,
@@ -20,7 +19,7 @@ export interface ValidationOptions {
 
 export const validateFile = (
   file: File,
-  options: ValidationOptions
+  options: ValidationOptions,
 ): ValidateResult => {
   const {
     kind,
@@ -60,7 +59,7 @@ export const validateFile = (
 
 export const validateFileSimple = (
   file: File,
-  kind: UploadKind
+  kind: UploadKind,
 ): string | null => {
   const result = validateFile(file, { kind });
   return result.error;
@@ -68,7 +67,7 @@ export const validateFileSimple = (
 
 export const validateMultipleFiles = (
   files: File[],
-  options: ValidationOptions
+  options: ValidationOptions,
 ): ValidateResult[] => {
   return files.map((file) => validateFile(file, options));
 };

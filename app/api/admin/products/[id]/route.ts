@@ -1,17 +1,26 @@
-import { buildProductValues, isAdmin } from "@/lib/auth-helper";
+import { isAdmin } from "@/lib/auth-helper";
 import { backendUpdateProductSchema } from "@/lib/validations/product.schema";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+import { validateId } from "@/lib/validations/id.schema";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { revalidateTag } from "next/cache";
 
-// GET - Fetch single PDF (admin only - includes fileUrl)
+// GET
+// Fetch single product (admin only)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const rate = await checkRateLimit();
+    if (!rate.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
@@ -19,8 +28,8 @@ export async function GET(
         { status: 403 },
       );
     }
-
-    const { id: productId } = await params;
+    const { id } = await params;
+    const productId = validateId(id);
 
     const product = await db
       .select()
@@ -36,7 +45,8 @@ export async function GET(
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error fetching product", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error fetching product:", message);
     return NextResponse.json(
       { error: "Failed to fetch product" },
       { status: 500 },
@@ -44,12 +54,18 @@ export async function GET(
   }
 }
 
-// PATCH - Update PDF (admin only)
+// PATCH
+// Update product (admin only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const rate = await checkRateLimit();
+    if (!rate.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
@@ -58,11 +74,12 @@ export async function PATCH(
       );
     }
 
-    const { id: productId } = await params;
+    const { id } = await params;
+    const productId = validateId(id);
+
     const body = await request.json();
 
     const parsed = backendUpdateProductSchema.safeParse(body);
-
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -82,14 +99,12 @@ export async function PATCH(
       );
     }
 
-    // only include fields that were provided
     const updateData = {
       ...validatedData,
       price: Number(validatedData.price),
       updatedAt: new Date(),
     };
 
-    // Update PDF
     const updatedProduct = await db
       .update(products)
       .set(updateData)
@@ -100,16 +115,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    revalidateTag("products", "max");
     return NextResponse.json(
       {
         success: true,
-        message: "Product Updated successfully",
-        pdf: updatedProduct[0],
+        message: "Product updated successfully",
+        product: updatedProduct[0],
       },
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error Updating Product", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error updating product:", message);
     return NextResponse.json(
       { error: "Failed to update product" },
       { status: 500 },
@@ -117,13 +134,18 @@ export async function PATCH(
   }
 }
 
-// DELETE - Delete Pdf (admin only)
-
+// DELETE
+// Soft delete product (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const rate = await checkRateLimit();
+    if (!rate.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const admin = await isAdmin();
     if (!admin) {
       return NextResponse.json(
@@ -132,18 +154,20 @@ export async function DELETE(
       );
     }
 
-    const { id: productId } = await params;
+    const { id } = await params;
+    const productId = validateId(id);
 
-    const deleteProduct = await db
+    const deletedProduct = await db
       .update(products)
       .set({ deletedAt: new Date() })
       .where(eq(products.id, productId))
       .returning();
 
-    if (!deleteProduct) {
+    if (!deletedProduct.length) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    revalidateTag("products", "max");
     return NextResponse.json(
       {
         success: true,
@@ -152,9 +176,10 @@ export async function DELETE(
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error Deleting Product", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error deleting product:", message);
     return NextResponse.json(
-      { error: "Failed to delete Product" },
+      { error: "Failed to delete product" },
       { status: 500 },
     );
   }

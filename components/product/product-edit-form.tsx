@@ -1,10 +1,19 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { toast } from "sonner";
-import { AlignLeft, Loader2, UploadIcon } from "lucide-react";
+import {
+  AlignLeft,
+  BookOpen,
+  FileText,
+  Layers,
+  Loader2,
+  Save,
+  UploadIcon,
+} from "lucide-react";
 import Input from "../ui/input-form";
 import Upload from "../upload";
 import {
@@ -15,19 +24,70 @@ import {
   backendUpdateProductSchema,
 } from "@/lib/validations/product.schema";
 import { Toggle } from "../toggle";
-import { UseFormReturn } from "react-hook-form";
+import { BookFields } from "./book-fields";
+import { PdfFields } from "./pdf-fields";
+import ErrorState from "../admin/shared/error-state";
+import { useRouter } from "next/navigation";
 
 interface EditProductProps {
   productId: string;
 }
 
+// Shared UI helpers
+
+function Section({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-neutral-100 rounded-2xl p-4 md:p-6 border border-gray-300 space-y-4 md:space-y-6">
+      <h2 className="text-base font-semibold text-neutral-700 flex items-center gap-2">
+        <span className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+          {icon}
+        </span>
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function TypeBadge({ type }: { type: "book" | "pdf" | undefined }) {
+  if (!type) return null;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
+        type === "book"
+          ? "bg-amber-50 text-amber-700"
+          : "bg-blue-50 text-blue-600"
+      }`}
+    >
+      {type === "book" ? (
+        <BookOpen className="w-3 h-3" />
+      ) : (
+        <FileText className="w-3 h-3" />
+      )}
+      <span className="capitalize">{type}</span>
+    </span>
+  );
+}
+
+// Main Component
+
 export default function EditProduct({ productId }: EditProductProps) {
   const [hasImageUploaded, setHasImageUploaded] = useState(false);
-  const [hasFileUploaded, setHasFileUploaded] = useState(false); // For PDF file
+  const [hasFileUploaded, setHasFileUploaded] = useState(false);
   const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [uploadKey, setUploadKey] = useState(Date.now());
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [uploadKey, setUploadKey] = useState(0);
   const RATE_LIMIT_MS = 5000;
+  const router = useRouter();
 
   const form = useForm<FrontendUpdateProductValues>({
     resolver: zodResolver(frontendUpdateProductSchema),
@@ -39,21 +99,20 @@ export default function EditProduct({ productId }: EditProductProps) {
     setValue,
     reset,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form;
 
   const type = watch("type");
 
-  // Type assertions for easier access to type-specific fields and errors
-  const bookForm = form as UseFormReturn<FrontendUpdateBookValues>;
-  const pdfForm = form as UseFormReturn<FrontendUpdatePdfValues>;
+  // Fetch & prefill
 
-  /** Fetch product and prefill form */
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
+        setFetchError(null);
         const res = await axios.get(`/api/admin/products/${productId}`);
+        console.log("Res: ", res);
         const data = res.data.product;
 
         reset({
@@ -61,7 +120,7 @@ export default function EditProduct({ productId }: EditProductProps) {
           title: data.title,
           description: data.description,
           price: (data.price / 100).toFixed(2),
-          topics: data.topics ?? [],
+          topics: Array.isArray(data.topics) ? data.topics.join(", ") : "",
           language: data.language,
           thumbnail: data.thumbnail ?? "",
           isActive: data.isActive ?? false,
@@ -82,16 +141,23 @@ export default function EditProduct({ productId }: EditProductProps) {
 
         setHasImageUploaded(!!data.thumbnail);
         if (data.type === "pdf") setHasFileUploaded(!!data.fileUrl);
-      } catch {
-        toast.error("Failed to load product data");
+      } catch (err) {
+        console.error("[EditProduct] fetchProduct failed:", err);
+        const msg = axios.isAxiosError(err)
+          ? (err.response?.data?.error ?? "Failed to load product.")
+          : "Unexpected error while loading product.";
+        setFetchError(msg);
+        toast.error(msg);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchProduct();
   }, [productId, reset]);
 
-  /** Handle uploads */
+  // Upload handlers
+
   const handleThumbnailUpload = (res: { url: string }) => {
     setValue("thumbnail", res.url, { shouldValidate: true });
     setHasImageUploaded(true);
@@ -118,7 +184,8 @@ export default function EditProduct({ productId }: EditProductProps) {
     toast.success("File removed");
   };
 
-  /** Submit handler */
+  // Submit
+
   const onSubmit = async (data: FrontendUpdateProductValues) => {
     const now = Date.now();
     if (now - lastSubmitTime < RATE_LIMIT_MS) {
@@ -130,7 +197,6 @@ export default function EditProduct({ productId }: EditProductProps) {
     }
     setLastSubmitTime(now);
 
-    // backend schema handles paise conversion — no manual parseFloat needed
     const backendParsed = backendUpdateProductSchema.safeParse(data);
     if (!backendParsed.success) {
       toast.error("Invalid data. Please check your inputs.");
@@ -144,6 +210,7 @@ export default function EditProduct({ productId }: EditProductProps) {
         backendParsed.data,
       );
       toast.success(res.data.message ?? "Product updated successfully!");
+      router.push("/admin/products");
       setUploadKey((prev) => prev + 1);
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -154,38 +221,52 @@ export default function EditProduct({ productId }: EditProductProps) {
     }
   };
 
-  if (isLoading)
+  // Loading / error states
+
+  if (isLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-black" />
+      <div className="h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-sm text-gray-400 font-medium">
+            Loading product...
+          </p>
+        </div>
       </div>
     );
+  }
 
+  if (fetchError) {
+    return <ErrorState message="Failed to load product" />;
+  }
+
+  // Form
   return (
-    <div className="h-screen">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-700 mb-2">
-            Edit Product
-          </h1>
-          <p className="text-gray-700">Update your product information</p>
+    <div className="py-4 md:py-8">
+      <div className="w-full md:max-w-4xl mx-auto space-y-4 md:space-y-6">
+        {/* Page header */}
+        <div>
+          <div className="flex items-center justify-between gap-2.5 flex-wrap">
+            <h1 className="text-2xl font-bold text-secondary-dark">
+              Edit Product
+            </h1>
+            <TypeBadge type={type} />
+          </div>
+          <p className="mt-1 text-sm text-secondary-dark/60">
+            Update your product details, files, and visibility settings.
+          </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-8"
-          aria-label="Edit product form"
+          className="space-y-4 md:space-y-6"
         >
-          {/* Upload Section */}
-          <div className="bg-neutral-100 rounded-2xl p-6 border border-gray-300">
-            <h2 className="text-xl font-semibold text-neutral-700 mb-6 flex items-center gap-2">
-              <UploadIcon className="w-5 h-5 text-blue-500" />
-              Upload Files
-            </h2>
-
-            {/* Upload Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-              {/* Thumbnail */}
+          {/* Files & Media */}
+          <Section
+            icon={<UploadIcon className="w-3.5 h-3.5 text-blue-500" />}
+            title="Files & Media"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Upload
                 key={`thumbnail-${uploadKey}`}
                 uploadType="image"
@@ -194,159 +275,133 @@ export default function EditProduct({ productId }: EditProductProps) {
               />
               <input type="hidden" {...register("thumbnail")} />
 
-              {/* PDF file (only if type === pdf) */}
               {type === "pdf" && (
-                <>
-                  <Upload
-                    key={`file-${uploadKey}`}
-                    uploadType="pdf"
-                    onSuccess={handleFileUpload}
-                    onRemove={handleFileRemove}
-                  />
-                  <input type="hidden" {...register("fileUrl")} />
-                  <input type="hidden" {...register("fileSize")} />
-                </>
+                <PdfFields
+                  form={
+                    form as unknown as import("react-hook-form").UseFormReturn<FrontendUpdatePdfValues>
+                  }
+                  uploadKey={uploadKey}
+                  onFileUpload={handleFileUpload}
+                  onFileRemove={handleFileRemove}
+                />
               )}
             </div>
-          </div>
+          </Section>
 
-          {/* Details Section */}
-          <div className="bg-neutral-100 rounded-2xl p-6 border border-gray-300">
-            <h2 className="text-xl font-semibold text-neutral-700 mb-6 flex items-center gap-2">
-              <AlignLeft className="w-5 h-5 text-blue-500" />
-              Product Details
-            </h2>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  name="title"
-                  label="Title"
-                  type="text"
-                  placeholder="Enter title"
-                  register={bookForm.register("title")}
-                  error={bookForm.formState.errors.title}
-                />
-                <Input
-                  name="price"
-                  label="Price (INR)"
-                  type="text"
-                  placeholder="0.00"
-                  register={bookForm.register("price")}
-                  error={bookForm.formState.errors.price}
-                />
-                <Input
-                  name="topics"
-                  label="Topics"
-                  type="text"
-                  placeholder="e.g., GP Rating"
-                  register={bookForm.register("topics", {
-                    setValueAs: (v) =>
-                      typeof v === "string"
-                        ? v
-                            .split(",")
-                            .map((x) => x.trim())
-                            .filter(Boolean)
-                        : v,
-                  })}
-                  error={
-                    Array.isArray(bookForm.formState.errors.topics)
-                      ? bookForm.formState.errors.topics[0]
-                      : bookForm.formState.errors.topics
-                  }
-                />
+          {/* Core details */}
+          <Section
+            icon={<AlignLeft className="w-3.5 h-3.5 text-blue-500" />}
+            title="Product Details"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                name="title"
+                label="Title"
+                type="text"
+                placeholder="Enter title"
+                register={register("title")}
+                error={form.formState.errors.title}
+              />
+              <Input
+                name="price"
+                label="Price (INR)"
+                type="text"
+                placeholder="0.00"
+                register={register("price")}
+                error={form.formState.errors.price}
+              />
+              <Input
+                name="topics"
+                label="Topics"
+                type="text"
+                placeholder="e.g., GP Rating, Navigation"
+                register={register("topics", {
+                  setValueAs: (v) => {
+                    if (typeof v === "string") {
+                      return v
+                        .split(",")
+                        .map((x) => x.trim())
+                        .filter(Boolean);
+                    }
+                    if (Array.isArray(v)) return v;
+                    return [];
+                  },
+                })}
+                error={
+                  Array.isArray(form.formState.errors.topics)
+                    ? form.formState.errors.topics[0]
+                    : form.formState.errors.topics
+                }
+              />
+              <Input
+                type="text"
+                name="language"
+                label="Language"
+                placeholder="English"
+                register={register("language")}
+                error={form.formState.errors.language}
+              />
+              <div className="md:col-span-2">
                 <Input
                   as="textarea"
                   name="description"
                   label="Description"
-                  placeholder="Enter description"
-                  register={bookForm.register("description")}
-                  error={bookForm.formState.errors.description}
-                />
-                <Input
-                  type="text"
-                  name="language"
-                  label="Language"
-                  placeholder="English"
-                  register={bookForm.register("language")}
-                  error={bookForm.formState.errors.language}
-                />
-
-                {/* Book-specific fields */}
-                {type === "book" && (
-                  <>
-                    <Input
-                      type="text"
-                      name="author"
-                      label="Author"
-                      placeholder="Author name"
-                      register={bookForm.register("author")}
-                      error={bookForm.formState.errors.author}
-                    />
-                    <Input
-                      type="number"
-                      name="stockQuantity"
-                      label="Stock Quantity"
-                      placeholder="50"
-                      register={bookForm.register("stockQuantity", {
-                        valueAsNumber: true,
-                      })}
-                      error={bookForm.formState.errors.stockQuantity}
-                    />
-                    <Input
-                      type="text"
-                      name="publisher"
-                      label="Publisher"
-                      placeholder="Publisher"
-                      register={bookForm.register("publisher")}
-                      error={bookForm.formState.errors.publisher}
-                    />
-                    <Input
-                      type="text"
-                      name="isbn"
-                      label="ISBN"
-                      placeholder="123-45-678-9"
-                      register={bookForm.register("isbn")}
-                      error={bookForm.formState.errors.isbn}
-                    />
-                    <Input
-                      type="text"
-                      name="edition"
-                      label="Edition"
-                      placeholder="1st Edition"
-                      register={bookForm.register("edition")}
-                      error={bookForm.formState.errors.edition}
-                    />
-                  </>
-                )}
-
-                <input type="hidden" {...bookForm.register("type")} />
-              </div>
-
-              {/* Toggles */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Toggle
-                  label="Publish Document"
-                  description="Make this document available for purchase"
-                  name="isActive"
-                  register={register}
-                />
-                <Toggle
-                  label="Feature This Document"
-                  description="Feature this document on the homepage"
-                  name="isFeatured"
-                  register={register}
+                  placeholder="Enter a short description of this product"
+                  register={register("description")}
+                  error={form.formState.errors.description}
                 />
               </div>
             </div>
-          </div>
+          </Section>
 
+          {type === "book" && (
+            <BookFields
+              form={
+                form as unknown as import("react-hook-form").UseFormReturn<FrontendUpdateBookValues>
+              }
+            />
+          )}
+
+          {/* Visibility */}
+          <Section
+            icon={<Layers className="w-3.5 h-3.5 text-blue-500" />}
+            title="Visibility & Featuring"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Toggle
+                label="Publish Product"
+                description="Make this product available for purchase"
+                name="isActive"
+                register={register}
+              />
+              <Toggle
+                label="Feature This Product"
+                description="Highlight this product on the homepage"
+                name="isFeatured"
+                register={register}
+              />
+            </div>
+          </Section>
+
+          <input type="hidden" {...register("type")} />
+
+          {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-6 rounded-lg bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 transition-all font-medium shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-6 rounded-xl bg-linear-to-r from-blue-600 to-blue-500 text-white text-sm font-semibold hover:from-blue-700 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isSubmitting ? "Updating..." : "Update Product"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Save Changes
+              </>
+            )}
           </button>
         </form>
       </div>
