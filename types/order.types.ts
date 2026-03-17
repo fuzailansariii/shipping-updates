@@ -1,5 +1,5 @@
 import { Order, OrderItem } from "@/utils/db/schema";
-import { Status } from "@/components/admin/shared/status-badge";
+import { OrderStatus } from "@/utils/status-badge";
 
 export type OrderWithItems = Order & { items: OrderItem[] };
 
@@ -9,5 +9,5 @@ export type DashboardOrder = {
   customer: string;
   product: string;
   amount: number;
-  status: Status;
+  status: OrderStatus;
 };

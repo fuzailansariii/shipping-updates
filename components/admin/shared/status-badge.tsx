@@ -1,7 +1,7 @@
-import { getStatusConfig } from "@/utils/status-badge";
+import { getStatusConfig, OrderStatus } from "@/utils/status-badge";
 
 type Props = {
-  status: string;
+  status: OrderStatus;
 };
 
 export default function StatusBadge({ status }: Props) {

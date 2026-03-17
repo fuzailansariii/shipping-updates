@@ -3,6 +3,7 @@ import StatusBadge from "../shared/status-badge";
 import { formatPrice } from "@/utils/checkout-helper";
 import SectionHeader from "../shared/section-header";
 import DataTable from "../shared/data-table";
+import { OrderStatus } from "@/utils/status-badge";
 
 interface Order {
   id: string;
@@ -10,7 +11,7 @@ interface Order {
   customer: string;
   product: string;
   amount: number;
-  status: string;
+  status: OrderStatus;
 }
 
 interface RecentOrdersTableProps {

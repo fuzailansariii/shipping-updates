@@ -1,4 +1,3 @@
-import { Status } from "@/components/admin/shared/status-badge";
 import { db } from "@/utils/db";
 import {
   contactMessages,
@@ -7,6 +6,7 @@ import {
   products,
 } from "@/utils/db/schema";
 import { formatDate } from "@/utils/pdf-helper";
+import { OrderStatus } from "@/utils/status-badge";
 import { asc, count, countDistinct, desc, eq, lt, sum } from "drizzle-orm";
 
 // Overview Stats with explicit return types
@@ -67,7 +67,7 @@ export async function getRecentOrders(): Promise<
     customer: string;
     product: string;
     amount: number;
-    status: Status;
+    status: OrderStatus;
   }[]
 > {
   try {
@@ -83,7 +83,7 @@ export async function getRecentOrders(): Promise<
       customer: order.buyerName,
       product: order.items[0]?.productTitle ?? "-",
       amount: order.totalAmount,
-      status: order.orderStatus ?? "failed",
+      status: order.orderStatus as OrderStatus,
     }));
   } catch (error) {
     console.error("Failed to fetch recent orders: ", error);
