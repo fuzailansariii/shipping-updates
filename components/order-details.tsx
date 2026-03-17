@@ -2,64 +2,11 @@
 import { useOrderDetailsStore } from "@/stores/orders-history-store";
 import { formatPrice } from "@/utils/checkout-helper";
 import { formatDate } from "@/utils/pdf-helper";
-import { AnimatePresence, motion } from "framer-motion";
 import { BookOpenText, FileText, Package, X } from "lucide-react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import BottomSheetModal from "./bottom-sheet-modal";
 import { getStatusConfig } from "@/utils/status-badge";
 
-//   switch (status?.toLowerCase().trim()) {
-//     case "pending":
-//       return {
-//         label: "Pending",
-//         bg: "bg-yellow-100",
-//         text: "text-yellow-700",
-//         dot: "bg-yellow-500",
-//       };
-//     case "confirmed":
-//       return {
-//         label: "Confirmed",
-//         bg: "bg-green-100",
-//         text: "text-green-700",
-//         dot: "bg-green-500",
-//       };
-//     case "completed":
-//       return {
-//         label: "Completed",
-//         bg: "bg-green-100",
-//         text: "text-green-700",
-//         dot: "bg-green-500",
-//       };
-//     case "failed":
-//       return {
-//         label: "Failed",
-//         bg: "bg-red-100",
-//         text: "text-red-700",
-//         dot: "bg-red-500",
-//       };
-//     case "cancelled":
-//       return {
-//         label: "Cancelled",
-//         bg: "bg-gray-100",
-//         text: "text-gray-600",
-//         dot: "bg-gray-400",
-//       };
-//     case "refunded":
-//       return {
-//         label: "Refunded",
-//         bg: "bg-blue-100",
-//         text: "text-blue-700",
-//         dot: "bg-blue-500",
-//       };
-//     default:
-//       return {
-//         label: status,
-//         bg: "bg-gray-100",
-//         text: "text-gray-600",
-//         dot: "bg-gray-400",
-//       };
-//   }
-// };
 export default function OrderDetails() {
   const isOpen = useOrderDetailsStore((s) => s.isOpen);
   const selectedOrder = useOrderDetailsStore((s) => s.selectedOrder);
@@ -227,16 +174,70 @@ export default function OrderDetails() {
             <div className="border-t border-dashed border-gray-200" />
 
             {/* Delivery Info - Only show delivery address for physical orders */}
-            {hasPhysicalBook && selectedOrder.shippingAddress && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                  Delivery Address
-                </p>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {selectedOrder.shippingAddress}
-                </p>
-              </div>
-            )}
+            {hasPhysicalBook &&
+              selectedOrder.shippingAddress &&
+              (() => {
+                let addr: any = null;
+                let rawAddress: string | null = null;
+
+                try {
+                  addr = JSON.parse(selectedOrder.shippingAddress);
+                } catch {
+                  // Old order — can't reliably parse, show as plain text
+                  rawAddress = selectedOrder.shippingAddress;
+                }
+
+                return (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5">
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                      Delivery Address
+                    </p>
+
+                    {addr ? (
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                        <span className="text-gray-400">Name</span>
+                        <span className="font-medium text-gray-800">
+                          {addr.fullName}
+                        </span>
+
+                        <span className="text-gray-400">Phone</span>
+                        <span className="font-medium text-gray-800">
+                          {addr.phone}
+                        </span>
+
+                        <span className="text-gray-400">Address</span>
+                        <span className="text-gray-700">
+                          {[addr.addressLine1, addr.addressLine2]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </span>
+
+                        {addr.landmark && (
+                          <>
+                            <span className="text-gray-400">Landmark</span>
+                            <span className="text-gray-700">
+                              {addr.landmark}
+                            </span>
+                          </>
+                        )}
+
+                        <span className="text-gray-400">City</span>
+                        <span className="text-gray-700">{addr.city}</span>
+
+                        <span className="text-gray-400">State</span>
+                        <span className="text-gray-700">{addr.state}</span>
+
+                        <span className="text-gray-400">Pincode</span>
+                        <span className="text-gray-700">{addr.pincode}</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-700 leading-relaxed">
+                        {rawAddress}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
             {/* Payment */}
             {selectedOrder.paymentMethod && (

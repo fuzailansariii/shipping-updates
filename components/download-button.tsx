@@ -5,6 +5,7 @@ import axios from "axios";
 import { Download, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useOrderDetailsStore } from "@/stores/orders-history-store";
+import { toast } from "sonner";
 
 type DownloadState = "idle" | "loading" | "success";
 
@@ -43,6 +44,19 @@ export default function DownloadButton({
       setTimeout(() => setState("idle"), 2000);
     } catch (error: any) {
       setState("idle");
+
+      // Check if it's an axios error with a response
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.limitReached) {
+          toast.error("Download limit reached (max 3 downloads)");
+        } else {
+          toast.error(data.error || "Download failed. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+
       console.error(error);
     }
   };

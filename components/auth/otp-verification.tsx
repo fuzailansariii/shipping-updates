@@ -55,7 +55,7 @@ export default function OTPVerification({
   // Handle OTP input change
   const handleOTPChange = (value: string) => {
     setOtpValue(value);
-    setValue("code", value, { shouldValidate: true });
+    setValue("code", value);
     if (errors.code) {
       clearErrors("code");
     }
@@ -75,10 +75,11 @@ export default function OTPVerification({
       setIsLoading(true);
       await onVerify(data.code);
     } catch (error) {
-      console.error("Verification error:", error);
+      const errorMessage =
+        (error as Error)?.message || "Invalid code. Please try again.";
       setError("code", {
         type: "manual",
-        message: "Invalid code. Please try again.",
+        message: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -95,10 +96,11 @@ export default function OTPVerification({
       setOtpValue(""); // Clear OTP input
       reset();
     } catch (error) {
-      console.error("Resend error:", error);
+      const errorMessage =
+        (error as Error)?.message || "Failed to resend code. Please try again.";
       setError("code", {
         type: "manual",
-        message: "Failed to resend code. Please try again.",
+        message: errorMessage,
       });
     } finally {
       setIsResending(false);

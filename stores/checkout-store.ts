@@ -144,18 +144,16 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
           // Format address
           const formatAddress = (address: any) => {
             if (!address) return "Digital Product - No Address Required";
-
-            const parts = [
-              address.fullName,
-              address.phone,
-              address.addressLine1,
-              address.addressLine2,
-              address.landmark,
-              address.city,
-              address.state,
-              address.pincode,
-            ].filter(Boolean);
-            return parts.join(", ");
+            return JSON.stringify({
+              fullName: address.fullName,
+              phone: address.phone,
+              addressLine1: address.addressLine1,
+              addressLine2: address.addressLine2 ?? null,
+              landmark: address.landmark ?? null,
+              city: address.city,
+              state: address.state,
+              pincode: address.pincode,
+            });
           };
           const shippingAddress = formatAddress(state.selectedAddress);
           const billingAddress = state.useSameAddressForBilling

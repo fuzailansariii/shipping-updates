@@ -1,7 +1,5 @@
 "use client";
-import React from "react";
-import { motion } from "framer-motion";
-import StatusBadge, { Status } from "../shared/status-badge";
+import StatusBadge from "../shared/status-badge";
 import { formatPrice } from "@/utils/checkout-helper";
 import SectionHeader from "../shared/section-header";
 import DataTable from "../shared/data-table";
@@ -12,7 +10,7 @@ interface Order {
   customer: string;
   product: string;
   amount: number;
-  status: Status;
+  status: string;
 }
 
 interface RecentOrdersTableProps {

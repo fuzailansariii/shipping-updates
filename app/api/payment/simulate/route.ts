@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/utils/db";
 import { inventoryLogs, orderItems, orders, products } from "@/utils/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 
@@ -38,14 +38,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (order.paymentStatus === "completed") {
+    // ownership check
+    if (order.clerkUserId !== userId) {
       return NextResponse.json(
-        { success: false, error: "Order already paid" },
-        { status: 400 },
+        { success: false, error: "Order not found" },
+        { status: 404 },
       );
     }
 
-    // ✅ FIX: Use tolerance-based comparison instead of strict equality
+    // Amount check
     const amountDifference = Math.abs(order.totalAmount - amount);
     if (amountDifference > 0.01) {
       return NextResponse.json(
@@ -54,13 +55,6 @@ export async function POST(req: NextRequest) {
           error: `Amount mismatch. Expected: ₹${order.totalAmount}, Received: ₹${amount}`,
         },
         { status: 400 },
-      );
-    }
-
-    if (order.clerkUserId !== userId) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized to pay for this order" },
-        { status: 403 },
       );
     }
 
@@ -77,14 +71,24 @@ export async function POST(req: NextRequest) {
         .toString(36)
         .substr(2, 9)}`;
 
-      await db
+      const updatedOrders = await db
         .update(orders)
         .set({
           paymentStatus: "completed",
           orderStatus: "confirmed",
           razorpayPaymentId: paymentId,
         })
-        .where(eq(orders.id, order.id));
+        .where(
+          and(eq(orders.id, order.id), eq(orders.paymentStatus, "pending")),
+        )
+        .returning();
+
+      if (updatedOrders.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "Order already paid or not found" },
+          { status: 400 },
+        );
+      }
 
       return NextResponse.json(
         {
@@ -112,48 +116,49 @@ export async function POST(req: NextRequest) {
       const reason =
         failureReasons[Math.floor(Math.random() * failureReasons.length)];
 
-      // Add stock back if payment fails
-      const items = await db.query.orderItems.findMany({
-        where: eq(orderItems.orderId, orderId),
-      });
+      // Everything in one transaction
+      await db.transaction(async (tx) => {
+        // Get all order items
+        const items = await tx.query.orderItems.findMany({
+          where: eq(orderItems.orderId, orderId),
+        });
 
-      for (const item of items) {
-        if (item.productType === "book") {
-          const product = await db.query.products.findFirst({
-            where: eq(products.id, item.productId),
-          });
-
-          if (product) {
-            const previousStock = product.stockQuantity;
-            const newStock = previousStock + item.quantity;
-
-            await db
-              .update(products)
-              .set({ stockQuantity: newStock })
-              .where(eq(products.id, item.productId));
-
-            await db.insert(inventoryLogs).values({
-              id: nanoid(),
-              productId: item.productId,
-              action: "adjustment",
-              quantity: item.quantity,
-              previousStock,
-              newStock,
-              reason: `Payment failed for Order #${order.orderNumber}`,
-              createdBy: userId,
+        // Restore stock for each book item
+        for (const item of items) {
+          if (item.productType === "book") {
+            const product = await tx.query.products.findFirst({
+              where: eq(products.id, item.productId),
             });
+
+            if (product) {
+              const previousStock = product.stockQuantity;
+              const newStock = previousStock + item.quantity;
+
+              await tx
+                .update(products)
+                .set({ stockQuantity: newStock })
+                .where(eq(products.id, item.productId));
+
+              await tx.insert(inventoryLogs).values({
+                id: nanoid(),
+                productId: item.productId,
+                action: "adjustment",
+                quantity: item.quantity,
+                previousStock,
+                newStock,
+                reason: `Payment failed for Order #${order.orderNumber}`,
+                createdBy: userId,
+              });
+            }
           }
         }
-      }
 
-      // Update order to failed
-      await db
-        .update(orders)
-        .set({
-          paymentStatus: "failed",
-          orderStatus: "failed",
-        })
-        .where(eq(orders.id, orderId));
+        // Update order status — all in the same transaction
+        await tx
+          .update(orders)
+          .set({ paymentStatus: "failed", orderStatus: "failed" })
+          .where(eq(orders.id, orderId));
+      });
 
       return NextResponse.json(
         {

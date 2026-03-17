@@ -277,7 +277,6 @@ export default function Products() {
       <Container>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto text-center">
-            {/* Empty Icon with animation */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -294,48 +293,61 @@ export default function Products() {
               </div>
             </motion.div>
 
-            {/* Empty Message */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              No Study Materials Yet
-            </h2>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              We're working hard to bring you the best shipping exam preparation
-              materials. Check back soon for updates!
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-              <Button
-                onClick={() => window.location.reload()}
-                variant="default"
-                className="inline-flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => (window.location.href = "/")}
-              >
-                Go Home
-              </Button>
-            </div>
-
-            {/* Additional Info */}
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-              <p className="text-sm text-blue-800 font-medium mb-2">
-                Want to be notified when we add new materials?
-              </p>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => (window.location.href = "/contact")}
-                className="inline-flex items-center gap-2"
-              >
-                <Bell className="w-4 h-4" />
-                Get Notified
-              </Button>
-            </div>
+            {isAdmin ? (
+              // ✅ Admin empty state
+              <>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  No Products Yet
+                </h2>
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  You haven't added any study materials yet. Add your first
+                  product to get started.
+                </p>
+                <Button
+                  onClick={() => router.push("/admin/products/new")} // 👈 change to your actual route
+                  className="inline-flex items-center gap-2"
+                >
+                  + Add First Product
+                </Button>
+              </>
+            ) : (
+              // ✅ User empty state (existing)
+              <>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  No Study Materials Yet
+                </h2>
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  We're working hard to bring you the best shipping exam
+                  preparation materials. Check back soon for updates!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                  <Button
+                    onClick={() => window.location.reload()}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </Button>
+                  <Button variant="outline" onClick={() => router.push("/")}>
+                    Go Home
+                  </Button>
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 font-medium mb-2">
+                    Want to be notified when we add new materials?
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => router.push("/contact")}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Bell className="w-4 h-4" />
+                    Get Notified
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </Container>

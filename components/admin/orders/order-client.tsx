@@ -3,11 +3,11 @@ import DataTable from "@/components/admin/shared/data-table";
 import { motion } from "framer-motion";
 import SectionHeader from "@/components/admin/shared/section-header";
 import { formatDate } from "@/utils/pdf-helper";
-import StatusBadge, { Status } from "@/components/admin/shared/status-badge";
 import { formatPrice } from "@/utils/checkout-helper";
 import { useRouter } from "next/navigation";
 import { useAdminOrderModal } from "@/stores/admin-order-modal-store";
 import { OrderWithItems } from "@/types";
+import StatusBadge from "../shared/status-badge";
 
 type Pagination = {
   currentPage: number;
@@ -80,10 +80,10 @@ export default function OrdersClient({
               {pendingOrders.paymentMethod}
             </span>
             <div className="flex justify-center">
-              <StatusBadge status={pendingOrders.paymentStatus as Status} />
+              <StatusBadge status={pendingOrders.paymentStatus} />
             </div>
             <div className="flex justify-center">
-              <StatusBadge status={pendingOrders.orderStatus as Status} />
+              <StatusBadge status={pendingOrders.orderStatus} />
             </div>
             <span className="text-sm truncate">
               {formatDate(pendingOrders.createdAt)}
@@ -98,7 +98,7 @@ export default function OrdersClient({
               </span>
               <span className="text-xs text-secondary-dark/40">
                 Order Status ·{" "}
-                <StatusBadge status={pendingOrders.orderStatus as Status} />
+                <StatusBadge status={pendingOrders.orderStatus} />
               </span>
             </div>
             <div className="flex items-center justify-between font-nunito">
@@ -118,8 +118,7 @@ export default function OrdersClient({
                   {formatPrice(pendingOrders.totalAmount)}
                 </span>
                 <span className="text-xs text-secondary-dark/40 font-nunito">
-                  Payment ·{" "}
-                  <StatusBadge status={pendingOrders.paymentStatus as Status} />
+                  Payment · <StatusBadge status={pendingOrders.paymentStatus} />
                 </span>
               </div>
             </div>
@@ -162,10 +161,10 @@ export default function OrdersClient({
               {otherOrders.paymentMethod}
             </span>
             <div className="flex justify-center">
-              <StatusBadge status={otherOrders.paymentStatus as Status} />
+              <StatusBadge status={otherOrders.paymentStatus} />
             </div>
             <div className="flex justify-center">
-              <StatusBadge status={otherOrders.orderStatus as Status} />
+              <StatusBadge status={otherOrders.orderStatus} />
             </div>
             <span className="text-sm truncate">
               {formatDate(otherOrders.createdAt)}
@@ -179,8 +178,7 @@ export default function OrdersClient({
                 {otherOrders.orderNumber}
               </span>
               <span className="text-xs text-secondary-dark/40">
-                Order Status ·{" "}
-                <StatusBadge status={otherOrders.orderStatus as Status} />
+                Order Status · <StatusBadge status={otherOrders.orderStatus} />
               </span>
             </div>
             <div className="flex items-center justify-between font-nunito">
@@ -200,8 +198,7 @@ export default function OrdersClient({
                   {formatPrice(otherOrders.totalAmount)}
                 </span>
                 <span className="text-xs text-secondary-dark/40 font-nunito">
-                  Payment ·{" "}
-                  <StatusBadge status={otherOrders.paymentStatus as Status} />
+                  Payment · <StatusBadge status={otherOrders.paymentStatus} />
                 </span>
               </div>
             </div>

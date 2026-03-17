@@ -49,7 +49,11 @@ export default function SignIn() {
         clerkError.errors?.[0]?.message ||
         clerkError.errors?.[0]?.longMessage ||
         "Failed to send verification code";
-      toast.error("Failed to send verification code");
+      const friendlyMessage =
+        errorMessage === "Couldn't find your account."
+          ? "No account found with this email. Please sign up first."
+          : errorMessage;
+      toast.error(friendlyMessage);
       console.error("Email submission error:", errorMessage);
       throw new Error(errorMessage);
     }
@@ -81,7 +85,7 @@ export default function SignIn() {
         clerkError.errors?.[0]?.longMessage ||
         clerkError.errors?.[0]?.message ||
         "Failed to verify code";
-      toast.error("Failed to verify code");
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -113,8 +117,7 @@ export default function SignIn() {
         clerkError.errors?.[0]?.message ||
         clerkError.errors?.[0]?.longMessage ||
         "Failed to resend code";
-      toast.error("Failed to resend code");
-      // toast.error("Failed to resend code. Please try again.");
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -137,7 +140,7 @@ export default function SignIn() {
         clerkError.errors?.[0].longMessage ||
         "Google sign-in failed";
       console.error("Google sign-in error:", errorMessage);
-      toast.error("Google sign in failed. Please try again.");
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
   };

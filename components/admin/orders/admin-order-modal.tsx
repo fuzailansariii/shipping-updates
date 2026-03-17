@@ -10,14 +10,15 @@ import {
   BookOpenText,
   FileText,
   Loader2,
-  MapPin,
   Package,
   Phone,
   User,
   CreditCard,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getStatusConfig } from "@/utils/status-badge";
 
 const ORDER_STATUSES = [
   "pending",
@@ -29,42 +30,6 @@ const ORDER_STATUSES = [
 ] as const;
 
 type OrderStatus = (typeof ORDER_STATUSES)[number];
-
-const statusStyles: Record<
-  OrderStatus,
-  { bg: string; text: string; dot: string }
-> = {
-  pending: {
-    bg: "bg-yellow-50",
-    text: "text-yellow-700",
-    dot: "bg-yellow-400",
-  },
-  confirmed: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
-  packed: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400" },
-  shipped: {
-    bg: "bg-purple-50",
-    text: "text-purple-700",
-    dot: "bg-purple-400",
-  },
-  delivered: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
-  failed: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
-};
-
-function StatusPill({ status }: { status: string }) {
-  const s = statusStyles[status as OrderStatus] ?? {
-    bg: "bg-gray-50",
-    text: "text-gray-600",
-    dot: "bg-gray-400",
-  };
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.bg} ${s.text}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -112,8 +77,12 @@ export default function AdminOrderModal() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const status = selectedOrder
+    ? getStatusConfig(selectedOrder.orderStatus)
+    : null;
+
   // Sync local state when selectedOrder changes (modal opens with new order)
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedOrder) {
       setOrderStatus((selectedOrder.orderStatus as OrderStatus) ?? "pending");
       setAwbNumber(selectedOrder.awbNumber ?? "");
@@ -180,7 +149,12 @@ export default function AdminOrderModal() {
         <>
           {/* ── Status + Date ── */}
           <div className="flex items-center justify-between px-2">
-            <StatusPill status={selectedOrder.orderStatus} />
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${status?.badge} ${status?.text}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${status?.dot}`} />
+              {status?.label}
+            </span>
             <p className="text-xs text-gray-400">
               {formatDate(selectedOrder.createdAt)}
             </p>
@@ -229,10 +203,14 @@ export default function AdminOrderModal() {
                       <p className="text-sm font-medium text-gray-800 line-clamp-1">
                         {item.productTitle}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {item.productType === "pdf"
-                          ? "Digital Product"
-                          : `Qty: ${item.quantity}`}
+                      <p className="text-xs text-gray-400 flex items-center gap-1">
+                        <span>
+                          {item.productType === "pdf"
+                            ? "Digital Product"
+                            : `Qty: ${item.quantity}`}
+                        </span>
+                        <X size={13}/>
+                        <span>{formatPrice(item.totalPrice)}</span>
                       </p>
                     </div>
                   </div>
@@ -240,9 +218,6 @@ export default function AdminOrderModal() {
                     <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
                       {item.productType?.toUpperCase()}
                     </span>
-                    <p className="text-sm font-semibold text-gray-700">
-                      {formatPrice(item.totalPrice)}
-                    </p>
                   </div>
                 </div>
               ))}
@@ -297,19 +272,70 @@ export default function AdminOrderModal() {
           <div className="border-t border-dashed border-gray-300" />
 
           {/* ── Shipping Address ── */}
-          {hasPhysicalBook && selectedOrder.shippingAddress && (
-            <div className="px-2">
-              <SectionLabel>Shipping Address</SectionLabel>
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
-                  <MapPin className="w-3.5 h-3.5 text-gray-400" />
+          {/* Delivery Info - Only show delivery address for physical orders */}
+          {hasPhysicalBook &&
+            selectedOrder.shippingAddress &&
+            (() => {
+              let addr: any = null;
+              let rawAddress: string | null = null;
+
+              try {
+                addr = JSON.parse(selectedOrder.shippingAddress);
+              } catch {
+                // Old order — can't reliably parse, show as plain text
+                rawAddress = selectedOrder.shippingAddress;
+              }
+
+              return (
+                <div className="px-2">
+                  <SectionLabel>Shipping Address</SectionLabel>
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5">
+                    {addr ? (
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                        <span className="text-gray-400">Name</span>
+                        <span className="font-medium text-gray-800">
+                          {addr.fullName}
+                        </span>
+
+                        <span className="text-gray-400">Phone</span>
+                        <span className="font-medium text-gray-800">
+                          {addr.phone}
+                        </span>
+
+                        <span className="text-gray-400">Address</span>
+                        <span className="text-gray-700">
+                          {[addr.addressLine1, addr.addressLine2]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </span>
+
+                        {addr.landmark && (
+                          <>
+                            <span className="text-gray-400">Landmark</span>
+                            <span className="text-gray-700">
+                              {addr.landmark}
+                            </span>
+                          </>
+                        )}
+
+                        <span className="text-gray-400">City</span>
+                        <span className="text-gray-700">{addr.city}</span>
+
+                        <span className="text-gray-400">State</span>
+                        <span className="text-gray-700">{addr.state}</span>
+
+                        <span className="text-gray-400">Pincode</span>
+                        <span className="text-gray-700">{addr.pincode}</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-700 leading-relaxed">
+                        {rawAddress}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {selectedOrder.shippingAddress}
-                </p>
-              </div>
-            </div>
-          )}
+              );
+            })()}
 
           {/* ── Payment ── */}
           <div className="px-2">
@@ -318,10 +344,16 @@ export default function AdminOrderModal() {
               <span className="text-sm text-gray-600 capitalize">
                 {selectedOrder.paymentMethod}
               </span>
-              <StatusPill status={selectedOrder.paymentStatus} />
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${status?.badge} ${status?.text}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${status?.dot}`} />
+                {status?.label}
+              </span>
             </div>
           </div>
 
+          {/* border */}
           <div className="border-t border-dashed border-gray-300" />
 
           {/* ── Admin Actions ── */}
@@ -329,28 +361,31 @@ export default function AdminOrderModal() {
             <SectionLabel>Update Order</SectionLabel>
 
             {/* Order Status */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-gray-500 font-medium">
-                Order Status
-              </label>
-              <select
-                value={orderStatus}
-                onChange={(e) => setOrderStatus(e.target.value as OrderStatus)}
-                className="w-full text-sm rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
-              >
-                {ORDER_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-3 gap-2">
+              {ORDER_STATUSES.map((statusValue) => {
+                const config = getStatusConfig(statusValue);
+                const isActive = orderStatus === statusValue;
+
+                return (
+                  <button
+                    key={statusValue}
+                    type="button"
+                    onClick={() => setOrderStatus(statusValue)}
+                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition ${isActive ? `${config.badge} ${config.text}` : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${config.dot}`} />
+                    {config.label}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* border */}
+            <div className="border-t border-dashed border-gray-300" />
 
             {/* AWB Number */}
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-500 font-medium">
-                AWB Number
-              </label>
+              <SectionLabel>AWB Number</SectionLabel>
               <input
                 type="text"
                 value={awbNumber}
@@ -362,9 +397,7 @@ export default function AdminOrderModal() {
 
             {/* Courier Partner */}
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-500 font-medium">
-                Courier Partner
-              </label>
+              <SectionLabel>Courier Partner</SectionLabel>
               <input
                 type="text"
                 value={courierPartner}
@@ -376,7 +409,7 @@ export default function AdminOrderModal() {
 
             {/* Notes */}
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-500 font-medium">Notes</label>
+              <SectionLabel>Notes</SectionLabel>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

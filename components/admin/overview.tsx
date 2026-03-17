@@ -1,11 +1,9 @@
 "use client";
-import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AdminMenuCard from "./admin-menu-card";
 import MessagesList from "./messages/messages-list";
 import LowStockList from "./stocks/low-stock-list";
 import RecentOrderTable from "./orders/recent-order-table";
-import { Status } from "./shared/status-badge";
 import TopSellingProducts from "./products/top-selling-table";
 import {
   DashboardOrder,
