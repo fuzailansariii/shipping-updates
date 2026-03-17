@@ -18,7 +18,7 @@ export default function Contact() {
   } = useForm<MessageData>({
     resolver: zodResolver(messageSchema),
     defaultValues: {
-      subject: undefined, // Don't set a default, force user to select
+      subject: undefined, // force user to select
       email: "",
       message: "",
       name: "",

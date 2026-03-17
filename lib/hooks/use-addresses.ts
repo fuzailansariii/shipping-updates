@@ -62,8 +62,16 @@ export function useAddresses() {
         throw new Error(response.data.message || "Failed to add address");
       }
 
-      // add new address
-      setAddresses((prev) => [...prev, response.data.data]);
+      // new address
+      const newAddress = response.data.data;
+
+      // If new address is default, unset all others in local state too
+      setAddresses((prev) => [
+        ...prev.map((a) =>
+          addressData.isDefault ? { ...a, isDefault: false } : a,
+        ),
+        newAddress,
+      ]);
 
       toast.success("Address added successfully");
 

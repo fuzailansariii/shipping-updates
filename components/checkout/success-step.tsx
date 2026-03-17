@@ -21,7 +21,7 @@ export default function SuccessStep() {
 
   const handleViewOrders = () => {
     resetCheckout();
-    router.push("/orders");
+    router.push("/orders-history");
   };
 
   const handleContinueShopping = () => {

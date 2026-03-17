@@ -7,9 +7,5 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
 
-  return (
-    <div className="p-6">
-      <EditProduct productId={id} />
-    </div>
-  );
+  return <EditProduct productId={id} />;
 }

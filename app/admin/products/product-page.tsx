@@ -1,51 +1,69 @@
 "use client";
 
-import axios from "axios";
-import { useMemo, useState } from "react";
-import {
-  BookOpen,
-  FileText,
-  Filter,
-  Plus,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { Filter, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Product } from "@/utils/db/schema";
 import { formatPrice } from "@/utils/checkout-helper";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DataTable from "@/components/admin/shared/data-table";
 import { useAdminProductModal } from "@/stores/admin-product-modal-store";
 import AdminProductModal from "@/components/admin/admin-product-modal";
 import { formatDate } from "@/utils/pdf-helper";
+import ErrorState from "@/components/admin/shared/error-state";
 
-type FilterType = "all" | "book" | "pdf";
+interface AdminProductPageProps {
+  initialProducts: Product[];
+  error: string | null;
+  currentPage: number;
+}
 
 export default function ProductsPage({
   initialProducts,
-}: {
-  initialProducts: Product[];
-}) {
+  error,
+  currentPage,
+}: AdminProductPageProps) {
   const [products, setProducts] = useState(initialProducts);
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<FilterType>("all");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "inactive"
-  >("all");
 
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  // Current filter value from the URL
+
+  const query = searchParams.get("query") ?? "";
+  const typeFilter = searchParams.get("type") ?? "all";
+  const statusFilter = searchParams.get("status") ?? "all";
+
+  // This function updates the URL when a filter changes
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (value === "all" || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+
+      // reset to page 1 when filter change
+      params.delete("page");
+      // This triggers Next.js to rerun the server component with new params
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams],
+  );
+
   const { openProductModal } = useAdminProductModal();
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      // Client side — just title and topics
       const matchesQuery =
         !query ||
         product.title.toLowerCase().includes(query.toLowerCase()) ||
-        product.description.toLowerCase().includes(query.toLowerCase()) ||
-        product.topics?.some((topic) =>
-          topic.toLowerCase().includes(query.toLowerCase()),
+        product.topics?.some((t) =>
+          t.toLowerCase().includes(query.toLowerCase()),
         );
 
       const matchesType =
@@ -61,6 +79,8 @@ export default function ProductsPage({
       return matchesQuery && matchesType && matchesStatus;
     });
   }, [products, query, typeFilter, statusFilter]);
+
+  if (error) return <ErrorState message={error} />;
 
   return (
     <>
@@ -95,11 +115,10 @@ export default function ProductsPage({
             {/* Type filter */}
             <div className="flex flex-col md:flex-row items-center overflow-hidden overflow-y-auto gap-3">
               <div className="inline-flex rounded-full bg-gray-50 border border-gray-200 p-1 text-xs">
-                {(["all", "book", "pdf"] as FilterType[]).map((type) => (
+                {(["all", "book", "pdf"] as const).map((type) => (
                   <button
                     key={type}
-                    type="button"
-                    onClick={() => setTypeFilter(type)}
+                    onClick={() => updateFilter("type", type)}
                     className={cn(
                       "px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors",
                       typeFilter === type
@@ -107,20 +126,18 @@ export default function ProductsPage({
                         : "text-gray-600 hover:bg-white",
                     )}
                   >
-                    {type === "book" && <BookOpen className="w-3 h-3" />}
-                    {type === "pdf" && <FileText className="w-3 h-3" />}
-                    <span className="capitalize">{type}</span>
+                    {type}
                   </button>
                 ))}
               </div>
 
               {/* Status filter */}
               <div className="inline-flex rounded-full bg-gray-50 border border-gray-200 p-1 text-xs">
+                {/* Status filter buttons */}
                 {(["all", "active", "inactive"] as const).map((status) => (
                   <button
                     key={status}
-                    type="button"
-                    onClick={() => setStatusFilter(status)}
+                    onClick={() => updateFilter("status", status)}
                     className={cn(
                       "px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors",
                       statusFilter === status
@@ -128,11 +145,7 @@ export default function ProductsPage({
                         : "text-gray-600 hover:bg-white",
                     )}
                   >
-                    {status === "active" && (
-                      <CheckCircle2 className="w-3 h-3" />
-                    )}
-                    {status === "inactive" && <XCircle className="w-3 h-3" />}
-                    <span className="capitalize">{status}</span>
+                    {status}
                   </button>
                 ))}
               </div>
@@ -210,6 +223,34 @@ export default function ProductsPage({
             </div>
           )}
         />
+      </div>
+      {/* Pagination */}
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={currentPage === 1}
+          onClick={() => updateFilter("page", String(currentPage - 1))}
+          className="h-8 px-2.5 text-xs rounded-lg"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Previous</span>
+        </Button>
+
+        <span className="text-xs font-medium text-neutral-500 px-1">
+          Page {currentPage}
+        </span>
+
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={initialProducts.length < 20}
+          onClick={() => updateFilter("page", String(currentPage + 1))}
+          className="h-8 px-2.5 text-xs rounded-lg"
+        >
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+        </Button>
       </div>
 
       {/* Modal — lives outside the page div, at root level */}

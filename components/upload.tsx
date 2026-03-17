@@ -88,7 +88,7 @@ const Upload = ({
       setError(
         error?.response?.data?.message ||
           error?.message ||
-          "Upload failed. Please try again."
+          "Upload failed. Please try again.",
       );
     } finally {
       setUploading(false);
@@ -173,10 +173,10 @@ const Upload = ({
           isDragOver
             ? "border-blue-500 bg-blue-500/10"
             : uploadedFile
-            ? "border-green-500 bg-green-500/5"
-            : error
-            ? "border-red-500 bg-red-500/5"
-            : "border-gray-700 bg-neutral-200 hover:border-gray-600"
+              ? "border-green-500 bg-green-500/5"
+              : error
+                ? "border-red-500 bg-red-500/5"
+                : "border-gray-700 bg-neutral-200 hover:border-gray-600"
         }`}
       >
         <input

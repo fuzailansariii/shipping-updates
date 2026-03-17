@@ -40,15 +40,14 @@ export default function SignUp() {
         clerkError.errors?.[0]?.message ||
         "Failed to send verification code";
 
-      // console.error("Email submission error:", errorMessage);
-      toast.error("Failed to send verification code");
+      toast.error(errorMessage);
+      console.error("Email submission error:", errorMessage);
     }
   };
 
   // handle OTP verification
   const handleVerify = async (code: string) => {
     if (!isLoaded) {
-      console.error("Clerk not loaded yet");
       throw new Error("Authentication service is not ready. Please try again.");
     }
     try {
@@ -56,28 +55,35 @@ export default function SignUp() {
       const attemptSignUp = await signUp.attemptEmailAddressVerification({
         code: cleanCode,
       });
+
       if (attemptSignUp.status === "complete") {
-        if (!setActive) {
-          throw new Error("Unable to set active session");
-        }
+        if (!setActive) throw new Error("Unable to set active session");
         await setActive({ session: attemptSignUp.createdSessionId });
         toast.success("Sign up successful!");
         router.push("/");
-      } else if (attemptSignUp.status === "missing_requirements") {
-        toast.error("Please complete all required fields.");
-        throw new Error("Please complete all required fields.");
       } else {
-        toast.error("Verification incomplete. Please try again.");
         throw new Error("Verification incomplete. Please try again.");
       }
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };
+      const errorCode = clerkError.errors?.[0]?.code;
       const errorMessage =
-        clerkError.errors?.[0]?.message ||
         clerkError.errors?.[0]?.longMessage ||
+        clerkError.errors?.[0]?.message ||
+        (error as Error)?.message ||
         "Invalid verification code";
 
-      toast.error("Failed to verify code");
+      toast.error(errorMessage);
+
+      // If code expired or too many attempts, restart the flow
+      if (
+        errorCode === "verification_expired" ||
+        errorCode === "verification_failed"
+      ) {
+        toast.error("Code expired. Please request a new one.");
+        handleBackToEmail(); // go back to email step
+      }
+
       throw new Error(errorMessage);
     }
   };
@@ -100,8 +106,7 @@ export default function SignUp() {
         clerkError.errors?.[0]?.longMessage ||
         "Failed to resend verification code";
 
-      toast.error("Failed to resend code");
-
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -125,8 +130,7 @@ export default function SignUp() {
         clerkError.errors?.[0]?.longMessage ||
         "Google sign-up failed";
 
-      toast.error("Google sign-up failed. Please try again.");
-
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -136,11 +140,6 @@ export default function SignUp() {
     setCurrentStep("email");
     setEmail("");
   };
-
-  // At the top of the component
-  // if (!isLoaded) {
-  //   return <div>Lofading...</div>; // or a proper loading spinner
-  // }
 
   if (currentStep === "verification") {
     return (

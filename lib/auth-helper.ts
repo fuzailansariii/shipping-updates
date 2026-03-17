@@ -91,9 +91,9 @@ export function buildProductValues(
     return {
       ...baseValue,
       author: validateData.author,
-      publisher: validateData.publisher || null,
-      isbn: validateData.isbn || null,
-      edition: validateData.edition || null,
+      publisher: validateData.publisher ?? null,
+      isbn: validateData.isbn ?? null,
+      edition: validateData.edition ?? null,
       fileUrl: null,
       fileSize: null,
     };

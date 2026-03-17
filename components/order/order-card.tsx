@@ -59,13 +59,17 @@ export default function OrderCard() {
     if (!isLoaded) return;
 
     if (!userId) {
-      setLoading(false); // auth is done, user just isn't logged in
+      setLoading(false);
       setError("Please log in to view your orders.");
       return;
     }
+
+    setLoading(true);
+    setOrders([]);
+    setError(null);
+
     const controller = new AbortController();
     const fetchOrders = async () => {
-      setError(null);
       try {
         const response = await axios.get("/api/orders", {
           withCredentials: true,
@@ -76,13 +80,11 @@ export default function OrderCard() {
       } catch (err) {
         if (axios.isCancel(err)) return;
         if (axios.isAxiosError(err)) {
-          if (err.response?.status === 401) {
+          if (err.response?.status === 401)
             setError("Session expired. Please log in again.");
-          } else if (err.response?.status === 500) {
+          else if (err.response?.status === 500)
             setError("Server error. Please try again later.");
-          } else {
-            setError("Could not load orders.");
-          }
+          else setError("Could not load orders.");
         }
         console.error("Error fetching orders:", err);
         setOrders([]);
@@ -96,12 +98,12 @@ export default function OrderCard() {
   }, [userId, isLoaded]);
 
   return (
-    <div className="flex flex-col mx-auto px-4 gap-3 md:px-0">
-      <h1 className="text-3xl md:text-5xl text-center font-medium leading-tight">
+    <div className="flex flex-col mx-auto gap-3 w-full">
+      <h1 className="text-3xl md:text-4xl text-center font-medium leading-tight">
         Orders & History
       </h1>
 
-      <div className="w-full mt-10 md:mt-5">
+      <div className="w-full mt-4 md:mt-5">
         {loading ? (
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -115,7 +117,7 @@ export default function OrderCard() {
             No orders found. Start shopping to see your orders here.
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 gap-y-5 justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full px-3">
             {orders.map((order) => {
               const orderStatus = getStatusConfig(order.orderStatus);
               const paymentStatus = getStatusConfig(order.paymentStatus);
@@ -123,84 +125,79 @@ export default function OrderCard() {
               return (
                 <div
                   key={order.id}
-                  className="relative max-w-md border px-4 py-5 rounded-lg shadow-sm overflow-visible font-roboto text-primary-dark flex flex-col justify-between"
+                  className="relative flex flex-col gap-2.5 bg-secondary-dark/10 border border-gray-200 hover:border-gray-300 rounded-xl p-4 transition-colors duration-150 font-sans"
                 >
-                  {/* Status Badge - fixed positioning */}
-
-                  <span
-                    className={`absolute -top-3 right-3 ${orderStatus.badge} rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5`}
-                  >
+                  {/* Top row: order number + status badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-mono text-[11px] font-medium text-gray-400 tracking-wide uppercase">
+                      {order.orderNumber}
+                    </span>
                     <span
-                      className={`inline-block w-2 h-2 rounded-full ${orderStatus.dot}`}
-                    />
-                    {orderStatus.label}
-                  </span>
-                  {/* Top Info */}
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-full whitespace-nowrap ${orderStatus.badge}`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${orderStatus.dot}`}
+                      />
+                      {orderStatus.label}
+                    </span>
+                  </div>
+
+                  {/* Product title */}
                   <div>
-                    <div className="text-xs md:text-sm space-y-1 ">
-                      <p>
-                        <span className="font-semibold">Order No.</span>{" "}
-                        {order.orderNumber.toUpperCase()}
+                    <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+                      {order.items?.[0]?.productTitle ?? "Product Unavailable"}
+                    </p>
+                    {order.items.length > 1 && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        +{order.items.length - 1} more item
+                        {order.items.length > 2 ? "s" : ""}
                       </p>
-                      <p>
-                        <span className="font-semibold">Date:</span>{" "}
+                    )}
+                  </div>
+
+                  {/* Meta */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Date</span>
+                      <span className="font-medium text-gray-800">
                         {formatDate(order.createdAt)}
-                      </p>
+                      </span>
                     </div>
-                    <div className="text-xs md:text-sm mt-1">
-                      <p className="flex items-center gap-2">
-                        <span className="font-semibold">Payment:</span>
-
-                        <span
-                          className={`flex items-center gap-1 ${paymentStatus.text}`}
-                        >
-                          {paymentStatus.label}
-                        </span>
-                      </p>
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="mt-2">
-                      <p className="text-sm md:text-base font-medium line-clamp-1">
-                        {order.items?.[0]?.productTitle ??
-                          "Product Unavailable"}
-                      </p>
-
-                      {order.items.length > 1 && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          +{order.items.length - 1} more item(s)
-                        </p>
-                      )}
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Payment</span>
+                      <span className={`font-medium ${paymentStatus.text}`}>
+                        {paymentStatus.label}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Action */}
-                  <div>
-                    <p className="text-sm font-semibold mt-2">
-                      Total: {formatPrice(order.totalAmount)}
-                    </p>
-                    <div className="flex justify-between items-center">
+                  <hr className="border-gray-100" />
+
+                  {/* Price */}
+                  <p className="text-lg font-semibold text-gray-900">
+                    {formatPrice(order.totalAmount)}
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => openOrderDetails(order)}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 px-3"
+                    >
+                      View details
+                    </Button>
+                    {order.items.some((item) => item.productType === "pdf") && (
                       <Button
-                        onClick={() => openOrderDetails(order)}
-                        variant={"ghost"}
-                        className="px-2 py-1.5 text-xs flex text-blue-600 underline mt-1 cursor-pointer hover:text-blue-800"
+                        onClick={() => openDownloadModal(order)}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
                       >
-                        View details
+                        Download PDFs
                       </Button>
-                      {order.items.some(
-                        (item) => item.productType === "pdf",
-                      ) && (
-                        <div className="ml-2">
-                          <Button
-                            onClick={() => openDownloadModal(order)}
-                            variant={"ghost"}
-                            className="px-2 py-1.5 text-xs flex text-blue-600 underline mt-1 cursor-pointer hover:text-blue-800"
-                          >
-                            Download PDFs
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               );

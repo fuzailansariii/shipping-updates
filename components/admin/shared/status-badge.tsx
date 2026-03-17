@@ -1,36 +1,18 @@
-import React from "react";
+import { getStatusConfig, OrderStatus } from "@/utils/status-badge";
 
-export type Status =
-  | "pending"
-  | "confirmed"
-  | "packed"
-  | "shipped"
-  | "delivered"
-  | "failed"
-  | "completed"
-  | "refunded";
-
-interface StatusBadgeProps {
-  status: Status;
-}
-
-const statusStyles: Record<Status, string> = {
-  pending: "bg-yellow-500/10 text-yellow-700 border border-yellow-500/20",
-  confirmed: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
-  packed: "bg-red-500/10 text-red-500 border border-red-500/20",
-  shipped: "bg-purple-500/10 text-purple-500 border border-purple-500/20",
-  delivered: "bg-green-500/10 text-green-500 border border-green-500/20",
-  failed: "bg-red-500/10 text-red-500 border border-red-500/20",
-  completed: "bg-green-500/10 text-green-500 border border-green-500/20",
-  refunded: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
+type Props = {
+  status: OrderStatus;
 };
 
-export default function StatusBadge({ status }: StatusBadgeProps) {
+export default function StatusBadge({ status }: Props) {
+  const config = getStatusConfig(status);
+
   return (
     <span
-      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit ${statusStyles[status]} truncate`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mx-auto text-xs font-medium ${config.badge}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      <span className={`w-2 h-2 rounded-full ${config.dot}`} />
+      {config.label}
     </span>
   );
 }
