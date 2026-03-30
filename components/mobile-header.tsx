@@ -31,15 +31,15 @@ export default function MobileHeader() {
         {/* Right side - Notification and Profile */}
         <div className="flex items-center gap-2">
           {/* Notification Icon */}
-          <button
+          {/* <button
             className="relative p-2 hover:bg-gray-100 rounded-lg transition"
             aria-label="Notifications"
           >
-            <Bell className="h-5 w-5 text-gray-600" />
-            {/* Notification badge */}
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
-          </button>
-
+            <Bell className="h-5 w-5 text-gray-600" /> */}
+          {/* Notification badge */}
+          {/* <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
+          </button> 
+           */}
           {/* Profile Icon */}
           {user?.imageUrl ? (
             <Image

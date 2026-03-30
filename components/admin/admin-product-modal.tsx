@@ -94,7 +94,7 @@ export default function AdminProductModal() {
       isOpen={isOpen}
       onClose={closeProductModal}
       title="Product Details"
-      subTitle={selectedProduct?.title ?? "—"}
+      // subTitle={selectedProduct?.title ?? "—"}
     >
       {selectedProduct ? (
         <>
