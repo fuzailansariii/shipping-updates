@@ -196,31 +196,71 @@ export default function ProductsPage({
           loading={false}
           error={null}
           renderMobileCard={(product) => (
-            <div className="flex items-center justify-between font-nunito">
-              <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-secondary-dark/80">
-                  {product.title}
-                </p>
-                <p className="text-xs text-secondary-dark/70">
+            <>
+              {/* Top Section */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex gap-3">
+                  {/* Thumbnail */}
+                  <img
+                    src={product.thumbnail}
+                    alt={product.title}
+                    className="w-12 h-12 rounded-lg object-cover border"
+                  />
+
+                  {/* Title + Type */}
+                  <div>
+                    <p className="text-sm font-semibold text-secondary-dark leading-tight">
+                      {product.title}
+                    </p>
+                    <p className="text-xs text-secondary-dark/50 capitalize">
+                      {product.type}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <span
+                  className={cn(
+                    "text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap",
+                    product.isActive
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-gray-100 text-gray-500",
+                  )}
+                >
+                  {product.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+
+              {/* Middle Section */}
+              <div className="flex items-center justify-between">
+                {/* Price */}
+                <p className="text-base font-semibold text-secondary-dark">
                   {formatPrice(product.price)}
                 </p>
-                <p className="text-xs text-secondary-dark/40">
+
+                {/* Stock / File */}
+                <p className="text-xs text-secondary-dark/60">
                   {product.type === "book"
                     ? `${product.stockQuantity ?? 0} in stock`
                     : "Digital file"}
                 </p>
               </div>
-              <span
-                className={cn(
-                  "text-xs font-medium px-2 py-0.5 rounded-full",
-                  product.isActive
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-gray-100 text-gray-500",
+
+              {/* Bottom Section */}
+              <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-400/50">
+                {/* Language / Meta */}
+                <p className="text-xs text-secondary-dark/50">
+                  {product.language ?? "N/A"}
+                </p>
+
+                {/* Optional Feature Badge */}
+                {product.isFeatured && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                    Featured
+                  </span>
                 )}
-              >
-                {product.isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
+              </div>
+            </>
           )}
         />
       </div>
