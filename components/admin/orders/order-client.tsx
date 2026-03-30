@@ -181,42 +181,46 @@ export default function OrdersClient({
         )}
         renderMobileCard={(otherOrders) => (
           <>
-            <div className="flex items-center justify-between font-nunito">
-              <span className="text-sm font-semibold text-secondary-dark/80">
-                {otherOrders.orderNumber}
-              </span>
-              <span className="text-xs text-secondary-dark/40">
-                Order Status ·{" "}
-                <StatusBadge status={otherOrders.orderStatus as OrderStatus} />
-              </span>
+            {/* Top Row */}
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-semibold text-secondary-dark">
+                  {otherOrders.orderNumber}
+                </p>
+                <p className="text-xs text-secondary-dark/50">
+                  {formatDate(otherOrders.createdAt)}
+                </p>
+              </div>
+
+              {/* Order Status Badge */}
+              <StatusBadge status={otherOrders.orderStatus as OrderStatus} />
             </div>
-            <div className="flex items-center justify-between font-nunito">
-              <div className="space-y-0.5">
-                <p className="text-xs text-secondary-dark/70">
+
+            {/* Middle Row */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-secondary-dark/80 font-medium">
                   {otherOrders.buyerName}
                 </p>
-                <p className="text-xs text-secondary-dark/40">
+                <p className="text-xs text-secondary-dark/50">
                   {otherOrders.items.length} item(s) ·{" "}
                   <span className="capitalize">
                     {otherOrders.paymentMethod}
                   </span>
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-1.5">
-                <span className="text-sm font-semibold text-secondary-dark/80">
-                  {formatPrice(otherOrders.totalAmount)}
-                </span>
-                <span className="text-xs text-secondary-dark/40 font-nunito">
-                  Payment ·{" "}
-                  <StatusBadge
-                    status={otherOrders.paymentStatus as OrderStatus}
-                  />
-                </span>
-              </div>
+
+              <p className="text-base font-semibold text-secondary-dark">
+                {formatPrice(otherOrders.totalAmount)}
+              </p>
             </div>
-            <p className="text-xs text-secondary-dark/40">
-              {formatDate(otherOrders.createdAt)}
-            </p>
+
+            {/* Bottom Row */}
+            <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-400/50">
+              <p className="text-xs text-secondary-dark/50">Payment Status</p>
+
+              <StatusBadge status={otherOrders.paymentStatus as OrderStatus} />
+            </div>
           </>
         )}
       />

@@ -78,7 +78,7 @@ export default function AdminMenuCard({
       </motion.p>
 
       {/* Title */}
-      <p className="text-[11px] font-semibold text-secondary-dark/50 uppercase tracking-widest z-30">
+      <p className="text-[11px] font-semibold text-secondary-dark/50 uppercase tracking-widest z-20">
         {title}
       </p>
     </motion.div>
