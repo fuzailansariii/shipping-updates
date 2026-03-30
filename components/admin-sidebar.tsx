@@ -74,7 +74,7 @@ export default function AdminSidebar() {
           md:static md:transform-none!
         "
       >
-        <div className="flex flex-col h-full px-4 md:py-6 py-3">
+        <div className="flex flex-col justify-between h-full px-4 md:py-6 pt-3">
           {/* Mobile close button */}
           <div className="md:hidden flex justify-end">
             <button
@@ -105,11 +105,6 @@ export default function AdminSidebar() {
 
           {/* Divider */}
           <div className="h-px bg-linear-to-r from-transparent via-black/10 to-transparent mx-1 mb-2" />
-
-          {/* Section Label */}
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-white/25 px-3 mb-2">
-            Navigation
-          </p>
 
           {/* Nav Links */}
           <nav className="flex flex-col gap-0.5 flex-1">
@@ -142,7 +137,7 @@ export default function AdminSidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 mt-2 border-t border-white/6">
+          <div className="border-t border-black/6 py-3">
             <SignOutButton>
               <Button className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 border border-black/20 text-red-600/80 text-sm font-semibold hover:bg-red-500/20 hover:text-red-700 hover:border-red-500/40 transition-all duration-150">
                 <LogOut size={14} />
