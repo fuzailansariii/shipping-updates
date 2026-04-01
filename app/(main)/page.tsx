@@ -14,16 +14,16 @@ export default function Home() {
   const { isSignedIn } = useUser();
 
   const weOffer = [
-    "BOOK and PDF Study Materials",
-    "Exam-Oriented Content",
-    "Practical Maritime Knowledge",
-    "YouTube Learning Support",
+    "Physical Books delivered across India",
+    "Instant Downloadable PDF Study Materials",
+    "Exam-Oriented Content for Shipping Exams",
+    "Practical Maritime Knowledge & Guidance",
   ];
   const whyChoose = [
-    "Created by an active Merchant Navy officer",
+    "Created by an experienced Merchant Navy officer",
     "Based on real exam experience",
-    "Secure payments via Razorpay",
-    "Trusted by shipping aspirants",
+    "Secure payments powered by Razorpay",
+    "Used by shipping aspirants across India",
   ];
 
   const howItWorks = [
@@ -43,9 +43,9 @@ export default function Home() {
     },
     {
       step: "3",
-      title: "Start Learning",
+      title: "Receive & Start Learning",
       description:
-        "Access your materials instantly and prepare with expert guidance",
+        "Get instant access to digital materials and receive physical books via courier within 3–10 business days",
       icon: Award,
     },
   ];
@@ -64,6 +64,7 @@ export default function Home() {
             entrance and competency exams through high-quality, exam-focused
             study materials.
           </p>
+
           <div className="flex justify-center items-center gap-5 font-nunito">
             <Link href={"/products"}>
               <Button
@@ -71,7 +72,7 @@ export default function Home() {
                 size="lg"
                 className="shadow-md hover:shadow-lg transition-shadow cursor-pointer"
               >
-                Get Started
+                Get Study Materials
               </Button>
             </Link>
             <Link href={"/about"}>
@@ -85,7 +86,7 @@ export default function Home() {
           </div>
           <div className="flex items-center cursor-pointer gap-2 text-xs md:text-sm text-muted-foreground border rounded-full px-4 py-2 shadow-sm bg-neutral-50">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <p>Trusted by Merchant Navy aspirants across India</p>
+            <p>Used by Merchant Navy aspirants across India</p>
           </div>
         </div>
 
@@ -159,6 +160,11 @@ export default function Home() {
               title={whyChoose}
             />
           </div>
+
+          <p className="text-center text-sm text-gray-600 mt-6">
+            Physical books are delivered within 3–10 business days. Digital
+            products are available instantly after purchase.
+          </p>
         </Card>
 
         {/* Social Proof / Stats Section */}
@@ -198,6 +204,10 @@ export default function Home() {
               Explore Study Materials
             </Button>
           </Link>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            All payments are securely processed via Razorpay. No sensitive
+            payment data is stored on our servers.
+          </p>
         </div>
       </div>
     </Container>

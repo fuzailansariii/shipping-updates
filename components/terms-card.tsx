@@ -35,7 +35,7 @@ export default function TermsCard({
         {/* Welcome Card */}
         {welcomeMessage && (
           <div className="mt-10 bg-linear-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border-l-4 border-emerald-500">
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-gray-700 leading-relaxed font-nunito">
               {welcomeMessage}
             </p>
           </div>

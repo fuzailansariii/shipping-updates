@@ -19,42 +19,58 @@ export const metadata = {
 
 const termsAndConditions: TermItem[] = [
   {
-    title: "Digital Products",
+    title: "Products",
     description:
-      "All products sold on this platform are digital PDFs or books. No physical delivery is provided.",
+      "Shipping Updates offers both physical books and digital PDF study materials related to shipping and merchant navy entrance exams. Physical products are delivered via courier, while digital products are made available instantly after successful payment.",
     icon: BookOpenText,
   },
   {
-    title: "Payments & Refunds",
+    title: "Orders & Payments",
     description:
-      "Payments are processed securely via Razorpay. Due to the digital nature of products, refunds are not provided once delivery is complete.",
+      "All orders must be paid in full at the time of purchase. Payments are processed securely through Razorpay. Once an order is placed, it cannot be cancelled or modified.",
     icon: Banknote,
+  },
+  {
+    title: "Shipping & Delivery",
+    description:
+      "Physical products are shipped to the address provided at checkout. Delivery typically takes 5–10 business days within India, depending on your location and the courier partner. We are not responsible for delays caused by incorrect addresses or courier disruptions. Shipping is currently available within India only.",
+    icon: CircleCheck,
+  },
+  {
+    title: "Cancellation & Refund Policy",
+    description:
+      "All sales are final. Orders cannot be cancelled or modified once placed. Refunds are not applicable for digital PDF products once the download link has been accessed. For physical books, please refer to our Replacement Policy below. In case of payment failure where the amount is debited but the order is not confirmed, the amount will be automatically refunded by Razorpay within 5–7 business days.",
+    icon: CircleAlert,
+  },
+  {
+    title: "Replacement Policy",
+    description:
+      "Replacement is only applicable for physical products that arrive defective or damaged. To request a replacement, contact us at shippingupdates21@gmail.com within 7 days of delivery with your order ID and photo/video proof of the damage. Replacements are subject to stock availability. No cash refunds will be issued.",
+    icon: ShieldCheck,
   },
   {
     title: "Intellectual Property",
     description:
-      "All content belongs to Shipping Updates and may not be redistributed without permission.",
+      "All content, including books, PDFs, and study materials, is the intellectual property of Shipping Updates. Users are strictly prohibited from copying, sharing, redistributing, or reselling any content without prior permission.",
     icon: LockKeyhole,
+  },
+  {
+    title: "User Accounts",
+    description:
+      "Users are responsible for maintaining the confidentiality of their account credentials and for all activities that occur under their account.",
+    icon: LockKeyhole,
+  },
+  {
+    title: "Limitation of Liability",
+    description:
+      "Shipping Updates shall not be held liable for any indirect, incidental, or consequential damages arising from the use of the website or products.",
+    icon: ShieldCheck,
   },
   {
     title: "Governing Law",
     description:
-      "These terms are governed by Indian law and the Information Technology Act, 2000.",
+      "These Terms & Conditions are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in Uttar Pradesh, India.",
     icon: Scale,
-  },
-  {
-    title: "GDPR Rights",
-    description:
-      "EU users have the right to access or delete their personal data. Requests can be made via the contact page.",
-
-    icon: ShieldCheck,
-  },
-  {
-    title: "Important Notice",
-    description:
-      "By using this website, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions. If you do not agree with any part of these terms, please discontinue use of the website immediately.",
-
-    icon: CircleAlert,
   },
 ];
 
@@ -64,17 +80,24 @@ export default function TermsAndConditions() {
     "Do not share, redistribute, or resell digital products",
     "Maintain the confidentiality of your account credentials",
     "Report any technical issues or concerns promptly",
+    "Provide accurate shipping and contact details while placing orders",
   ];
 
   return (
     <TermsCard
       title="Terms & Conditions"
+      lastUpdated="March 31, 2026"
       termsAndConditions={termsAndConditions}
       welcomeMessage={
         <>
-          Welcome to <strong className="text-gray-900">Shipping Updates</strong>
-          . By accessing or using this website, you agree to be bound by these
-          Terms & Conditions.
+          Welcome to <strong className="text-gray-900">Shipping Updates</strong>{" "}
+          (<strong className="text-gray-900">https://shippingupdates.in</strong>
+          ), operated by an individual based in India. By accessing or using
+          this website, you agree to be bound by these Terms & Conditions,
+          including policies related to orders, payments, shipping, and usage of
+          our study materials. For any queries, reach us at{" "}
+          <strong className="text-gray-900">shippingupdates21@gmail.com</strong>
+          .
         </>
       }
     >
