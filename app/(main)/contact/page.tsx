@@ -5,6 +5,7 @@ import Input from "@/components/ui/input-form";
 import { MessageData, messageSchema } from "@/lib/validations/message.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
+import { Info } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,15 +58,18 @@ export default function Contact() {
     <Container>
       <div className="flex flex-col gap-6 md:gap-10 justify-center items-center px-4 py-8 md:py-12">
         {/* Header Section */}
-        <div className="text-center font-nunito max-w-2xl">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
             Contact Shipping Updates
           </h1>
-          <p className="mt-2 text-sm md:text-base text-gray-600">
-            Have a question? We're here to help.
+          <p className="mt-3 text-gray-600">
+            For any queries related to orders, payments, shipping, or study
+            materials, feel free to contact us.
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            Operated by Shipping Updates (Individual) – Uttar Pradesh, India
           </p>
         </div>
-
         {/* Form Section */}
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -173,6 +177,16 @@ export default function Contact() {
                   Shipping Updates Channel
                 </Link>
               </p>
+              <div className="w-full flex items-center justify-center mt-5 gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                <Info className="w-4 h-4 text-gray-500 shrink-0" />
+                <p>
+                  For order-related issues, please include your{" "}
+                  <span className="font-medium text-gray-900">
+                    order details
+                  </span>{" "}
+                  for faster support.
+                </p>
+              </div>
             </div>
           </div>
         </div>

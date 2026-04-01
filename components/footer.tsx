@@ -20,9 +20,10 @@ const aboutMenu = [
 ];
 
 const helpMenu = [
-  { title: "Privacy", link: "/privacy-policy" },
+  { title: "Privacy Policy", link: "/privacy-policy" },
   { title: "Terms & Conditions", link: "/terms-condition" },
   { title: "Refund & Cancellation Policy", link: "/refund-policy" },
+  { title: "Contact Us", link: "/contact" },
   { title: "Developer & Teams", link: "/developer-teams" },
 ];
 

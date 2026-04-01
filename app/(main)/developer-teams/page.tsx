@@ -10,16 +10,15 @@ export const metadata = {
     "Meet the developer behind Shipping Updates - built from scratch with passion for maritime education.",
 };
 
-const techUsed = [
+const techStack = [
   { name: "Next.js", category: "Framework" },
   { name: "React", category: "Frontend" },
   { name: "TypeScript", category: "Language" },
   { name: "Tailwind CSS", category: "Styling" },
-  { name: "Clerk", category: "Authentication" },
+  { name: "Clerk", category: "Auth" },
   { name: "Razorpay", category: "Payments" },
   { name: "PostgreSQL", category: "Database" },
-  { name: "Prisma", category: "ORM" },
-  { name: "Resend", category: "Emails" },
+  { name: "Drizzle ORM", category: "ORM" },
 ];
 
 // TODO: Rebuild with scratch and fetch LinkedIn Account to show it.
@@ -29,11 +28,11 @@ export default function DeveloperTeamPage() {
     <Container>
       <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Developer & Team
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-nunito">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Built with passion, dedication, and a mission to help aspiring
             maritime professionals succeed.
           </p>
@@ -59,7 +58,7 @@ export default function DeveloperTeamPage() {
                   Mohd Fuzail Ansari
                 </h2>
                 <p className="text-lg text-gray-600 font-nunito">
-                  Founder & Solo Developer
+                  Solo Developer
                 </p>
                 <div className="flex items-center gap-2 mt-2 justify-center font-nunito sm:justify-start">
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
@@ -73,23 +72,22 @@ export default function DeveloperTeamPage() {
             </div>
 
             {/* Bio */}
-            <div className="prose max-w-none mb-8 font-lato">
-              <p className="text-lg text-gray-700 leading-relaxed">
+            <div className="mt-8 space-y-4 text-muted-foreground">
+              <p>
                 Hi! I'm the solo developer behind{" "}
-                <strong>Shipping Updates</strong>. I built this entire platform
-                from the ground up with a vision to make quality shipping exam
-                preparation materials accessible to everyone.
+                <strong>Shipping Updates</strong>. I built this platform from
+                the ground up to make shipping exam preparation accessible and
+                efficient.
               </p>
-              <p className="text-gray-700 leading-relaxed mt-4">
-                Every line of code, every feature, and every design decision has
-                been carefully crafted to provide the best learning experience
-                for aspiring maritime professionals. This project represents my
-                commitment to education and technology coming together.
+              <p>
+                Every feature, design decision, and system architecture reflects
+                my focus on performance, usability, and real-world value for
+                students.
               </p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
               <div className="bg-blue-50 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-blue-600">1</div>
                 <div className="text-sm text-gray-600 mt-1">Developer</div>
@@ -147,19 +145,17 @@ export default function DeveloperTeamPage() {
         </div>
 
         {/* What I Do Section */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 gap-6 mb-12 font-nunito">
           <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-100">
             <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
               <Code2 className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-nunito">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
               Full Stack Development
             </h3>
-            <p className="text-gray-700 leading-relaxed font-roboto">
-              I handle everything from frontend design to backend
-              infrastructure, database management, payment integration, and
-              deployment. Every aspect of Shipping Updates is built and
-              maintained by me.
+            <p className="text-muted-foreground">
+              I build complete products - from UI/UX to backend architecture,
+              authentication, payments, and deployment pipelines.
             </p>
           </div>
 
@@ -167,13 +163,12 @@ export default function DeveloperTeamPage() {
             <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
               <Rocket className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-nunito">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
               Product Vision
             </h3>
-            <p className="text-gray-700 leading-relaxed font-roboto">
-              Beyond coding, I shape the product strategy, user experience, and
-              content direction. I'm constantly iterating based on user feedback
-              to make this the best platform possible.
+            <p className="text-muted-foreground">
+              I focus on building meaningful products by combining user
+              experience, performance, and continuous iteration.
             </p>
           </div>
         </div>
@@ -193,7 +188,7 @@ export default function DeveloperTeamPage() {
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {techUsed.map((tech, idx) => (
+            {techStack.map((tech, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
@@ -209,31 +204,32 @@ export default function DeveloperTeamPage() {
         </div>
 
         {/* Mission Statement */}
-        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white text-center font-nunito">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <Heart className="w-8 h-8 text-white" />
-            </div>
+        <div className="rounded-2xl p-10 text-center bg-linear-to-r from-blue-600 to-indigo-600 text-white">
+          <div className="flex justify-center mb-4">
+            <Heart className="w-8 h-8" />
           </div>
-          <h2 className="text-3xl font-bold mb-4">Built with Purpose</h2>
-          <p className="text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
-            Shipping Updates isn't just a project—it's a mission to democratize
-            access to quality maritime education. Every feature is designed with
-            students in mind, because I believe everyone deserves the tools to
-            succeed.
+          <h2 className="text-2xl font-bold mb-3">Built with Purpose</h2>
+          <p className="max-w-2xl mx-auto text-blue-100">
+            Shipping Updates is more than a project - it's a mission to make
+            quality maritime education accessible to everyone.
           </p>
         </div>
 
         {/* Contact CTA */}
         <div className="mt-12 text-center font-nunito">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
             Let's Connect
           </h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          <p className="text-gray-600 mb-3 max-w-2xl mx-auto">
             Have questions, feedback, or just want to say hi? I'd love to hear
             from you!
           </p>
-          <Button size="lg" className="gap-2 font-bold" variant={"outline"} asChild>
+          <Button
+            size="lg"
+            className="gap-2 font-bold"
+            variant={"outline"}
+            asChild
+          >
             <Link href="mailto:fuzailansarisecret@gmail.com">
               <Mail className="w-5 h-5" />
               Contact Me
