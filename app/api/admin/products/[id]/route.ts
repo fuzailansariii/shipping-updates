@@ -16,7 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit();
+    const rate = await checkRateLimit(request);
     if (!rate.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -61,7 +61,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit();
+    const rate = await checkRateLimit(request);
     if (!rate.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -141,7 +141,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit();
+    const rate = await checkRateLimit(request);
     if (!rate.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
