@@ -11,7 +11,7 @@ import { revalidateTag } from "next/cache";
 
 export async function GET(req: NextRequest) {
   try {
-    const rate = await checkRateLimit();
+    const rate = await checkRateLimit(req);
     if (!rate.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const rate = await checkRateLimit();
+    const rate = await checkRateLimit(req);
     if (!rate.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }

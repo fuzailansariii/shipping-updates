@@ -1,20 +1,22 @@
+import arcjet, { slidingWindow } from "@arcjet/next";
 import { auth } from "@clerk/nextjs/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { NextRequest } from "next/server";
 
-export async function checkRateLimit() {
-  const ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(5, "10 s"),
-  });
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  characteristics: ["fingerprint"],
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      max: 5,
+      interval: "10s",
+    }),
+  ],
+});
 
+export async function checkRateLimit(request: NextRequest) {
   const { userId } = await auth();
-
-  if (!userId) {
-    return { success: false, status: 401 };
-  }
-
-  const result = await ratelimit.limit(userId);
-
-  return result;
+  if (!userId) return { success: false };
+  const decision = await aj.protect(request, { fingerprint: userId });
+  return { success: decision.isAllowed() };
 }
