@@ -165,7 +165,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
           const response = await axios.post("/api/checkout", {
             // clerkUserId: userId,
             buyerEmail: userEmail,
-            buyerName: userName,
+            buyerName: userName || userEmail.split("@")[0],
             buyerPhone: userPhone || state.selectedAddress?.phone || "",
             shippingAddress,
             billingAddress,

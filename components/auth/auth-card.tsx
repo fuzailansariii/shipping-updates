@@ -13,7 +13,11 @@ import Google from "@/icons/google";
 
 interface AuthCardProps {
   mode: "sign-in" | "sign-up";
-  onEmailSubmit: (email: string) => Promise<void>;
+  onEmailSubmit: (
+    email: string,
+    firstName?: string,
+    lastName?: string,
+  ) => Promise<void>;
   onGoogleAuth?: () => Promise<void>;
 }
 
@@ -36,6 +40,8 @@ export default function AuthCard({
   } = useForm<EmailFormData>({
     defaultValues: {
       email: "",
+      firstName: "",
+      lastName: "",
     },
     resolver: zodResolver(emailSchema),
   });
@@ -44,7 +50,7 @@ export default function AuthCard({
   const onSubmit = async (data: EmailFormData) => {
     try {
       setIsLoading(true);
-      await onEmailSubmit(data.email);
+      await onEmailSubmit(data.email, data.firstName, data.lastName);
       reset();
     } catch (error) {
       console.error("Error submitting email:", error);
@@ -95,6 +101,36 @@ export default function AuthCard({
           >
             {/* Email input */}
             <div className="flex flex-col gap-4">
+              {isSignUp && (
+                <div className="flex gap-2">
+                  <div className="flex flex-col gap-1 w-full">
+                    <Input
+                      {...register("firstName")}
+                      placeholder="First name"
+                      className="bg-neutral-100"
+                      disabled={isLoading || isGoogleLoading}
+                    />
+                    {errors.firstName && (
+                      <p className="text-[10px] text-red-500">
+                        {errors.firstName.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 w-full">
+                    <Input
+                      {...register("lastName")}
+                      placeholder="Last name"
+                      className="bg-neutral-100"
+                      disabled={isLoading || isGoogleLoading}
+                    />
+                    {errors.lastName && (
+                      <p className="text-sm text-red-500">
+                        {errors.lastName.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
               <Input
                 {...register("email")}
                 type="email"
