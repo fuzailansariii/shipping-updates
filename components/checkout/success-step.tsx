@@ -3,30 +3,29 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCheckoutStore } from "@/stores/checkout-store";
-import { useCartStore } from "@/stores/cart-store";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/utils/checkout-helper";
 import { CheckCircle2, Package, ShoppingBag } from "lucide-react";
 
 export default function SuccessStep() {
   const router = useRouter();
-  const { createdOrderId, createdOrderNumber, orderSummary, resetCheckout } =
+  const { createdOrderNumber, orderSummary, resetCheckout } =
     useCheckoutStore();
-  const { clearCart } = useCartStore();
 
   // Clear cart and reset checkout on mount
   useEffect(() => {
-    clearCart();
-  }, []);
+    if (!createdOrderNumber) {
+      router.push("/orders-history");
+    }
+  }, [createdOrderNumber, router]);
 
-  const handleViewOrders = () => {
-    resetCheckout();
-    router.push("/orders-history");
-  };
+  // const handleViewOrders = () => {
+  //   router.push("/orders-history");
+  // };
 
   const handleContinueShopping = () => {
-    resetCheckout();
     router.push("/products");
+    setTimeout(() => resetCheckout(), 300);
   };
 
   return (
@@ -96,10 +95,10 @@ export default function SuccessStep() {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3">
-          <Button onClick={handleViewOrders} className="w-full bg-primary-dark">
+          {/* <Button onClick={handleViewOrders} className="w-full bg-primary-dark">
             <ShoppingBag className="w-4 h-4 mr-2" />
             View My Orders
-          </Button>
+          </Button> */}
           <Button
             onClick={handleContinueShopping}
             variant="outline"

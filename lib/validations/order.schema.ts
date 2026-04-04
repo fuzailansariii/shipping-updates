@@ -16,7 +16,7 @@ export type OrderItemInput = z.infer<typeof orderItemSchema>;
    Checkout SCHEMA
 ========================= */
 export const checkoutSchema = z.object({
-  clerkUserId: z.string().min(1, "UserID is required"),
+  // clerkUserId: z.string().min(1, "UserID is required"),
   buyerEmail: z.string().min(1, "Buyer email is required"),
   buyerName: z.string().min(1, "Buyer Name is required"),
   buyerPhone: z
@@ -28,13 +28,13 @@ export const checkoutSchema = z.object({
   items: z
     .array(orderItemSchema)
     .min(1, "At least one item is required in the order"),
-  paymentMethod: z.enum(["razorpay", "cod"]).default("razorpay"),
+  // paymentMethod: z.enum(["razorpay", "cod"]).default("razorpay"),
   // Payment updates optional for now
   razorpayOrderId: z.string().optional(),
   razorpayPaymentId: z.string().optional(),
-  paymentStatus: z
-    .enum(["pending", "completed", "failed", "refunded"])
-    .default("pending"),
+  // paymentStatus: z
+  //   .enum(["pending", "completed", "failed", "refunded"])
+  //   .default("pending"),
   notes: z.string().max(500).optional(),
 });
 

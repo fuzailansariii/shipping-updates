@@ -27,7 +27,7 @@ export interface StepConfig {
 // Step metadata
 export const STEP_METADATA: Record<CheckoutSteps, StepConfig> = {
   address: {
-    title: "Delivary Address",
+    title: "Delivery Address",
     description: "Select where we should deliver your order",
     showProgressBar: true,
   },
@@ -74,6 +74,7 @@ export interface CheckoutState {
   // Success State
   createdOrderId: string | null;
   createdOrderNumber: string | null;
+  hasHydrated?: boolean;
 }
 
 // CHECKOUT ACTIONS
@@ -98,4 +99,5 @@ export interface CheckoutActions {
   ) => Promise<OrderCreationResult>;
   resetCheckout: () => void;
   clearError: () => void;
+  setHasHydrated: (state: boolean) => void;
 }

@@ -15,9 +15,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit
-    const rate = await checkRateLimit(request);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    const rateLimitResult = await checkRateLimit(request, userId, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
+      );
     }
 
     // Validate body

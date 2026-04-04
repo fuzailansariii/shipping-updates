@@ -7,6 +7,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-helper";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 },
+      );
+    }
+
+    // rate limit check
+    const rateLimitResult = await checkRateLimit(req, user.id, "checkout");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
       );
     }
 
