@@ -1,4 +1,5 @@
 import { currentUserId } from "@/lib/auth-helper";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { db } from "@/utils/db";
 import { orders } from "@/utils/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -14,6 +15,14 @@ export async function GET(req: NextRequest) {
           error: "Unauthorized - Please sign in to view orders",
         },
         { status: 401 },
+      );
+    }
+
+    const rateLimitResult = await checkRateLimit(req, userId, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests" },
+        { status: 429 },
       );
     }
 

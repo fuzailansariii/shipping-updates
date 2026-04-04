@@ -7,6 +7,7 @@ import {
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { calculatePricing } from "@/lib/pricing";
+import { Address } from "@/utils/db/schema";
 
 const initialState: CheckoutState = {
   selectedAddress: null,
@@ -35,6 +36,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
     (set, get) => ({
       // initial States
       ...initialState,
+      hasHydrated: false,
 
       setSelectedAddress: (address) => {
         set({ selectedAddress: address });
@@ -142,7 +144,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
           }));
 
           // Format address
-          const formatAddress = (address: any) => {
+          const formatAddress = (address: Address | null) => {
             if (!address) return "Digital Product - No Address Required";
             return JSON.stringify({
               fullName: address.fullName,
@@ -161,7 +163,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             : formatAddress(state.billingAddress);
 
           const response = await axios.post("/api/checkout", {
-            clerkUserId: userId,
+            // clerkUserId: userId,
             buyerEmail: userEmail,
             buyerName: userName,
             buyerPhone: userPhone || state.selectedAddress?.phone || "",
@@ -173,8 +175,8 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             shippingCharges: state.orderSummary.shippingCharges,
             discount: state.orderSummary.discount,
             items: orderItems,
-            paymentMethod: "razorpay",
-            paymentStatus: "pending",
+            // paymentMethod: "razorpay",
+            // paymentStatus: "pending",
           });
 
           if (response.status !== 201) {
@@ -219,10 +221,14 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
       clearError: () => {
         set({ orderError: null });
       },
+      setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
       name: "checkout-storage",
       storage: createJSONStorage(() => sessionStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
 
       partialize: (state) => ({
         selectedAddress: state.selectedAddress,
@@ -231,6 +237,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
         orderSummary: state.orderSummary,
         createdOrderId: state.createdOrderId,
         createdOrderNumber: state.createdOrderNumber,
+        currentStep: state.currentStep,
       }),
     },
   ),

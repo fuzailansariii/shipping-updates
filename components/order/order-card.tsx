@@ -65,7 +65,7 @@ export default function OrderCard() {
     }
 
     setLoading(true);
-    setOrders([]);
+    // setOrders([]);
     setError(null);
 
     const controller = new AbortController();
@@ -104,7 +104,7 @@ export default function OrderCard() {
       </h1>
 
       <div className="w-full mt-4 md:mt-5">
-        {loading ? (
+        {!isLoaded || loading ? (
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
               <OrderSkeleton key={i} />

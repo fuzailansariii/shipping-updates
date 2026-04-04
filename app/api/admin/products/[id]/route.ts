@@ -1,4 +1,4 @@
-import { isAdmin } from "@/lib/auth-helper";
+import { currentUserId, isAdmin } from "@/lib/auth-helper";
 import { backendUpdateProductSchema } from "@/lib/validations/product.schema";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
@@ -16,18 +16,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit(request);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
-
     const admin = await isAdmin();
-    if (!admin) {
+    const userId = await currentUserId();
+    if (!admin || !userId) {
       return NextResponse.json(
-        { error: "Unauthorized, admin access is required" },
+        { success: false, error: "Unauthorized" },
         { status: 403 },
       );
     }
+
+    const rateLimitResult = await checkRateLimit(request, userId, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
+      );
+    }
+
     const { id } = await params;
     const productId = validateId(id);
 
@@ -61,16 +66,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit(request);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    const admin = await isAdmin();
+    const userId = await currentUserId();
+    if (!admin || !userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 },
+      );
     }
 
-    const admin = await isAdmin();
-    if (!admin) {
+    const rateLimitResult = await checkRateLimit(request, userId, "general");
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Unauthorized, Admin access is required" },
-        { status: 403 },
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
       );
     }
 
@@ -141,16 +150,20 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const rate = await checkRateLimit(request);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    const admin = await isAdmin();
+    const userId = await currentUserId();
+    if (!admin || !userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 },
+      );
     }
 
-    const admin = await isAdmin();
-    if (!admin) {
+    const rateLimitResult = await checkRateLimit(request, userId, "general");
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Unauthorized, Admin access is required" },
-        { status: 403 },
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
       );
     }
 

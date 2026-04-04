@@ -1,5 +1,5 @@
 "use client";
-import React, { ComponentType, useEffect } from "react";
+import { ComponentType, useEffect, useState } from "react";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import {
   CHECKOUT_STEPS,
@@ -13,8 +13,9 @@ import SuccessStep from "@/components/checkout/success-step";
 import Container from "@/components/container";
 import { useCartStore } from "@/stores/cart-store";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-// Map steps to component
+// map steps to component
 const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
   address: AddressStep,
   review: ReviewStep,
@@ -23,22 +24,35 @@ const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
 };
 
 export default function Checkout() {
-  const { currentStep, resetCheckout } = useCheckoutStore();
+  const { currentStep, resetCheckout, hasHydrated } = useCheckoutStore();
 
   // navigate to the products page if cart is empty and current step is not success
   const { items } = useCartStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (items.length === 0 && currentStep !== "success") {
+    if (!hasHydrated) return;
+    if (items.length === 0 && currentStep === "address") {
       router.replace("/products");
-      return;
     }
+  }, [items, currentStep, router, hasHydrated]);
 
-    if (items.length > 0 && currentStep === "success") {
+  // reset when user starts fresh checkout
+  useEffect(() => {
+    if (currentStep === "success" && items.length > 0) {
       resetCheckout();
     }
-  }, [items, currentStep, router]);
+  }, [hasHydrated, currentStep, items, resetCheckout]);
+
+  if (!hasHydrated) {
+    return (
+      <Container className="py-6">
+        <div className="flex items-center justify-center h-60">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      </Container>
+    );
+  }
 
   // get current step index and total steps for progress bar
   const currentStepIndex = CHECKOUT_STEPS.indexOf(currentStep);

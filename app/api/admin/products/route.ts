@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { products } from "@/utils/db/schema";
-import { buildProductValues, isAdmin } from "@/lib/auth-helper";
+import { buildProductValues, isAdmin, currentUserId } from "@/lib/auth-helper";
 import { isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import z from "zod";
@@ -11,16 +11,22 @@ import { revalidateTag } from "next/cache";
 
 export async function GET(req: NextRequest) {
   try {
-    const rate = await checkRateLimit(req);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
-
     const admin = await isAdmin();
-    if (!admin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    const userId = await currentUserId();
+    if (!admin || !userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 },
+      );
     }
 
+    const rateLimitResult = await checkRateLimit(req, userId, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
+      );
+    }
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const pageSize = 20;
@@ -54,15 +60,20 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const rate = await checkRateLimit(req);
-    if (!rate.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
     const admin = await isAdmin();
-    if (!admin) {
+    const userId = await currentUserId();
+    if (!admin || !userId) {
       return NextResponse.json(
-        { error: "Unauthorized, admin access is required" },
+        { success: false, error: "Unauthorized" },
         { status: 403 },
+      );
+    }
+
+    const rateLimitResult = await checkRateLimit(req, userId, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests, please slow down" },
+        { status: 429 },
       );
     }
 
