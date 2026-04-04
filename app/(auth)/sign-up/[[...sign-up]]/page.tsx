@@ -17,14 +17,22 @@ export default function SignUp() {
   const router = useRouter();
 
   // handle email submission
-  const handleEmailSubmit = async (emailAddress: string) => {
+  const handleEmailSubmit = async (
+    emailAddress: string,
+    firstName?: string,
+    lastName?: string,
+  ) => {
     if (!isLoaded) {
       console.error("Clerk not loaded yet");
       throw new Error("Authentication service is not ready. Please try again.");
     }
     try {
       // create sign up with emailAddress
-      await signUp.create({ emailAddress });
+      await signUp.create({
+        emailAddress,
+        firstName: firstName || "",
+        lastName: lastName || "",
+      });
       // send verification code to emailAddress
       await signUp.prepareEmailAddressVerification({
         strategy: "email_code",

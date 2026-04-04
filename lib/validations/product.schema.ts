@@ -8,6 +8,11 @@ export const productTypeEnum = z.enum(["book", "pdf"]);
 
 export const emailSchema = z.object({
   email: z.email("Please enter a valid email address"),
+  firstName: z
+    .string()
+    .min(2, "First name must be at least 2 characters")
+    .optional(),
+  lastName: z.string().optional(),
 });
 
 export const otpSchema = z.object({
