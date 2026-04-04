@@ -6,12 +6,11 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const razorpay = new Razorpay({
-  key_id: process.env.TEST_RAZORPAY_KEY_ID!,
-  key_secret: process.env.TEST_RAZORPAY_KEY_SECRET!,
-});
-
 export async function POST(request: NextRequest) {
+  const razorpay = new Razorpay({
+    key_id: process.env.TEST_RAZORPAY_KEY_ID!,
+    key_secret: process.env.TEST_RAZORPAY_KEY_SECRET!,
+  });
   try {
     const { userId } = await auth();
     if (!userId) {
