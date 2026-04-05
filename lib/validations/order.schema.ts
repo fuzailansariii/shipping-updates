@@ -22,7 +22,9 @@ export const checkoutSchema = z.object({
   buyerPhone: z
     .string()
     .regex(/^\d{10}$/, "Phone must be exactly 10 digits")
-    .transform((val) => val.trim()),
+    .transform((val) => val.trim())
+    .optional()
+    .or(z.literal("")),
   shippingAddress: z.string().min(10, "Shipping Address is required"),
   billingAddress: z.string().optional(), // Defaults to shipping if not provided
   items: z
