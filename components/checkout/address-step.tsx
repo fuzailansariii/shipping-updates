@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
@@ -31,6 +31,12 @@ export default function AddressStep() {
 
   // Check if cart has physical books
   const hasPhysicalBooks = items.some((item) => item.type === "book");
+
+  useEffect(() => {
+    if (!hasPhysicalBooks) {
+      goToNextStep();
+    }
+  }, [hasPhysicalBooks, goToNextStep]);
 
   // RHF for form validation
   const {
