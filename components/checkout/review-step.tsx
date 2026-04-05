@@ -28,6 +28,8 @@ export default function ReviewStep() {
   const [pricing, setPricing] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(true);
 
+  const hasPhysicalBooks = items.some((item) => item.type === "book");
+
   useEffect(() => {
     const fetchPreview = async () => {
       try {
@@ -180,7 +182,9 @@ export default function ReviewStep() {
               variant={"default"}
               className="w-full"
               onClick={handlePlaceOrder}
-              disabled={isProcessingOrder || !selectedAddress}
+              disabled={
+                isProcessingOrder || (hasPhysicalBooks && !selectedAddress)
+              }
             >
               {isProcessingOrder ? "Placing Order..." : "Proceed to Pay"}
             </Button>
