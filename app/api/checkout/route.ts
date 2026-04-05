@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
           orderNumber,
           buyerEmail,
           buyerName,
-          buyerPhone,
+          buyerPhone: buyerPhone || "",
           subTotal: pricing.subTotal,
           tax: pricing.tax,
           shippingCharges: pricing.shippingCharges,
