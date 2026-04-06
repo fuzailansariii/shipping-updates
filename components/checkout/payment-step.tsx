@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import { useCartStore } from "@/stores/cart-store";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,13 @@ export default function PaymentStep() {
   const { clearCart } = useCartStore();
   const { user } = useUser();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { selectedAddress } = useCheckoutStore();
+
+  useEffect(() => {
+    if (!createdOrderId) {
+      goToPreviousStep();
+    }
+  }, [createdOrderId]);
 
   const handlePayment = async () => {
     if (!createdOrderId) {
@@ -165,6 +172,24 @@ export default function PaymentStep() {
             <span className="text-gray-600">Order Number</span>
             <span className="font-semibold">{createdOrderNumber}</span>
           </div>
+          <Separator />
+          {selectedAddress && (
+            <div className="w-full ring-1 ring-gray-300 p-4 rounded-lg space-y-2">
+              <h3 className="font-semibold text-gray-900">Shipping Address</h3>
+              <p className="text-sm text-gray-600">
+                {selectedAddress.fullName}
+              </p>
+              <p className="text-sm text-gray-600">
+                {selectedAddress.addressLine1}, {selectedAddress.city}
+              </p>
+              <p className="text-sm text-gray-600">
+                {selectedAddress.state} - {selectedAddress.pincode}
+              </p>
+              <p className="text-sm text-gray-600">
+                Phone: {selectedAddress.phone}
+              </p>
+            </div>
+          )}
           <Separator />
           <div className="space-y-2">
             <p className="flex justify-between font-lato font-medium text-primary-dark">

@@ -121,83 +121,98 @@ export default function OrderCard() {
             {orders.map((order) => {
               const orderStatus = getStatusConfig(order.orderStatus);
               const paymentStatus = getStatusConfig(order.paymentStatus);
+              const hasPdf = order.items.some(
+                (item) => item.productType === "pdf",
+              );
 
               return (
                 <div
                   key={order.id}
-                  className="relative flex flex-col gap-2.5 bg-secondary-dark/10 border border-gray-200 hover:border-gray-300 rounded-xl p-4 transition-colors duration-150 font-sans"
+                  className="relative flex flex-col justify-between gap-2.5 bg-secondary-dark/10 border border-gray-200 hover:border-gray-300 rounded-xl p-4 transition-colors duration-150 font-sans"
                 >
-                  {/* Top row: order number + status badge */}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-mono text-[11px] font-medium text-gray-400 tracking-wide uppercase">
-                      {order.orderNumber}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-full whitespace-nowrap ${orderStatus.badge}`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${orderStatus.dot}`}
-                      />
-                      {orderStatus.label}
-                    </span>
-                  </div>
-
-                  {/* Product title */}
                   <div>
-                    <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
-                      {order.items?.[0]?.productTitle ?? "Product Unavailable"}
-                    </p>
-                    {order.items.length > 1 && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        +{order.items.length - 1} more item
-                        {order.items.length > 2 ? "s" : ""}
+                    {/* Top row: order number + status badge */}
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-mono text-[11px] font-medium text-gray-400 tracking-wide uppercase">
+                        {order.orderNumber}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-full whitespace-nowrap ${orderStatus.badge}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${orderStatus.dot}`}
+                        />
+                        {orderStatus.label}
+                      </span>
+                    </div>
+
+                    {/* Product title */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+                        {order.items?.[0]?.productTitle ??
+                          "Product Unavailable"}
                       </p>
-                    )}
+                      {order.items.length > 1 && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          +{order.items.length - 1} more item
+                          {order.items.length > 2 ? "s" : ""}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Meta */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Date</span>
+                        <span className="font-medium text-gray-800">
+                          {formatDate(order.createdAt)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Payment</span>
+                        <span className={`font-medium ${paymentStatus.text}`}>
+                          {paymentStatus.label}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Meta */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Date</span>
-                      <span className="font-medium text-gray-800">
-                        {formatDate(order.createdAt)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Payment</span>
-                      <span className={`font-medium ${paymentStatus.text}`}>
-                        {paymentStatus.label}
-                      </span>
-                    </div>
-                  </div>
+                  {/* <hr className="border-gray-100" /> */}
 
-                  <hr className="border-gray-100" />
+                  <div className="border-t border-t-gray-300 border-dashed pt-2 space-y-2">
+                    {/* Price */}
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatPrice(order.totalAmount)}
+                    </p>
 
-                  {/* Price */}
-                  <p className="text-lg font-semibold text-gray-900">
-                    {formatPrice(order.totalAmount)}
-                  </p>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => openOrderDetails(order)}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 px-3"
-                    >
-                      View details
-                    </Button>
-                    {order.items.some((item) => item.productType === "pdf") && (
+                    {/* Actions */}
+                    <div className="flex items-center justify-between gap-2">
                       <Button
-                        onClick={() => openDownloadModal(order)}
+                        onClick={() => openOrderDetails(order)}
                         variant="outline"
                         size="sm"
-                        className="text-xs h-7 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="text-xs h-7 px-3"
                       >
-                        Download PDFs
+                        View details
                       </Button>
-                    )}
+
+                      {hasPdf ? (
+                        order.paymentStatus === "completed" ? (
+                          <Button
+                            onClick={() => openDownloadModal(order)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                          >
+                            Download PDFs
+                          </Button>
+                        ) : (
+                          <span className="text-yellow-600 text-xs font-medium">
+                            Complete payment to download
+                          </span>
+                        )
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               );

@@ -41,7 +41,7 @@ export default function RootLayout({
         >
           <ProfileModal />
           {children}
-          <Toaster position="top-center" />
+          <Toaster position="bottom-right" />
           <CartSidebar />
           <ProductModal />
         </body>

@@ -27,6 +27,7 @@ export default function ReviewStep() {
 
   const [pricing, setPricing] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(true);
+  const { removeFromCart, updateQuantity } = useCartStore();
 
   const hasPhysicalBooks = items.some((item) => item.type === "book");
 
@@ -46,6 +47,20 @@ export default function ReviewStep() {
           toast.error(data.error || "Failed to load preview");
           goToPreviousStep();
           return;
+        }
+
+        if (data.data.invalidItems?.length > 0) {
+          data.data.invalidItems.forEach((item: any) => {
+            if (item.reason === "OUT_OF_STOCK") {
+              removeFromCart(item.productId);
+            }
+
+            if (item.reason === "INSUFFICIENT_STOCK") {
+              updateQuantity(item.productId, item.availableStock);
+            }
+          });
+
+          toast.error("Cart updated due to stock changes");
         }
 
         setPricing(data.data);

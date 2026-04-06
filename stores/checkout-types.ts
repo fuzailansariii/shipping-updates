@@ -75,6 +75,7 @@ export interface CheckoutState {
   createdOrderId: string | null;
   createdOrderNumber: string | null;
   hasHydrated?: boolean;
+  checkoutInitialized: boolean;
 }
 
 // CHECKOUT ACTIONS
@@ -100,4 +101,5 @@ export interface CheckoutActions {
   resetCheckout: () => void;
   clearError: () => void;
   setHasHydrated: (state: boolean) => void;
+  initializeCheckout: () => void;
 }

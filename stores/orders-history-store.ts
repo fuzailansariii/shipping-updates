@@ -21,6 +21,7 @@ type SelectedOrder = {
   shippingCharges?: number;
   shippingAddress?: string;
   paymentMethod?: string;
+  paymentStatus?: string;
   createdAt: string;
   items: OrderItems[];
 };

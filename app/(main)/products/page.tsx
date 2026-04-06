@@ -24,6 +24,7 @@ import { ProductStockBadge } from "@/components/product/product-stock-badge";
 import { ProductActions } from "@/components/product/product-actions";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/utils/checkout-helper";
+import { useCheckoutStore } from "@/stores/checkout-store";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,6 +35,7 @@ export default function Products() {
   const router = useRouter();
   const { items, addToCart, removeFromCart, updateQuantity } = useCartStore();
   const { openProductModal } = useProductModalStore();
+  const { resetCheckout } = useCheckoutStore();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -125,6 +127,7 @@ export default function Products() {
         return;
       }
     }
+    resetCheckout();
     router.push("/checkout");
   };
 

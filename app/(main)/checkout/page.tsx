@@ -14,6 +14,7 @@ import Container from "@/components/container";
 import { useCartStore } from "@/stores/cart-store";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useCheckoutGuard } from "@/lib/hooks/useCheckoutGuard";
 
 // map steps to component
 const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
@@ -25,6 +26,7 @@ const STEP_COMPONENTS: Record<CheckoutSteps, ComponentType> = {
 
 export default function Checkout() {
   const { currentStep, resetCheckout, hasHydrated } = useCheckoutStore();
+  useCheckoutGuard();
 
   // navigate to the products page if cart is empty and current step is not success
   const { items } = useCartStore();

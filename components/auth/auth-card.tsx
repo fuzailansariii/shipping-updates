@@ -6,8 +6,13 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import Link from "next/link";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { EmailFormData, emailSchema } from "@/lib/validations/product.schema";
+import { FieldErrors, useForm, UseFormRegister } from "react-hook-form";
+import {
+  SignInFormData,
+  signInSchema,
+  SignUpFormData,
+  signUpSchema,
+} from "@/lib/validations/product.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/icons/google";
 
@@ -30,6 +35,7 @@ export default function AuthCard({
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
 
   const isSignUp = mode === "sign-up";
+  const schema = isSignUp ? signUpSchema : signInSchema;
 
   // React Hook Form setup
   const {
@@ -37,20 +43,27 @@ export default function AuthCard({
     register,
     reset,
     formState: { errors },
-  } = useForm<EmailFormData>({
-    defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-    },
-    resolver: zodResolver(emailSchema),
+  } = useForm<SignUpFormData | SignInFormData>({
+    defaultValues: isSignUp
+      ? { email: "", firstName: "", lastName: "" }
+      : { email: "" },
+    resolver: zodResolver(schema),
   });
 
+  // cast for signup fields
+  const signUpRegister = register as unknown as UseFormRegister<SignUpFormData>;
+  const signUpErrors = errors as FieldErrors<SignUpFormData>;
+
   // handle email submission
-  const onSubmit = async (data: EmailFormData) => {
+  const onSubmit = async (data: SignUpFormData | SignInFormData) => {
     try {
       setIsLoading(true);
-      await onEmailSubmit(data.email, data.firstName, data.lastName);
+      const signUpData = data as SignUpFormData;
+      await onEmailSubmit(
+        data.email,
+        signUpData.firstName,
+        signUpData.lastName,
+      );
       reset();
     } catch (error) {
       console.error("Error submitting email:", error);
@@ -105,27 +118,27 @@ export default function AuthCard({
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1 w-full">
                     <Input
-                      {...register("firstName")}
+                      {...signUpRegister("firstName")}
                       placeholder="First name"
                       className="bg-neutral-100"
                       disabled={isLoading || isGoogleLoading}
                     />
-                    {errors.firstName && (
+                    {signUpErrors.firstName && (
                       <p className="text-[10px] text-red-500">
-                        {errors.firstName.message}
+                        {signUpErrors.firstName.message}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-col gap-1 w-full">
                     <Input
-                      {...register("lastName")}
+                      {...signUpRegister("lastName")}
                       placeholder="Last name"
                       className="bg-neutral-100"
                       disabled={isLoading || isGoogleLoading}
                     />
-                    {errors.lastName && (
+                    {signUpErrors.lastName && (
                       <p className="text-sm text-red-500">
-                        {errors.lastName.message}
+                        {signUpErrors.lastName.message}
                       </p>
                     )}
                   </div>

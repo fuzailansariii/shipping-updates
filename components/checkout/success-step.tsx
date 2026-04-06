@@ -24,8 +24,8 @@ export default function SuccessStep() {
   // };
 
   const handleContinueShopping = () => {
+    resetCheckout();
     router.push("/products");
-    setTimeout(() => resetCheckout(), 300);
   };
 
   return (
