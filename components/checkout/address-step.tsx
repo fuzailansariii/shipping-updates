@@ -34,9 +34,9 @@ export default function AddressStep() {
 
   useEffect(() => {
     if (!hasPhysicalBooks) {
-      goToNextStep();
+      setSelectedAddress(null);
     }
-  }, [hasPhysicalBooks, goToNextStep]);
+  }, [hasPhysicalBooks]);
 
   // RHF for form validation
   const {

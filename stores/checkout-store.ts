@@ -29,6 +29,7 @@ const initialState: CheckoutState = {
 
   createdOrderId: null,
   createdOrderNumber: null,
+  checkoutInitialized: false,
 };
 
 export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
@@ -37,6 +38,7 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
       // initial States
       ...initialState,
       hasHydrated: false,
+      checkoutInitialized: false,
 
       setSelectedAddress: (address) => {
         set({ selectedAddress: address });
@@ -179,9 +181,13 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             // paymentStatus: "pending",
           });
 
-          if (response.status !== 201) {
-            throw new Error(response.data.error || "Failed to create order");
-          }
+          const data = response.data;
+
+          set({
+            isProcessingOrder: false,
+            createdOrderId: data.data.orderId,
+            createdOrderNumber: data.data.orderNumber,
+          });
 
           set({
             isProcessingOrder: false,
@@ -195,11 +201,11 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
             createdOrderNumber: response.data.data.orderNumber,
             totalAmount: response.data.totalAmount,
           };
-        } catch (error) {
+        } catch (error: any) {
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "An error occured during checkout";
+            error?.response?.data?.error ||
+            error?.message ||
+            "An error occurred during checkout";
 
           set({
             isProcessingOrder: false,
@@ -215,13 +221,25 @@ export const useCheckoutStore = create<CheckoutState & CheckoutActions>()(
       },
 
       resetCheckout: () => {
-        set(initialState);
+        set({
+          ...initialState,
+          hasHydrated: true,
+        });
       },
 
       clearError: () => {
         set({ orderError: null });
       },
       setHasHydrated: (state) => set({ hasHydrated: state }),
+
+      initializeCheckout: () => {
+        const state = get();
+        if (!state.checkoutInitialized) {
+          set({
+            checkoutInitialized: true,
+          });
+        }
+      },
     }),
     {
       name: "checkout-storage",

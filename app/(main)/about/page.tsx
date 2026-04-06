@@ -6,7 +6,7 @@ import Card from "@/components/card";
 import CardContent from "@/components/card-content";
 import Link from "next/link";
 import ShipImage from "@/public/shipImage.jpg";
-
+import mudassirHussainLogo from "@/public/Mudassir_Hussain_Image.jpeg";
 export default function AboutPage() {
   const ourMission = [
     "Provide exam-focused study materials for maritime professionals",
@@ -78,27 +78,43 @@ export default function AboutPage() {
 
         {/* Founder Section */}
         <Card heading="Meet the Founder">
-          <div className="mt-6 space-y-4 text-center">
-            <h3 className="text-2xl font-semibold font-nunito">
-              Mudassir Hussain
-            </h3>
-            <p className="text-lg text-secondary-dark font-roboto">
-              Second Officer, Merchant Navy
-            </p>
-            <div className="max-w-3xl mx-auto space-y-3 text-secondary-dark">
-              <p>
-                With over 15 years of active sailing experience, Mudassir brings
-                authentic maritime expertise to every study material. His
-                journey from cadet to officer has given him unique insights into
-                what it takes to succeed in shipping examinations and onboard
-                operations.
-              </p>
-              <p>
-                Passionate about mentoring the next generation of mariners,
-                Mudassir combines his practical shipboard experience with a deep
-                understanding of examination requirements to create content that
-                truly prepares students for their maritime careers.
-              </p>
+          <div className="mt-6 flex flex-col md:flex-row items-center gap-8">
+            {/* Founder Image */}
+            <div className="shrink-0">
+              <Image
+                src={mudassirHussainLogo}
+                alt="Mudassir Hussain - Founder of Shipping Updates"
+                width={200}
+                height={200}
+                className="rounded-2xl object-cover shadow-lg border-2 border-neutral-200 w-48 h-48 md:w-56 md:h-56"
+              />
+            </div>
+            {/* Founder Info */}
+            <div className="flex flex-col gap-3 text-center md:text-left">
+              <div>
+                <h3 className="text-2xl font-semibold font-nunito">
+                  Mudassir Hussain
+                </h3>
+                <p className="text-base text-secondary-dark font-roboto mt-1">
+                  Second Officer, Merchant Navy
+                </p>
+              </div>
+              <div className="space-y-3 text-secondary-dark font-roboto">
+                <p>
+                  With over 15 years of active sailing experience, Mudassir
+                  brings authentic maritime expertise to every study material.
+                  His journey from cadet to officer has given him unique
+                  insights into what it takes to succeed in shipping
+                  examinations and onboard operations.
+                </p>
+                <p>
+                  Passionate about mentoring the next generation of mariners,
+                  Mudassir combines his practical shipboard experience with a
+                  deep understanding of examination requirements to create
+                  content that truly prepares students for their maritime
+                  careers.
+                </p>
+              </div>
             </div>
           </div>
         </Card>

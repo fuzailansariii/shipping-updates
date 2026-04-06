@@ -26,20 +26,20 @@ const techStack = [
 export default function DeveloperTeamPage() {
   return (
     <Container>
-      <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16">
+      <div className="w-full md:max-w-5xl mx-auto px-4 py-12 sm:py-16">
         {/* Hero Section */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Developer & Team
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground font-nunito w-full md:max-w-2xl mx-auto">
             Built with passion, dedication, and a mission to help aspiring
             maritime professionals succeed.
           </p>
         </div>
 
         {/* Main Developer Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-12">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-12 mt-4">
           <div className="bg-linear-to-r from-blue-600 to-indigo-600 h-32" />
 
           <div className="px-8 sm:px-12 pb-10">

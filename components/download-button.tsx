@@ -12,16 +12,23 @@ type DownloadState = "idle" | "loading" | "success";
 interface DownloadButtonProps {
   orderItemId: string;
   orderItemTitle: string;
+  isPaid: boolean;
 }
 
 export default function DownloadButton({
   orderItemId,
   orderItemTitle,
+  isPaid,
 }: DownloadButtonProps) {
   const [state, setState] = useState<DownloadState>("idle");
   const { incrementDownloadCount } = useOrderDetailsStore();
 
   const handleDownload = async () => {
+    if (!isPaid) {
+      toast.error("Please complete payment first");
+      return;
+    }
+
     if (state === "loading") return;
     setState("loading");
 

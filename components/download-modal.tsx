@@ -12,6 +12,8 @@ export default function DownloadModal() {
   const { isDownloadModalOpen, closeDownloadModal, selectedOrder } =
     useOrderDetailsStore();
 
+  const isPaid = selectedOrder?.paymentStatus === "completed";
+
   useEffect(() => {
     if (isDownloadModalOpen) {
       document.documentElement.style.overflow = "hidden";
@@ -82,12 +84,17 @@ export default function DownloadModal() {
                     </div>
                   </div>
                   {/* Keep button visible until fully exhausted */}
-                  {!isExhausted && (
+                  {!isPaid ? (
+                    <span className="text-yellow-600 text-xs font-medium">
+                      Complete payment to download
+                    </span>
+                  ) : !isExhausted ? (
                     <DownloadButton
                       orderItemId={item.id}
                       orderItemTitle={item.productTitle}
+                      isPaid={isPaid}
                     />
-                  )}
+                  ) : null}
                 </div>
               </div>
             );

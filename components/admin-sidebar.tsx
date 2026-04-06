@@ -94,10 +94,10 @@ export default function AdminSidebar() {
               className="w-9 h-9 rounded-xl border border-white/10 shrink-0"
             />
             <div>
-              <p className="text-sm font-bold text-primary-dark tracking-wide leading-tight">
+              <p className="text-base font-bold text-primary-dark tracking-wide leading-tight">
                 SU Admin
               </p>
-              <p className="text-[10px] font-semibold text-secondary-dark tracking-widest uppercase">
+              <p className="text-[12px] font-semibold text-secondary-dark tracking-widest uppercase">
                 Dashboard
               </p>
             </div>
@@ -115,7 +115,7 @@ export default function AdminSidebar() {
                   key={index}
                   href={menu.link}
                   className={`
-                    relative flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150
+                    relative flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-base font-medium transition-all duration-150
                     ${
                       isActive
                         ? "bg-primary-dark/20 text-secondary-dark"
@@ -127,7 +127,7 @@ export default function AdminSidebar() {
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-[55%] bg-secondary-dark rounded-r-full" />
                   )}
                   <menu.icon
-                    size={16}
+                    size={19}
                     className={`shrink-0 ${isActive ? "text-secondary-dark" : ""}`}
                   />
                   <span>{menu.title}</span>
@@ -139,7 +139,7 @@ export default function AdminSidebar() {
           {/* Footer */}
           <div className="border-t border-black/6 py-3">
             <SignOutButton>
-              <Button className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 border border-black/20 text-red-600/80 text-sm font-semibold hover:bg-red-500/20 hover:text-red-700 hover:border-red-500/40 transition-all duration-150">
+              <Button className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 border border-black/20 text-red-600/80 text-base font-semibold hover:bg-red-500/20 hover:text-red-700 hover:border-red-500/40 transition-all duration-150">
                 <LogOut size={14} />
                 <span>Sign Out</span>
               </Button>

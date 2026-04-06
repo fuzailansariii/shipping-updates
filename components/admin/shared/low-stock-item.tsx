@@ -1,4 +1,5 @@
 import React from "react";
+import { hasPhysicalBooks } from "@/utils/checkout-helper";
 
 interface LowStockItemProps {
   title: string;

@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { formatPrice } from "@/utils/checkout-helper";
 import { useRouter } from "next/navigation";
+import { useCheckoutStore } from "@/stores/checkout-store";
 
 export default function CartSidebar() {
   const {
@@ -32,6 +33,8 @@ export default function CartSidebar() {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  const { resetCheckout } = useCheckoutStore();
 
   return (
     <AnimatePresence>
@@ -153,6 +156,7 @@ export default function CartSidebar() {
                 <Button
                   asChild
                   onClick={() => {
+                    resetCheckout();
                     router.push("/checkout");
                     closeCart();
                   }}

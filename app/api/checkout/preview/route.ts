@@ -44,21 +44,62 @@ export async function POST(req: NextRequest) {
       dbProducts.map((product) => [product.id, product]),
     );
 
-    const pricingInput = items.map((item) => {
+    // stock validation
+    const invalidItems: any[] = [];
+    const validItems: any[] = [];
+
+    for (const item of items) {
       const product = productMap.get(item.productId)!;
-      return {
+
+      // SKIP stock validation for PDFs
+      if (product.type !== "pdf") {
+        if (product.stockQuantity === 0) {
+          invalidItems.push({
+            productId: item.productId,
+            reason: "OUT_OF_STOCK",
+            message: `${product.title} is out of stock`,
+          });
+          continue;
+        }
+
+        if (item.quantity > product.stockQuantity) {
+          invalidItems.push({
+            productId: item.productId,
+            reason: "INSUFFICIENT_STOCK",
+            availableStock: product.stockQuantity,
+            message: `Only ${product.stockQuantity} left for ${product.title}`,
+          });
+          continue;
+        }
+      }
+
+      validItems.push({
         price: product.price,
         quantity: item.quantity,
         type: product.type,
-      };
-    });
+      });
+    }
 
-    const pricing = calculatePricing(pricingInput);
+    // If everything invalid
+    if (validItems.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Some items are out of stock",
+          invalidItems,
+        },
+        { status: 400 },
+      );
+    }
 
-    // Return only pricing, not items
+    const pricing = calculatePricing(validItems);
+
     return NextResponse.json({
       success: true,
-      data: pricing, // Just { subTotal, tax, shippingCharges, totalAmount }
+      data: {
+        ...pricing,
+        invalidItems,
+      },
     });
   } catch (error) {
     return NextResponse.json(

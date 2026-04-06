@@ -173,8 +173,9 @@ export async function getLowStockProducts(): Promise<
 > {
   try {
     const result = await db.query.products.findMany({
-      where: lt(products.stockQuantity, 10),
-      orderBy: asc(products.stockQuantity),
+      where: (p, { and, lt, eq }) =>
+        and(lt(p.stockQuantity, 10), eq(p.type, "book")),
+      orderBy: (p, { asc }) => asc(p.stockQuantity),
       limit: 5,
       columns: {
         id: true,
