@@ -2,7 +2,7 @@
 import AuthCard from "@/components/auth/auth-card";
 import OTPVerification from "@/components/auth/otp-verification";
 import { useSignUp } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { ClerkAPIError } from "@clerk/types";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ export default function SignUp() {
 
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect_url") || "/";
 
   // handle email submission
   const handleEmailSubmit = async (
@@ -68,7 +70,7 @@ export default function SignUp() {
         if (!setActive) throw new Error("Unable to set active session");
         await setActive({ session: attemptSignUp.createdSessionId });
         toast.success("Sign up successful!");
-        router.push("/");
+        router.push(redirectUrl);
       } else {
         throw new Error("Verification incomplete. Please try again.");
       }
@@ -129,7 +131,7 @@ export default function SignUp() {
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
+        redirectUrlComplete: redirectUrl,
       });
     } catch (error) {
       const clerkError = error as { errors?: ClerkAPIError[] };

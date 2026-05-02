@@ -73,8 +73,9 @@ export default function SignIn() {
           throw new Error("Unable to set active session");
         }
         await setActive({ session: completeSignIn.createdSessionId });
-        router.push(redirectUrl);
         toast.success("Signed in successfully!");
+        // router.push(redirectUrl);
+        window.location.href = redirectUrl;
       } else {
         toast.error("Sign-in not complete. Please try again.");
         throw new Error("Sign-in not complete");
