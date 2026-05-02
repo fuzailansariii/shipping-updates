@@ -40,6 +40,10 @@ export default clerkMiddleware(async (auth, req) => {
 
   // If already logged in, redirect from auth pages
   if (isAuthRoute(req) && userId) {
+    const redirectUrl = req.nextUrl.searchParams.get("redirect_url");
+    if (redirectUrl) {
+      return NextResponse.redirect(new URL(redirectUrl));
+    }
     if (isAdmin) {
       return NextResponse.redirect(new URL("/admin", req.url));
     } else {

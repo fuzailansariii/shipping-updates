@@ -42,6 +42,7 @@ export default function Navbar({ userId, isAdmin }: NavbarProps) {
   const { openProfile } = useProfileStore();
   const links = [
     { name: "Home", href: "/" },
+    { name: "Mock Tests", href: "https://prep.shippingupdates.in" },
     { name: "About", href: "/about" },
     { name: "Products", href: "/products" },
     { name: "Contact", href: "/contact" },
