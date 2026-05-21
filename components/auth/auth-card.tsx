@@ -211,11 +211,17 @@ export default function AuthCard({
           {/* Terms */}
           <p className="text-center text-xs text-neutral-500 mt-6">
             By continuing, you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-neutral-700">
+            <Link
+              href="/terms-condition"
+              className="underline hover:text-neutral-700"
+            >
               Terms
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="underline hover:text-neutral-700">
+            <Link
+              href="/privacy-policy"
+              className="underline hover:text-neutral-700"
+            >
               Privacy Policy
             </Link>
           </p>
